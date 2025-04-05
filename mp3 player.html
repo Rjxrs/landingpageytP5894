@@ -85,10 +85,18 @@
         label[for="audio-file-input"] {
             display: block; /* Make label block */
             text-align: center;
-            background-color: #007bff;
+            background-color: #007bff; /* Blue for file input */
         }
          label[for="audio-file-input"]:hover {
             background-color: #0056b3;
+        }
+         /* Style for the built-in track button */
+        #play-builtin-btn {
+            background-color: #6f42c1; /* Purple for built-in */
+            width: 100%; /* Make it full width */
+        }
+        #play-builtin-btn:hover {
+             background-color: #5a3d9a;
         }
         /* Hide the actual file input */
         #audio-file-input { display: none; }
@@ -131,6 +139,17 @@
              width: auto;
              margin-right: 5px;
          }
+         /* Styling for optgroup */
+         optgroup {
+             font-weight: bold;
+             font-style: italic;
+             color: #ccc;
+             background-color: #222; /* Slightly different background for group label */
+         }
+         option {
+             background-color: #333; /* Ensure options have the standard background */
+             color: #eee;
+         }
 
     </style>
 </head>
@@ -139,26 +158,64 @@
         <h1 class="text-2xl font-bold mb-4 text-center text-white">Enhanced Audio Visualizer</h1>
 
         <div>
-            <label for="audio-file-input" class="w-full">Choose Local Audio File</label>
-            <input type="file" id="audio-file-input" accept="audio/*">
-            <p id="loading-message" class="info-text">Or select a radio stream below.</p>
+             <p class="section-title">Select Audio Source</p>
+             <label for="audio-file-input" class="w-full mb-2">Choose Local Audio File</label>
+             <input type="file" id="audio-file-input" accept="audio/*">
+
+             <button id="play-builtin-btn" class="w-full mb-2">Play Built-in Track: Lock In</button>
+
+             <div class="control-group mb-1">
+                 <select id="radio-select" class="w-full">
+                     <option value="">-- Or Select Radio Station --</option>
+                     <optgroup label="United Kingdom">
+                         <option value="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio1_mf_p">BBC Radio 1 (MP3)</option>
+                         <option value="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_radio2_mf_p">BBC Radio 2 (MP3)</option>
+                         <option value="http://bbcmedia.ic.llnwd.net/stream/bbcmedia_6music_mf_p">BBC Radio 6 Music (MP3)</option>
+                         <option value="https://media-ssl.musicradio.com/CapitalUK">Capital UK (AAC)</option>
+                         <option value="https://media-ssl.musicradio.com/HeartUK">Heart UK (AAC)</option>
+                     </optgroup>
+                     <optgroup label="Germany">
+                         <option value="http://st01.dlf.de/dlf/01/128/mp3/stream.mp3">Deutschlandfunk (MP3)</option>
+                         <option value="https://br-edge-2051-fra-ts-cdn.cast.addradio.de/br/br3/live/mp3/128/stream.mp3">Bayern 3 (MP3)</option>
+                         <option value="http://stream.1a-webradio.de/deutsch/mp3">1A Deutsche Hits (MP3)</option>
+                          <option value="https://streams.planetradio.de/planetradio/mp3/hqlivestream.mp3">Planet Radio (MP3)</option>
+                     </optgroup>
+                     <optgroup label="France">
+                         <option value="https://icecast.radiofrance.fr/franceinter-hifi.aac">France Inter (AAC)</option>
+                         <option value="https://icecast.radiofrance.fr/fip-hifi.aac">FIP (AAC)</option>
+                         <option value="http://cdn.nrjaudio.fm/audio1/fr/30001/mp3_128.mp3">NRJ France (MP3)</option>
+                          <option value="http://streaming.radio.rtl.fr/rtl-1-44-128">RTL France (MP3)</option>
+                     </optgroup>
+                     <optgroup label="Netherlands">
+                          <option value="https://icecast.omroep.nl/radio1-bb-mp3">NPO Radio 1 (MP3)</option>
+                          <option value="https://icecast.omroep.nl/radio2-bb-mp3">NPO Radio 2 (MP3)</option>
+                          <option value="https://icecast.omroep.nl/3fm-bb-mp3">NPO 3FM (MP3)</option>
+                          <option value="http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO538AAC.aac">Radio 538 (AAC)</option>
+                          <option value="http://stream.qmusic.nl/qmusic/aacp">Qmusic NL (AAC+)</option>
+                      </optgroup>
+                     <optgroup label="Spain">
+                         <option value="http://haydn.torontocast.com:2199/stream/los40principales_alternative_es">Los40 Principales (MP3 - Alt Source)</option>
+                         <option value="http://cadena100-cope-rrcast.flumotion.com/cope/cadena100-low.mp3">Cadena 100 (MP3)</option>
+                         <option value="http://rne.rtveradio.cires21.com/rne_r3.mp3">RNE Radio 3 (MP3)</option>
+                     </optgroup>
+                     <optgroup label="Italy">
+                         <option value="https://icstream.rds.radio/rds">RDS (AAC)</option>
+                         <option value="http://icecast.rtl.it/RTL1025.mp3">RTL 102.5 (MP3)</option>
+                         <option value="http://ice01.fluidstream.net/fluid011.aac">Radio Deejay (AAC)</option>
+                     </optgroup>
+                      <optgroup label="Other/Internet">
+                          <option value="https://somafm.com/defcon.pls">SomaFM DEF CON Radio (PLS)</option>
+                          <option value="https://somafm.com/groovesalad.pls">SomaFM Groove Salad (PLS)</option>
+                          <option value="https://stream.radioparadise.com/aac-192">Radio Paradise Main (AAC 192k)</option>
+                          <option value="http://stream-dc4.radioparadise.com/mellow-320">Radio Paradise Mellow Mix (MP3 320k)</option>
+                      </optgroup>
+                 </select>
+                 <button id="play-radio-btn" class="px-3 py-1 rounded bg-green-600 hover:bg-green-700 flex-shrink-0">Play</button>
+             </div>
+             <p id="loading-message" class="info-text">Select a source above.</p>
+             <p class="info-text">Radio streams depend on external sources & CORS. Availability may vary.</p>
         </div>
 
-        <div>
-            <p class="section-title">Live Radio</p>
-            <div class="control-group">
-                <select id="radio-select" class="w-full">
-                    <option value="">-- Select Radio Station --</option>
-                    <option value="https://somafm.com/defcon.pls">SomaFM DEF CON Radio (PLS)</option>
-                    <option value="https://somafm.com/groovesalad.pls">SomaFM Groove Salad (PLS)</option>
-                     <option value="https://icecast.radiofrance.fr/fip-hifi.aac">FIP (AAC)</option>
-                     <option value="https://stream.radioparadise.com/aac-192">Radio Paradise (AAC 192k)</option>
-                     <option value="http://stream-dc4.radioparadise.com/mellow-320">Radio Paradise Mellow Mix (MP3 320k)</option>
-                </select>
-                <button id="play-radio-btn" class="px-3 py-1 rounded bg-green-600 hover:bg-green-700 flex-shrink-0">Play</button>
-            </div>
-             <p class="info-text">Radio streams depend on external sources & CORS.</p>
-        </div>
 
          <div>
              <p class="section-title">Audio Player</p>
@@ -174,7 +231,7 @@
             </div>
             <div class="control-group mt-2">
                  <label for="loop-checkbox" class="w-auto">Loop:</label> <input type="checkbox" id="loop-checkbox">
-                 <span class="flex-grow info-text text-left pl-2">(For local files)</span> </div>
+                 <span class="flex-grow info-text text-left pl-2">(For local files/built-in)</span> </div>
              <p class="info-text mt-2">Quality depends on the source file/stream.</p>
         </div>
 
@@ -196,57 +253,53 @@
 
     <script>
         // --- Global Variables ---
-        let scene, camera, renderer, controls; // Added controls for OrbitControls
+        let scene, camera, renderer, controls;
         let audioContext, analyser, source, dataArray, bufferLength;
         const bars = [];
         const NUM_BARS = 128;
         let isAudioContextInitialized = false;
-        let currentObjectURL = null; // To keep track of the object URL for revocation
+        let currentObjectURL = null;
 
-        // Base color for bars, changeable by picker
         let baseBarColor = new THREE.Color(0x00ffcc);
-
-        // Background cycle options
-        const backgroundColors = [0x000000, 0x1a1a2a, 0x2a1a1a, 0x1a2a1a];
+        const backgroundColors = [0x000000, 0x1a1a2a, 0x2a1a1a, 0x1a2a1a, 0x2a2a4a];
         let currentBgIndex = 0;
+
+        // URL for the built-in track
+        const BUILTIN_TRACK_URL = "https://rjxrs.github.io/landingpageytP5894/lock-in.mp3";
+        const BUILTIN_TRACK_NAME = "Lock In"; // Name for display
 
         // --- Initialization ---
         function init() {
-            // Scene, Camera, Renderer Setup (as before)
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 55); // Slightly adjusted camera start position
+            camera.position.set(0, 10, 55);
 
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('visualizer-canvas'), alpha: true, antialias: true }); // Added antialias
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('visualizer-canvas'), alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(backgroundColors[currentBgIndex], 1); // Use initial background color
-            renderer.setPixelRatio(window.devicePixelRatio); // Improve sharpness on high DPI screens
+            renderer.setClearColor(backgroundColors[currentBgIndex], 1);
+            renderer.setPixelRatio(window.devicePixelRatio);
 
-            // OrbitControls Setup
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true; // Smooth camera movement
+            controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.screenSpacePanning = false; // Panning moves parallel to ground
+            controls.screenSpacePanning = false;
             controls.minDistance = 10;
             controls.maxDistance = 200;
-            controls.target.set(0, -5, 0); // Set initial focus point
+            controls.target.set(0, -5, 0);
 
-            // Create Visualizer Bars (as before, but use baseBarColor)
             const barWidth = 0.5;
             const spacing = 0.2;
             const totalWidth = (barWidth + spacing) * NUM_BARS;
             const startX = -totalWidth / 2 + barWidth / 2;
             const geometry = new THREE.BoxGeometry(barWidth, 1, barWidth);
             const material = new THREE.MeshPhongMaterial({
-                 color: baseBarColor.clone(), // Use clone of base color
-                 emissive: baseBarColor.clone().multiplyScalar(0.3), // Emissive based on base color
-                 specular: 0x111111,
-                 shininess: 50,
-                 side: THREE.DoubleSide
+                 color: baseBarColor.clone(),
+                 emissive: baseBarColor.clone().multiplyScalar(0.3),
+                 specular: 0x111111, shininess: 50, side: THREE.DoubleSide
             });
 
             for (let i = 0; i < NUM_BARS; i++) {
-                const barMaterial = material.clone(); // Clone for each bar
+                const barMaterial = material.clone();
                 const bar = new THREE.Mesh(geometry, barMaterial);
                 bar.position.x = startX + i * (barWidth + spacing);
                 bar.scale.y = 0.1;
@@ -254,37 +307,36 @@
                 bars.push(bar);
             }
 
-            // Lighting (as before)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // Slightly stronger ambient
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
-            const pointLight = new THREE.PointLight(0x88ccff, 0.7, 400); // Adjusted color/intensity
+            const pointLight = new THREE.PointLight(0x88ccff, 0.7, 400);
             pointLight.position.set(0, 40, 50);
             scene.add(pointLight);
-            const pointLight2 = new THREE.PointLight(0xffaa88, 0.4, 400); // Adjusted color/intensity
+            const pointLight2 = new THREE.PointLight(0xffaa88, 0.4, 400);
             pointLight2.position.set(-50, 20, 30);
             scene.add(pointLight2);
 
-            // Setup Event Listeners for Controls
             setupEventListeners();
-
-            // Start Animation Loop
             animate();
-
-            // Handle Window Resize
             window.addEventListener('resize', onWindowResize, false);
         }
 
         // --- Web Audio API Setup ---
         function setupAudioContextAndSource(audioElement) {
             if (isAudioContextInitialized) {
-                 // If context exists but source is disconnected (e.g., after error), try reconnecting
-                 if (source && source.mediaElement !== audioElement) {
-                     source.disconnect();
-                     source = audioContext.createMediaElementSource(audioElement);
-                     source.connect(analyser);
-                     console.log("Reconnected source to analyser");
+                 if (!source || source.mediaElement !== audioElement) {
+                     if (source) source.disconnect();
+                     try {
+                        source = audioContext.createMediaElementSource(audioElement);
+                        source.connect(analyser);
+                        console.log("Reconnected source to analyser");
+                     } catch(e) {
+                         console.error("Error reconnecting source:", e);
+                         isAudioContextInitialized = false;
+                         document.getElementById('loading-message').textContent = "Error connecting audio source.";
+                         return;
+                     }
                  }
-                 // Ensure context is running
                  resumeAudioContext();
                  return;
             }
@@ -303,7 +355,6 @@
                 isAudioContextInitialized = true;
                 console.log("AudioContext Initialized and Source Connected");
 
-                // Attempt to resume context if suspended
                 audioElement.addEventListener('play', resumeAudioContext);
                 document.body.addEventListener('click', resumeAudioContext, { once: true });
 
@@ -311,7 +362,7 @@
                 console.error("Error setting up Web Audio API:", e);
                 document.getElementById('loading-message').textContent = "Error initializing audio.";
                 alert("Web Audio API error: " + e.message);
-                isAudioContextInitialized = false; // Reset flag on error
+                isAudioContextInitialized = false;
             }
         }
 
@@ -321,7 +372,6 @@
                      console.log("AudioContext Resumed");
                  }).catch(e => console.error("Error resuming AudioContext:", e));
              }
-             // Clean up body listener after first interaction attempt
              document.body.removeEventListener('click', resumeAudioContext);
         }
 
@@ -333,108 +383,102 @@
             const loadingMessage = document.getElementById('loading-message');
             const radioSelect = document.getElementById('radio-select');
             const playRadioBtn = document.getElementById('play-radio-btn');
+            const playBuiltinBtn = document.getElementById('play-builtin-btn'); // Get the new button
             const speedSlider = document.getElementById('speed-slider');
             const speedValueSpan = document.getElementById('speed-value');
             const loopCheckbox = document.getElementById('loop-checkbox');
             const colorPicker = document.getElementById('bar-color-picker');
             const bgChangeBtn = document.getElementById('bg-change-btn');
 
+            // Helper function to play audio and handle errors
+            function playAudio(element, sourceName) {
+                const playPromise = element.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        loadingMessage.textContent = `Playing: ${sourceName}`;
+                        resumeAudioContext();
+                    }).catch(e => {
+                        loadingMessage.textContent = `Error playing ${sourceName}. Check console.`;
+                        console.error(`Error playing ${sourceName}:`, e);
+                         if (e.name === 'NotSupportedError') {
+                             alert(`Could not play ${sourceName}: Format might be unsupported or URL invalid.`);
+                         } else {
+                             alert(`Could not play ${sourceName}. It might be offline or incompatible.\nError: ${e.message}`);
+                         }
+                    });
+                }
+            }
+
             // 1. File Input Listener
             fileInput.addEventListener('change', function(event) {
                 const files = event.target.files;
                 if (files.length > 0) {
                     const file = files[0];
-
-                    // Revoke previous Object URL if it exists
-                    if (currentObjectURL) {
-                        URL.revokeObjectURL(currentObjectURL);
-                        console.log("Revoked previous Object URL");
-                    }
-
-                    currentObjectURL = URL.createObjectURL(file); // Store the new URL
+                    if (currentObjectURL) URL.revokeObjectURL(currentObjectURL);
+                    currentObjectURL = URL.createObjectURL(file);
                     audioElement.src = currentObjectURL;
-
+                    audioElement.load();
                     loadingMessage.textContent = `Loaded: ${file.name}. Press play!`;
                     console.log("Audio file loaded:", file.name);
-                    radioSelect.value = ""; // Clear radio selection
-
-                    if (!isAudioContextInitialized) {
-                        setupAudioContextAndSource(audioElement);
-                    } else {
-                         // Ensure source is connected if context already exists
-                         setupAudioContextAndSource(audioElement);
-                    }
-                    audioElement.load(); // Explicitly load the new source
+                    radioSelect.value = "";
+                    setupAudioContextAndSource(audioElement);
+                    // Don't auto-play file, let user use controls
                 }
             });
 
              // Clean up Object URL on page leave
-             window.addEventListener('beforeunload', () => {
-                 if (currentObjectURL) {
-                     URL.revokeObjectURL(currentObjectURL);
-                 }
-             });
+             window.addEventListener('beforeunload', () => { if (currentObjectURL) URL.revokeObjectURL(currentObjectURL); });
 
             // 2. Radio Player Listener
             playRadioBtn.addEventListener('click', () => {
                 const streamUrl = radioSelect.value;
+                const stationName = radioSelect.options[radioSelect.selectedIndex].text;
                 if (streamUrl) {
-                     // Revoke previous Object URL if switching from file
-                     if (currentObjectURL) {
-                         URL.revokeObjectURL(currentObjectURL);
-                         currentObjectURL = null;
-                         console.log("Revoked Object URL when switching to radio");
-                     }
-
+                    if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; }
                     audioElement.src = streamUrl;
-                    loadingMessage.textContent = `Loading radio: ${radioSelect.options[radioSelect.selectedIndex].text}...`;
+                    audioElement.load();
+                    loadingMessage.textContent = `Loading radio: ${stationName}...`;
                     console.log("Attempting to play radio:", streamUrl);
-                    fileInput.value = ''; // Clear file input selection visually
-
-                     if (!isAudioContextInitialized) {
-                         setupAudioContextAndSource(audioElement);
-                     } else {
-                          // Ensure source is connected if context already exists
-                          setupAudioContextAndSource(audioElement);
-                     }
-
-                    audioElement.load(); // Load the stream
-                    audioElement.play().then(() => {
-                         loadingMessage.textContent = `Playing: ${radioSelect.options[radioSelect.selectedIndex].text}`;
-                         resumeAudioContext(); // Ensure context is running
-                    }).catch(e => {
-                         loadingMessage.textContent = `Error playing radio. Check console.`;
-                         console.error("Error playing radio stream:", e);
-                         alert(`Could not play radio stream. It might be offline, blocked by CORS, or incompatible.\nError: ${e.message}`);
-                    });
+                    fileInput.value = '';
+                    setupAudioContextAndSource(audioElement);
+                    playAudio(audioElement, stationName); // Use helper to play
                 } else {
                     loadingMessage.textContent = "Please select a radio station.";
                 }
             });
 
-            // 3. Speed Control Listener
+            // 3. Built-in Track Listener (NEW)
+            playBuiltinBtn.addEventListener('click', () => {
+                if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; } // Revoke file URL if exists
+                audioElement.src = BUILTIN_TRACK_URL;
+                audioElement.load();
+                loadingMessage.textContent = `Loading: ${BUILTIN_TRACK_NAME}...`;
+                console.log("Attempting to play built-in track:", BUILTIN_TRACK_URL);
+                fileInput.value = ''; // Clear file input
+                radioSelect.value = ''; // Clear radio selection
+                setupAudioContextAndSource(audioElement);
+                playAudio(audioElement, BUILTIN_TRACK_NAME); // Use helper to play
+            });
+
+
+            // 4. Speed Control Listener
             speedSlider.addEventListener('input', function() {
                 const speed = parseFloat(this.value);
                 audioElement.playbackRate = speed;
                 speedValueSpan.textContent = `${speed.toFixed(1)}x`;
             });
 
-            // 4. Loop Control Listener
+            // 5. Loop Control Listener
             loopCheckbox.addEventListener('change', function() {
                 audioElement.loop = this.checked;
             });
 
-            // 5. Color Picker Listener
+            // 6. Color Picker Listener
             colorPicker.addEventListener('input', function() {
                 baseBarColor.set(this.value);
-                // Update existing materials (optional, could wait for animate loop)
-                bars.forEach(bar => {
-                     bar.material.color.set(baseBarColor);
-                     bar.material.emissive.set(baseBarColor).multiplyScalar(0.3); // Adjust emissive too
-                });
             });
 
-            // 6. Background Change Listener
+            // 7. Background Change Listener
             bgChangeBtn.addEventListener('click', () => {
                 currentBgIndex = (currentBgIndex + 1) % backgroundColors.length;
                 renderer.setClearColor(backgroundColors[currentBgIndex], 1);
@@ -444,45 +488,32 @@
 
         // --- Animation Loop ---
         function animate() {
-            requestAnimationFrame(animate); // Loop the animation
+            requestAnimationFrame(animate);
+            controls.update();
 
-            controls.update(); // Required for damping
-
-            // Only update if analyser and dataArray are ready
-            if (analyser && dataArray) {
-                analyser.getByteFrequencyData(dataArray); // Get frequency data
-
-                // Update bar heights and colors based on frequency data
+            if (isAudioContextInitialized && analyser && dataArray) {
+                analyser.getByteFrequencyData(dataArray);
                 bars.forEach((bar, i) => {
-                    const frequencyValue = dataArray[i]; // Value from 0 to 255
-                    const scaleTarget = (frequencyValue / 255) * 60 + 0.1; // Increased max scale
-
-                    // Smooth the transition using lerp
-                    bar.scale.y += (scaleTarget - bar.scale.y) * 0.18; // Slightly faster smoothing
-
-                    // Adjust position so scaling happens from the bottom
+                    const frequencyValue = dataArray[i];
+                    const scaleTarget = (frequencyValue / 255) * 60 + 0.1;
+                    bar.scale.y += (scaleTarget - bar.scale.y) * 0.18;
                     bar.position.y = bar.scale.y / 2 - 10;
 
-                    // Modulate color lightness/emissiveness based on frequency, using the base color
-                    const lightnessFactor = Math.min(1, 0.4 + (frequencyValue / 255) * 0.8); // 0.4 to 1.2 (clamped at 1)
-                    const emissiveFactor = Math.min(0.6, (frequencyValue / 255) * 0.6); // 0 to 0.6
-
-                    // Get HSL from base color to modify lightness
-                    let currentHSL = {};
-                    bar.material.color.getHSL(currentHSL);
-                    bar.material.color.setHSL(currentHSL.h, currentHSL.s, baseBarColor.getHSL(currentHSL).l * lightnessFactor);
-
+                    const lightnessFactor = Math.min(1, 0.4 + (frequencyValue / 255) * 0.8);
+                    const emissiveFactor = Math.min(0.6, (frequencyValue / 255) * 0.6);
+                    let baseHSL = {};
+                    baseBarColor.getHSL(baseHSL);
+                    bar.material.color.setHSL(baseHSL.h, baseHSL.s, baseHSL.l * lightnessFactor);
                     bar.material.emissive.copy(bar.material.color).multiplyScalar(emissiveFactor);
-
                 });
-
-                // No automatic camera rotation when OrbitControls are enabled
-                // camera.position.x = Math.sin(Date.now() * 0.00015) * 15;
-                // camera.position.z = 50 + Math.cos(Date.now() * 0.00015) * 15;
-                // camera.lookAt(0, -5, 0);
+            } else if (!isAudioContextInitialized && bars.length > 0) {
+                 bars.forEach(bar => {
+                     bar.scale.y += (0.1 - bar.scale.y) * 0.1;
+                     bar.position.y = bar.scale.y / 2 - 10;
+                 });
             }
 
-            renderer.render(scene, camera); // Render the scene
+            renderer.render(scene, camera);
         }
 
         // --- Window Resize Handler ---
