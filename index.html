@@ -38,6 +38,8 @@
             --icon-inactive-color: var(--muted-text-color);
             --top-bar-icon-color: var(--muted-text-color);
             --top-bar-icon-hover-color: var(--link-color);
+            --top-bar-btn-bg: var(--switch-bg); /* Match switch bg */
+            --top-bar-btn-hover-bg: #ced4da;
             /* Social Button Variables */
             --social-btn-bg: var(--section-bg-darker);
             --social-btn-icon-color: var(--muted-text-color);
@@ -70,6 +72,8 @@
             --icon-inactive-color: var(--muted-text-color);
             --top-bar-icon-color: var(--muted-text-color);
             --top-bar-icon-hover-color: var(--link-color);
+            --top-bar-btn-bg: var(--switch-bg); /* Match switch bg */
+            --top-bar-btn-hover-bg: #5c636a;
              /* Social Button Variables - Dark */
             --social-btn-bg: var(--card-bg);
             --social-btn-icon-color: var(--muted-text-color);
@@ -78,7 +82,7 @@
         }
 
         /* Apply smooth transitions */
-        body, .section, .video-card, .short-card, .social-buttons, footer, .top-bar, .hero-section, .btn, a, .carousel-indicators [data-bs-target], .theme-switch-wrapper i, .btn-social, .top-bar-controls a {
+        body, .section, .video-card, .short-card, .social-buttons, footer, .top-bar, .hero-section, .btn, a, .carousel-indicators [data-bs-target], .theme-switch-wrapper i, .btn-social, .top-bar-controls a, .btn-top-bar {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, transform 0.2s ease;
         }
         /* Apply theme variables & Font */
@@ -106,24 +110,40 @@
         .top-bar-controls {
             display: flex;
             align-items: center;
-            gap: 18px; /* Spacing between MP3 link and theme switch */
+            gap: 15px; /* Adjusted spacing */
         }
 
-        /* Style for MP3 Link (Icon only) */
-        .top-bar-controls .mp3-link {
+        /* Style for MP3 Link Button */
+        .btn-top-bar {
+            --bs-btn-padding-x: 0.5rem;
+            --bs-btn-padding-y: 0.25rem;
+            --bs-btn-font-size: 0.9rem; /* Icon size */
+            width: 34px; /* Fixed width */
+            height: 34px; /* Fixed height */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; /* Make it circular */
+            background-color: var(--top-bar-btn-bg);
             color: var(--top-bar-icon-color);
-            font-size: 1.2rem; /* Slightly larger icon */
-            text-decoration: none;
+            border: none;
+            box-shadow: none;
         }
-        .top-bar-controls .mp3-link:hover {
+        .btn-top-bar:hover, .btn-top-bar:focus {
+            background-color: var(--top-bar-btn-hover-bg);
             color: var(--top-bar-icon-hover-color);
-            transform: scale(1.1);
+            transform: scale(1.05);
+            box-shadow: none;
         }
+        .btn-top-bar i { /* Ensure icon fits */
+            line-height: 1;
+        }
+
 
         /* Theme switch styling */
         .theme-switch-wrapper { display: flex; align-items: center; gap: 8px; }
-        .theme-switch-wrapper .fa-sun { color: var(--icon-active-color); }
-        .theme-switch-wrapper .fa-moon { color: var(--icon-inactive-color); }
+        .theme-switch-wrapper .fa-sun { color: var(--icon-active-color); font-size: 1.1rem; }
+        .theme-switch-wrapper .fa-moon { color: var(--icon-inactive-color); font-size: 1.1rem; }
         [data-bs-theme="dark"] .theme-switch-wrapper .fa-sun { color: var(--icon-inactive-color); }
         [data-bs-theme="dark"] .theme-switch-wrapper .fa-moon { color: var(--icon-active-color); }
 
@@ -242,8 +262,8 @@
         <div class="time-date" id="time-date-display">Loading...</div>
 
         <div class="top-bar-controls">
-            <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="mp3-link" target="_blank" rel="noopener noreferrer" title="MP3 Player">
-                <i class="fas fa-music"></i>
+            <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="btn btn-sm rounded-circle btn-top-bar mp3-link" target="_blank" rel="noopener noreferrer" title="MP3 Player">
+                <i class="fas fa-headphones"></i>
             </a>
 
             <div class="theme-switch-wrapper">
