@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Audio Visualizer</title>
+    <title>Enhanced 3D Audio Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         /* Basic styling for body and canvas */
         body {
@@ -30,75 +31,164 @@
         }
         /* Style the controls container */
         .controls-container {
-            background-color: rgba(30, 30, 30, 0.8); /* Semi-transparent dark background */
-            padding: 20px;
-            border-radius: 12px; /* Rounded corners */
-            margin-top: 50px; /* Space from the top */
+            background-color: rgba(25, 25, 25, 0.85); /* Slightly darker, more opaque */
+            padding: 25px;
+            border-radius: 16px; /* More rounded */
+            margin-top: 30px; /* Less margin */
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px; /* Space between elements */
+            align-items: stretch; /* Stretch items */
+            gap: 20px; /* Increased gap */
             z-index: 10; /* Ensure controls are above canvas */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            max-width: 90%;
-            width: 500px; /* Fixed width for the container */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+            max-width: 95%;
+            width: 600px; /* Wider container */
+            max-height: 90vh; /* Limit height */
+            overflow-y: auto; /* Allow scrolling if needed */
         }
-        /* Style the file input label */
-        label[for="audio-file-input"] {
-            display: block;
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            background-color: #007bff; /* Blue background for button-like appearance */
-            color: #fff;
-            font-size: 1rem;
+
+        /* Section titles */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #eee;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        /* General input/button styling */
+        label, button, select {
+            font-size: 0.95rem;
+        }
+        input[type="color"], input[type="range"], select, button, label[for="audio-file-input"] {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #eee;
             cursor: pointer;
-            text-align: center;
-            transition: background-color 0.2s ease;
-            width: 100%; /* Make label take full width */
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
-        label[for="audio-file-input"]:hover {
+        input[type="range"] {
+             padding: 0; /* Remove padding for range */
+             cursor: grab;
+        }
+        input[type="color"] {
+             min-height: 38px; /* Ensure color picker height matches others */
+             padding: 4px; /* Adjust padding for color picker */
+        }
+        button:hover, label[for="audio-file-input"]:hover, select:hover {
+            background-color: #444;
+            border-color: #777;
+        }
+        label[for="audio-file-input"] {
+            display: block; /* Make label block */
+            text-align: center;
+            background-color: #007bff;
+        }
+         label[for="audio-file-input"]:hover {
             background-color: #0056b3;
         }
-        /* Hide the actual file input visually but keep accessible */
-        #audio-file-input {
-            width: 0.1px;
-            height: 0.1px;
-            opacity: 0;
-            overflow: hidden;
-            position: absolute;
-            z-index: -1;
-        }
+        /* Hide the actual file input */
+        #audio-file-input { display: none; }
+
          /* Style the audio element */
         audio {
             width: 100%;
-             /* Style default controls to be visible on dark background */
             filter: invert(1) sepia(1) saturate(5) hue-rotate(180deg);
             border-radius: 8px;
-            margin-top: 10px; /* Add some space above audio controls */
+            margin-top: 5px;
         }
         /* Style the info text */
-        .info-text {
-            font-size: 0.9rem;
-            color: #aaa;
+        .info-text, #loading-message {
+            font-size: 0.85rem;
+            color: #bbb;
             text-align: center;
+            margin-top: 5px;
         }
-        #loading-message {
-            color: #ccc;
-            font-style: italic;
+        #loading-message { font-style: italic; }
+
+        /* Flex layout for controls */
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .control-group label {
+            flex-shrink: 0; /* Prevent label shrinking */
+             width: 100px; /* Fixed width for labels */
+        }
+        .control-group input, .control-group select, .control-group span {
+            flex-grow: 1; /* Allow input/select to grow */
+        }
+         .control-group span { /* For speed display */
+             text-align: right;
+             min-width: 40px;
+         }
+         .control-group input[type="checkbox"] {
+             flex-grow: 0;
+             width: auto;
+             margin-right: 5px;
+         }
+
     </style>
 </head>
 <body>
     <div class="controls-container rounded-lg shadow-lg">
-        <h1 class="text-2xl font-bold mb-2 text-center">Audio Visualizer</h1>
+        <h1 class="text-2xl font-bold mb-4 text-center text-white">Enhanced Audio Visualizer</h1>
 
-        <label for="audio-file-input">Choose an Audio File</label>
-        <input type="file" id="audio-file-input" accept="audio/*">
+        <div>
+            <label for="audio-file-input" class="w-full">Choose Local Audio File</label>
+            <input type="file" id="audio-file-input" accept="audio/*">
+            <p id="loading-message" class="info-text">Or select a radio stream below.</p>
+        </div>
 
-        <p id="loading-message" class="info-text">Please select an audio file.</p>
+        <div>
+            <p class="section-title">Live Radio</p>
+            <div class="control-group">
+                <select id="radio-select" class="w-full">
+                    <option value="">-- Select Radio Station --</option>
+                    <option value="https://somafm.com/defcon.pls">SomaFM DEF CON Radio (PLS)</option>
+                    <option value="https://somafm.com/groovesalad.pls">SomaFM Groove Salad (PLS)</option>
+                     <option value="https://icecast.radiofrance.fr/fip-hifi.aac">FIP (AAC)</option>
+                     <option value="https://stream.radioparadise.com/aac-192">Radio Paradise (AAC 192k)</option>
+                     <option value="http://stream-dc4.radioparadise.com/mellow-320">Radio Paradise Mellow Mix (MP3 320k)</option>
+                </select>
+                <button id="play-radio-btn" class="px-3 py-1 rounded bg-green-600 hover:bg-green-700 flex-shrink-0">Play</button>
+            </div>
+             <p class="info-text">Radio streams depend on external sources & CORS.</p>
+        </div>
 
-        <audio id="audio-source" controls crossorigin="anonymous" class="w-full rounded"></audio>
+         <div>
+             <p class="section-title">Audio Player</p>
+             <audio id="audio-source" controls crossorigin="anonymous" class="w-full rounded"></audio>
+         </div>
+
+        <div>
+            <p class="section-title">Playback Controls</p>
+            <div class="control-group">
+                <label for="speed-slider">Speed:</label>
+                <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0" class="flex-grow">
+                <span id="speed-value">1.0x</span>
+            </div>
+            <div class="control-group mt-2">
+                 <label for="loop-checkbox" class="w-auto">Loop:</label> <input type="checkbox" id="loop-checkbox">
+                 <span class="flex-grow info-text text-left pl-2">(For local files)</span> </div>
+             <p class="info-text mt-2">Quality depends on the source file/stream.</p>
+        </div>
+
+        <div>
+            <p class="section-title">Visualizer Options</p>
+            <div class="control-group">
+                <label for="bar-color-picker">Bar Color:</label>
+                <input type="color" id="bar-color-picker" value="#00ffcc"> </div>
+             <div class="control-group mt-2">
+                 <label for="bg-change-btn">Background:</label>
+                 <button id="bg-change-btn" class="flex-grow">Cycle Background</button>
+             </div>
+             <p class="info-text mt-2">Use mouse/touch to rotate/zoom the visualizer.</p>
+        </div>
 
     </div>
 
@@ -106,155 +196,248 @@
 
     <script>
         // --- Global Variables ---
-        let scene, camera, renderer;
-        let audioContext, analyser, source, dataArray, bufferLength; // Make audio variables global
-        const bars = []; // Array to hold the visualizer bars
-        const NUM_BARS = 128; // Number of bars in the visualizer
-        let isAudioContextInitialized = false; // Flag to track initialization
+        let scene, camera, renderer, controls; // Added controls for OrbitControls
+        let audioContext, analyser, source, dataArray, bufferLength;
+        const bars = [];
+        const NUM_BARS = 128;
+        let isAudioContextInitialized = false;
+        let currentObjectURL = null; // To keep track of the object URL for revocation
+
+        // Base color for bars, changeable by picker
+        let baseBarColor = new THREE.Color(0x00ffcc);
+
+        // Background cycle options
+        const backgroundColors = [0x000000, 0x1a1a2a, 0x2a1a1a, 0x1a2a1a];
+        let currentBgIndex = 0;
 
         // --- Initialization ---
         function init() {
-            // 1. Set up Three.js Scene, Camera, Renderer
+            // Scene, Camera, Renderer Setup (as before)
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 50; // Move camera back
+            camera.position.set(0, 10, 55); // Slightly adjusted camera start position
 
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('visualizer-canvas'), alpha: true });
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('visualizer-canvas'), alpha: true, antialias: true }); // Added antialias
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 1); // Black background initially
+            renderer.setClearColor(backgroundColors[currentBgIndex], 1); // Use initial background color
+            renderer.setPixelRatio(window.devicePixelRatio); // Improve sharpness on high DPI screens
 
-            // 2. Create Visualizer Bars
+            // OrbitControls Setup
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // Smooth camera movement
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false; // Panning moves parallel to ground
+            controls.minDistance = 10;
+            controls.maxDistance = 200;
+            controls.target.set(0, -5, 0); // Set initial focus point
+
+            // Create Visualizer Bars (as before, but use baseBarColor)
             const barWidth = 0.5;
             const spacing = 0.2;
             const totalWidth = (barWidth + spacing) * NUM_BARS;
             const startX = -totalWidth / 2 + barWidth / 2;
-
             const geometry = new THREE.BoxGeometry(barWidth, 1, barWidth);
-            // Use MeshPhongMaterial for better lighting interaction
             const material = new THREE.MeshPhongMaterial({
-                 color: 0x00ffcc, // Teal color
-                 emissive: 0x005566, // Darker emissive, light comes mainly from PointLight
-                 specular: 0x111111, // Small specular highlight
-                 shininess: 50,     // Moderate shininess
-                 side: THREE.DoubleSide // Render both sides (optional)
+                 color: baseBarColor.clone(), // Use clone of base color
+                 emissive: baseBarColor.clone().multiplyScalar(0.3), // Emissive based on base color
+                 specular: 0x111111,
+                 shininess: 50,
+                 side: THREE.DoubleSide
             });
 
             for (let i = 0; i < NUM_BARS; i++) {
-                // Clone material for each bar to allow individual color changes
-                const barMaterial = material.clone();
+                const barMaterial = material.clone(); // Clone for each bar
                 const bar = new THREE.Mesh(geometry, barMaterial);
                 bar.position.x = startX + i * (barWidth + spacing);
-                bar.scale.y = 0.1; // Start very small
+                bar.scale.y = 0.1;
                 scene.add(bar);
                 bars.push(bar);
             }
 
-            // 3. Add Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // Slightly brighter ambient
+            // Lighting (as before)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // Slightly stronger ambient
             scene.add(ambientLight);
-            const pointLight = new THREE.PointLight(0x00ccff, 0.8, 300); // Cyan point light
-            pointLight.position.set(0, 30, 40);
+            const pointLight = new THREE.PointLight(0x88ccff, 0.7, 400); // Adjusted color/intensity
+            pointLight.position.set(0, 40, 50);
             scene.add(pointLight);
-            const pointLight2 = new THREE.PointLight(0xff6600, 0.5, 300); // Orange point light from side
-            pointLight2.position.set(-40, 10, 20);
+            const pointLight2 = new THREE.PointLight(0xffaa88, 0.4, 400); // Adjusted color/intensity
+            pointLight2.position.set(-50, 20, 30);
             scene.add(pointLight2);
 
+            // Setup Event Listeners for Controls
+            setupEventListeners();
 
-            // 4. Set up File Input Listener (Audio Context setup moved here)
-            setupFileInputListener();
-
-            // 5. Start Animation Loop
+            // Start Animation Loop
             animate();
 
-            // 6. Handle Window Resize
+            // Handle Window Resize
             window.addEventListener('resize', onWindowResize, false);
         }
 
-        // --- Web Audio API Setup (Called after file selection) ---
+        // --- Web Audio API Setup ---
         function setupAudioContextAndSource(audioElement) {
-            if (isAudioContextInitialized) return; // Prevent re-initialization
+            if (isAudioContextInitialized) {
+                 // If context exists but source is disconnected (e.g., after error), try reconnecting
+                 if (source && source.mediaElement !== audioElement) {
+                     source.disconnect();
+                     source = audioContext.createMediaElementSource(audioElement);
+                     source.connect(analyser);
+                     console.log("Reconnected source to analyser");
+                 }
+                 // Ensure context is running
+                 resumeAudioContext();
+                 return;
+            }
 
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-                // Create analyser node
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = NUM_BARS * 2;
                 bufferLength = analyser.frequencyBinCount;
                 dataArray = new Uint8Array(bufferLength);
 
-                // Create media element source node AFTER user interaction (file select)
                 source = audioContext.createMediaElementSource(audioElement);
-
-                // Connect the nodes: source -> analyser -> destination (speakers)
                 source.connect(analyser);
                 analyser.connect(audioContext.destination);
 
-                isAudioContextInitialized = true; // Mark as initialized
+                isAudioContextInitialized = true;
                 console.log("AudioContext Initialized and Source Connected");
 
-                // Attempt to resume context if suspended (needed for autoplay restrictions)
-                 const resumeContext = () => {
-                    if (audioContext.state === 'suspended') {
-                        audioContext.resume().then(() => {
-                            console.log("AudioContext Resumed");
-                        }).catch(e => console.error("Error resuming AudioContext:", e));
-                    }
-                    // Clean up listeners after first successful resume/play
-                    audioElement.removeEventListener('play', resumeContext);
-                    document.body.removeEventListener('click', resumeContext);
-                };
-
-                // Listen for play event on audio element OR first click on body
-                audioElement.addEventListener('play', resumeContext);
-                document.body.addEventListener('click', resumeContext, { once: true }); // Use once for body click
-
+                // Attempt to resume context if suspended
+                audioElement.addEventListener('play', resumeAudioContext);
+                document.body.addEventListener('click', resumeAudioContext, { once: true });
 
             } catch (e) {
                 console.error("Error setting up Web Audio API:", e);
-                document.getElementById('loading-message').textContent = "Error initializing audio. Please try refreshing.";
+                document.getElementById('loading-message').textContent = "Error initializing audio.";
                 alert("Web Audio API error: " + e.message);
+                isAudioContextInitialized = false; // Reset flag on error
             }
         }
 
-        // --- File Input Listener ---
-        function setupFileInputListener() {
+        function resumeAudioContext() {
+             if (audioContext && audioContext.state === 'suspended') {
+                 audioContext.resume().then(() => {
+                     console.log("AudioContext Resumed");
+                 }).catch(e => console.error("Error resuming AudioContext:", e));
+             }
+             // Clean up body listener after first interaction attempt
+             document.body.removeEventListener('click', resumeAudioContext);
+        }
+
+
+        // --- Event Listeners Setup ---
+        function setupEventListeners() {
             const fileInput = document.getElementById('audio-file-input');
             const audioElement = document.getElementById('audio-source');
             const loadingMessage = document.getElementById('loading-message');
+            const radioSelect = document.getElementById('radio-select');
+            const playRadioBtn = document.getElementById('play-radio-btn');
+            const speedSlider = document.getElementById('speed-slider');
+            const speedValueSpan = document.getElementById('speed-value');
+            const loopCheckbox = document.getElementById('loop-checkbox');
+            const colorPicker = document.getElementById('bar-color-picker');
+            const bgChangeBtn = document.getElementById('bg-change-btn');
 
+            // 1. File Input Listener
             fileInput.addEventListener('change', function(event) {
                 const files = event.target.files;
                 if (files.length > 0) {
                     const file = files[0];
-                    const objectURL = URL.createObjectURL(file);
 
-                    // Set the audio source
-                    audioElement.src = objectURL;
-                    // audioElement.load(); // Load the new source
+                    // Revoke previous Object URL if it exists
+                    if (currentObjectURL) {
+                        URL.revokeObjectURL(currentObjectURL);
+                        console.log("Revoked previous Object URL");
+                    }
+
+                    currentObjectURL = URL.createObjectURL(file); // Store the new URL
+                    audioElement.src = currentObjectURL;
 
                     loadingMessage.textContent = `Loaded: ${file.name}. Press play!`;
                     console.log("Audio file loaded:", file.name);
+                    radioSelect.value = ""; // Clear radio selection
 
-                    // --- IMPORTANT: Setup Audio Context HERE ---
-                    // This ensures it's done after user interaction (selecting the file)
-                    // and the audio element has a valid src.
                     if (!isAudioContextInitialized) {
                         setupAudioContextAndSource(audioElement);
+                    } else {
+                         // Ensure source is connected if context already exists
+                         setupAudioContextAndSource(audioElement);
                     }
-
-                    // Revoke the object URL when the audio element starts playing a new source
-                    // or when the page unloads to free up memory.
-                    audioElement.onloadedmetadata = () => {
-                      // Optional: could revoke previous URL here if needed
-                    };
-                    window.addEventListener('beforeunload', () => {
-                        URL.revokeObjectURL(objectURL);
-                    });
-
-                } else {
-                    loadingMessage.textContent = "No file selected.";
+                    audioElement.load(); // Explicitly load the new source
                 }
+            });
+
+             // Clean up Object URL on page leave
+             window.addEventListener('beforeunload', () => {
+                 if (currentObjectURL) {
+                     URL.revokeObjectURL(currentObjectURL);
+                 }
+             });
+
+            // 2. Radio Player Listener
+            playRadioBtn.addEventListener('click', () => {
+                const streamUrl = radioSelect.value;
+                if (streamUrl) {
+                     // Revoke previous Object URL if switching from file
+                     if (currentObjectURL) {
+                         URL.revokeObjectURL(currentObjectURL);
+                         currentObjectURL = null;
+                         console.log("Revoked Object URL when switching to radio");
+                     }
+
+                    audioElement.src = streamUrl;
+                    loadingMessage.textContent = `Loading radio: ${radioSelect.options[radioSelect.selectedIndex].text}...`;
+                    console.log("Attempting to play radio:", streamUrl);
+                    fileInput.value = ''; // Clear file input selection visually
+
+                     if (!isAudioContextInitialized) {
+                         setupAudioContextAndSource(audioElement);
+                     } else {
+                          // Ensure source is connected if context already exists
+                          setupAudioContextAndSource(audioElement);
+                     }
+
+                    audioElement.load(); // Load the stream
+                    audioElement.play().then(() => {
+                         loadingMessage.textContent = `Playing: ${radioSelect.options[radioSelect.selectedIndex].text}`;
+                         resumeAudioContext(); // Ensure context is running
+                    }).catch(e => {
+                         loadingMessage.textContent = `Error playing radio. Check console.`;
+                         console.error("Error playing radio stream:", e);
+                         alert(`Could not play radio stream. It might be offline, blocked by CORS, or incompatible.\nError: ${e.message}`);
+                    });
+                } else {
+                    loadingMessage.textContent = "Please select a radio station.";
+                }
+            });
+
+            // 3. Speed Control Listener
+            speedSlider.addEventListener('input', function() {
+                const speed = parseFloat(this.value);
+                audioElement.playbackRate = speed;
+                speedValueSpan.textContent = `${speed.toFixed(1)}x`;
+            });
+
+            // 4. Loop Control Listener
+            loopCheckbox.addEventListener('change', function() {
+                audioElement.loop = this.checked;
+            });
+
+            // 5. Color Picker Listener
+            colorPicker.addEventListener('input', function() {
+                baseBarColor.set(this.value);
+                // Update existing materials (optional, could wait for animate loop)
+                bars.forEach(bar => {
+                     bar.material.color.set(baseBarColor);
+                     bar.material.emissive.set(baseBarColor).multiplyScalar(0.3); // Adjust emissive too
+                });
+            });
+
+            // 6. Background Change Listener
+            bgChangeBtn.addEventListener('click', () => {
+                currentBgIndex = (currentBgIndex + 1) % backgroundColors.length;
+                renderer.setClearColor(backgroundColors[currentBgIndex], 1);
             });
         }
 
@@ -263,6 +446,8 @@
         function animate() {
             requestAnimationFrame(animate); // Loop the animation
 
+            controls.update(); // Required for damping
+
             // Only update if analyser and dataArray are ready
             if (analyser && dataArray) {
                 analyser.getByteFrequencyData(dataArray); // Get frequency data
@@ -270,26 +455,31 @@
                 // Update bar heights and colors based on frequency data
                 bars.forEach((bar, i) => {
                     const frequencyValue = dataArray[i]; // Value from 0 to 255
-                    const scale = (frequencyValue / 255) * 50 + 0.1; // Normalize, scale, add minimum height
+                    const scaleTarget = (frequencyValue / 255) * 60 + 0.1; // Increased max scale
 
-                    // Smooth the transition using lerp (linear interpolation)
-                    bar.scale.y += (scale - bar.scale.y) * 0.15;
+                    // Smooth the transition using lerp
+                    bar.scale.y += (scaleTarget - bar.scale.y) * 0.18; // Slightly faster smoothing
 
-                    // Adjust position so scaling happens from the bottom (centered on XZ plane)
-                    bar.position.y = bar.scale.y / 2 - 10; // Offset slightly down
+                    // Adjust position so scaling happens from the bottom
+                    bar.position.y = bar.scale.y / 2 - 10;
 
-                    // Change color based on height/frequency value
-                    // Map frequency value (0-255) to hue (e.g., blue -> green -> red)
-                    const hue = (1 - (frequencyValue / 255)) * 0.66; // 0.66 (blue) down to 0 (red)
-                    bar.material.color.setHSL(hue, 0.9, 0.6); // Saturation 0.9, Lightness 0.6
-                    // Make emissive color stronger for higher frequencies
-                    bar.material.emissive.setHSL(hue, 0.8, Math.min(0.5, (frequencyValue / 255) * 0.5));
+                    // Modulate color lightness/emissiveness based on frequency, using the base color
+                    const lightnessFactor = Math.min(1, 0.4 + (frequencyValue / 255) * 0.8); // 0.4 to 1.2 (clamped at 1)
+                    const emissiveFactor = Math.min(0.6, (frequencyValue / 255) * 0.6); // 0 to 0.6
+
+                    // Get HSL from base color to modify lightness
+                    let currentHSL = {};
+                    bar.material.color.getHSL(currentHSL);
+                    bar.material.color.setHSL(currentHSL.h, currentHSL.s, baseBarColor.getHSL(currentHSL).l * lightnessFactor);
+
+                    bar.material.emissive.copy(bar.material.color).multiplyScalar(emissiveFactor);
+
                 });
 
-                // Optional: Rotate the camera slowly for a dynamic view
-                 camera.position.x = Math.sin(Date.now() * 0.00015) * 15; // Slower rotation, wider arc
-                 camera.position.z = 50 + Math.cos(Date.now() * 0.00015) * 15;
-                 camera.lookAt(0, -5, 0); // Keep camera focused slightly below center of bars
+                // No automatic camera rotation when OrbitControls are enabled
+                // camera.position.x = Math.sin(Date.now() * 0.00015) * 15;
+                // camera.position.z = 50 + Math.cos(Date.now() * 0.00015) * 15;
+                // camera.lookAt(0, -5, 0);
             }
 
             renderer.render(scene, camera); // Render the scene
@@ -305,7 +495,6 @@
         }
 
         // --- Start Everything ---
-        // Run init when the window is fully loaded
         window.onload = init;
 
     </script>
