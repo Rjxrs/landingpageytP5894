@@ -13,7 +13,7 @@
     <style>
         /* --- Base Variables & Smooth Transitions --- */
         :root {
-            --font-sans: 'Inter', sans-serif; /* Define font variable */
+            --font-sans: 'Inter', sans-serif;
             --bg-color: #f8f9fa;
             --text-color: #212529;
             --card-bg: #ffffff;
@@ -36,6 +36,8 @@
             --switch-checked-bg: #0d6efd;
             --icon-active-color: #ffc107; /* Yellow for sun */
             --icon-inactive-color: var(--muted-text-color);
+            --top-bar-icon-color: var(--muted-text-color);
+            --top-bar-icon-hover-color: var(--link-color);
             /* Social Button Variables */
             --social-btn-bg: var(--section-bg-darker);
             --social-btn-icon-color: var(--muted-text-color);
@@ -66,27 +68,29 @@
             --switch-checked-bg: #6ea8fe;
             --icon-active-color: #a7aef2; /* Light blue/purple for moon */
             --icon-inactive-color: var(--muted-text-color);
+            --top-bar-icon-color: var(--muted-text-color);
+            --top-bar-icon-hover-color: var(--link-color);
              /* Social Button Variables - Dark */
-            --social-btn-bg: var(--card-bg); /* Use card bg for dark */
+            --social-btn-bg: var(--card-bg);
             --social-btn-icon-color: var(--muted-text-color);
             --social-btn-hover-bg: #495057;
             --social-btn-hover-icon-color: var(--link-color);
         }
 
         /* Apply smooth transitions */
-        body, .section, .video-card, .short-card, .social-buttons, footer, .top-bar, .hero-section, .btn, a, .carousel-indicators [data-bs-target], .theme-switch-wrapper i, .btn-social {
+        body, .section, .video-card, .short-card, .social-buttons, footer, .top-bar, .hero-section, .btn, a, .carousel-indicators [data-bs-target], .theme-switch-wrapper i, .btn-social, .top-bar-controls a {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, transform 0.2s ease;
         }
         /* Apply theme variables & Font */
         body {
-            font-family: var(--font-sans); /* Use Inter font */
+            font-family: var(--font-sans);
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow-x: hidden;
         }
         html { scroll-behavior: smooth; }
 
-        /* --- Top Bar (Time/Date & Theme Switch) --- */
+        /* --- Top Bar (Time/Date & Theme Switch & MP3 Link) --- */
         .top-bar {
             background-color: rgba(var(--bs-body-bg-rgb), 0.9);
             backdrop-filter: blur(5px);
@@ -98,12 +102,28 @@
         }
         .time-date { font-size: 0.9rem; color: var(--muted-text-color); white-space: nowrap; }
 
-        .theme-switch-wrapper { display: flex; align-items: center; gap: 8px; }
+        /* Wrapper for controls on the right */
+        .top-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 18px; /* Spacing between MP3 link and theme switch */
+        }
 
-        /* Style icons based on theme */
+        /* Style for MP3 Link (Icon only) */
+        .top-bar-controls .mp3-link {
+            color: var(--top-bar-icon-color);
+            font-size: 1.2rem; /* Slightly larger icon */
+            text-decoration: none;
+        }
+        .top-bar-controls .mp3-link:hover {
+            color: var(--top-bar-icon-hover-color);
+            transform: scale(1.1);
+        }
+
+        /* Theme switch styling */
+        .theme-switch-wrapper { display: flex; align-items: center; gap: 8px; }
         .theme-switch-wrapper .fa-sun { color: var(--icon-active-color); }
         .theme-switch-wrapper .fa-moon { color: var(--icon-inactive-color); }
-
         [data-bs-theme="dark"] .theme-switch-wrapper .fa-sun { color: var(--icon-inactive-color); }
         [data-bs-theme="dark"] .theme-switch-wrapper .fa-moon { color: var(--icon-active-color); }
 
@@ -171,37 +191,25 @@
 
 
         /* --- Social Buttons Styling --- */
-        .social-buttons-container { /* Renamed container */
+        .social-buttons-container {
             text-align: center; padding: 60px 0; background-color: var(--section-bg-darker); border-radius: 15px; margin-top: 60px;
         }
-        .social-buttons-container h2 { margin-bottom: 40px; /* Increased spacing */ font-weight: bold; color: var(--heading-color); animation: fadeIn 1s ease-out; }
-        .social-buttons-wrapper { /* Added wrapper for flex layout */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 15px; /* Spacing between buttons */
+        .social-buttons-container h2 { margin-bottom: 40px; font-weight: bold; color: var(--heading-color); animation: fadeIn 1s ease-out; }
+        .social-buttons-wrapper {
+            display: flex; justify-content: center; align-items: center;
+            flex-wrap: wrap; gap: 15px;
         }
         .btn-social {
-            display: inline-flex; /* Use flex for icon centering */
-            justify-content: center;
-            align-items: center;
-            width: 50px; /* Fixed width */
-            height: 50px; /* Fixed height */
-            border-radius: 50%; /* Circular buttons */
-            background-color: var(--social-btn-bg);
-            border: 1px solid var(--card-border); /* Subtle border */
-            color: var(--social-btn-icon-color); /* Icon color */
-            font-size: 1.4rem; /* Icon size */
-            text-decoration: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            animation: popIn 0.5s ease-out backwards; /* Keep pop-in animation */
+            display: inline-flex; justify-content: center; align-items: center;
+            width: 50px; height: 50px; border-radius: 50%;
+            background-color: var(--social-btn-bg); border: 1px solid var(--card-border);
+            color: var(--social-btn-icon-color); font-size: 1.4rem;
+            text-decoration: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: popIn 0.5s ease-out backwards;
         }
         .btn-social:hover {
-            background-color: var(--social-btn-hover-bg);
-            color: var(--social-btn-hover-icon-color);
-            transform: translateY(-3px) scale(1.05); /* Lift and scale effect */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: var(--social-btn-hover-bg); color: var(--social-btn-hover-icon-color);
+            transform: translateY(-3px) scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         /* Staggered animation delays */
         .btn-social:nth-of-type(1) { animation-delay: 0.1s; }
@@ -232,12 +240,21 @@
 
     <div class="top-bar">
         <div class="time-date" id="time-date-display">Loading...</div>
-        <div class="theme-switch-wrapper">
-            <i class="fas fa-sun"></i> <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="themeSwitch">
-                <label class="form-check-label visually-hidden" for="themeSwitch">Toggle Theme</label>
-            </div>
-             <i class="fas fa-moon"></i> </div>
+
+        <div class="top-bar-controls">
+            <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="mp3-link" target="_blank" rel="noopener noreferrer" title="MP3 Player">
+                <i class="fas fa-music"></i>
+            </a>
+
+            <div class="theme-switch-wrapper">
+                <i class="fas fa-sun"></i>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="themeSwitch">
+                    <label class="form-check-label visually-hidden" for="themeSwitch">Toggle Theme</label>
+                </div>
+                 <i class="fas fa-moon"></i>
+             </div>
+        </div>
     </div>
 
     <section class="hero-section">
@@ -269,17 +286,17 @@
                 <div class="carousel-inner">
                     <div class="carousel-item active">
                         <div class="short-embed-wrapper">
-                            <iframe src="https://www.youtube.com/shorts/hig2LFBU8dI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            <iframe src="https://googleusercontent.com/youtube.com/embed/PLACEHOLDER_SHORT_ID_1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                     </div>
                     <div class="carousel-item">
                         <div class="short-embed-wrapper">
-                            <iframe src="https://www.youtube.com/shorts/6Gbk1DDgp_M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            <iframe src="https://googleusercontent.com/youtube.com/embed/PLACEHOLDER_SHORT_ID_2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                     </div>
                     <div class="carousel-item">
                         <div class="short-embed-wrapper">
-                           <iframe src="https://www.youtube.com/shorts/DNZkD_oA6Qs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                           <iframe src="https://googleusercontent.com/youtube.com/embed/PLACEHOLDER_SHORT_ID_3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                     </div>
                     </div>
@@ -296,7 +313,7 @@
                 <div class="col-md-6 col-lg-4 animate-on-scroll">
                     <div class="video-card">
                          <a href="#" target="_blank" rel="noopener noreferrer">
-                            <iframe src="https://www.youtube.com/watch?v=7KkPs-ZvcEw" class="card-img-top" alt="Video 1 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
+                            <img src="https://placehold.co/600x337/aaa/fff?text=Video+1+Thumbnail" class="card-img-top" alt="Video 1 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
                         </a>
                         <div class="card-body">
                             <h5 class="card-title">Video Title 1</h5>
@@ -307,7 +324,7 @@
                 <div class="col-md-6 col-lg-4 animate-on-scroll" style="animation-delay: 0.1s;">
                     <div class="video-card">
                          <a href="#" target="_blank" rel="noopener noreferrer">
-                            <iframe src="https://www.youtube.com/watch?v=7KkPs-ZvcEw" class="card-img-top" alt="Video 2 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
+                            <img src="https://placehold.co/600x337/bbb/fff?text=Video+2+Thumbnail" class="card-img-top" alt="Video 2 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
                         </a>
                         <div class="card-body">
                             <h5 class="card-title">Video Title 2</h5>
@@ -318,7 +335,7 @@
                 <div class="col-md-6 col-lg-4 animate-on-scroll" style="animation-delay: 0.2s;">
                     <div class="video-card">
                          <a href="#" target="_blank" rel="noopener noreferrer">
-                            <iframe src="https://www.youtube.com/watch?v=7KkPs-ZvcEw" class="card-img-top" alt="Video 3 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
+                            <img src="https://placehold.co/600x337/ccc/fff?text=Video+3+Thumbnail" class="card-img-top" alt="Video 3 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
                         </a>
                         <div class="card-body">
                             <h5 class="card-title">Video Title 3</h5>
@@ -371,59 +388,40 @@
             const timeDateDisplay = document.getElementById('time-date-display');
 
             // --- Theme Switching ---
-            // Function to apply the theme
             const applyTheme = (theme) => {
                 htmlElement.setAttribute('data-bs-theme', theme);
                 if (themeSwitch) {
                     themeSwitch.checked = (theme === 'dark');
                 }
-                // console.log(`Theme applied: ${theme}`); // For debugging
             };
-
-            // Function to get the preferred theme (localStorage > default)
             const getPreferredTheme = () => {
                 const storedTheme = localStorage.getItem('theme');
-                if (storedTheme) {
-                    // console.log(`Found stored theme: ${storedTheme}`); // For debugging
-                    return storedTheme;
-                }
-                // console.log('No stored theme found, defaulting to light.'); // For debugging
-                return 'light'; // Default to light if nothing is stored
+                if (storedTheme) return storedTheme;
+                return 'light'; // Default to light
             };
-
-            // Set initial theme on load
             const currentTheme = getPreferredTheme();
             applyTheme(currentTheme);
-
-            // Listener for theme switch toggle
             if (themeSwitch) {
                 themeSwitch.addEventListener('change', () => {
                     const newTheme = themeSwitch.checked ? 'dark' : 'light';
-                    // console.log(`Switch toggled. New theme: ${newTheme}`); // For debugging
                     applyTheme(newTheme);
-                    localStorage.setItem('theme', newTheme); // Save preference
+                    localStorage.setItem('theme', newTheme);
                 });
-            } else {
-                // console.error("Theme switch element not found!"); // For debugging
             }
 
             // --- Live Time and Date ---
             const updateTimeDate = () => {
                 if (timeDateDisplay) {
                     const now = new Date();
-                    // Use browser's default locale and formatting options
                     const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' }; // Consider adding timeZoneName: 'short' if needed
-
-                    // Let the browser determine the locale automatically
+                    const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
+                    // Use browser's default locale
                     const formattedDate = now.toLocaleDateString(undefined, optionsDate);
                     const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
-
-                    // Display the time based on the user's system clock and timezone
+                    // Display time based on user's system clock/timezone
                     timeDateDisplay.textContent = `${formattedDate} | ${formattedTime}`;
                 }
             };
-            // Update time immediately and then every second
             updateTimeDate();
             setInterval(updateTimeDate, 1000);
 
