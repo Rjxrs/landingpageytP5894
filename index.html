@@ -365,46 +365,65 @@
 
     <script>
         // Standard JavaScript for theme switching, time/date, and scroll animations
-        // No changes needed in the script itself
         document.addEventListener('DOMContentLoaded', () => {
             const themeSwitch = document.getElementById('themeSwitch');
             const htmlElement = document.documentElement;
             const timeDateDisplay = document.getElementById('time-date-display');
 
             // --- Theme Switching ---
+            // Function to apply the theme
             const applyTheme = (theme) => {
                 htmlElement.setAttribute('data-bs-theme', theme);
                 if (themeSwitch) {
                     themeSwitch.checked = (theme === 'dark');
                 }
+                // console.log(`Theme applied: ${theme}`); // For debugging
             };
+
+            // Function to get the preferred theme (localStorage > default)
             const getPreferredTheme = () => {
                 const storedTheme = localStorage.getItem('theme');
-                if (storedTheme) return storedTheme;
-                return 'light'; // Default to light
+                if (storedTheme) {
+                    // console.log(`Found stored theme: ${storedTheme}`); // For debugging
+                    return storedTheme;
+                }
+                // console.log('No stored theme found, defaulting to light.'); // For debugging
+                return 'light'; // Default to light if nothing is stored
             };
+
+            // Set initial theme on load
             const currentTheme = getPreferredTheme();
             applyTheme(currentTheme);
+
+            // Listener for theme switch toggle
             if (themeSwitch) {
                 themeSwitch.addEventListener('change', () => {
                     const newTheme = themeSwitch.checked ? 'dark' : 'light';
+                    // console.log(`Switch toggled. New theme: ${newTheme}`); // For debugging
                     applyTheme(newTheme);
-                    localStorage.setItem('theme', newTheme);
+                    localStorage.setItem('theme', newTheme); // Save preference
                 });
+            } else {
+                // console.error("Theme switch element not found!"); // For debugging
             }
 
             // --- Live Time and Date ---
             const updateTimeDate = () => {
                 if (timeDateDisplay) {
                     const now = new Date();
+                    // Use browser's default locale and formatting options
                     const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
-                    // Force English locale for consistency, or remove locale for browser default
-                    const formattedDate = now.toLocaleDateString('en-US', optionsDate);
-                    const formattedTime = now.toLocaleTimeString('en-US', optionsTime);
+                    const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' }; // Consider adding timeZoneName: 'short' if needed
+
+                    // Let the browser determine the locale automatically
+                    const formattedDate = now.toLocaleDateString(undefined, optionsDate);
+                    const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
+
+                    // Display the time based on the user's system clock and timezone
                     timeDateDisplay.textContent = `${formattedDate} | ${formattedTime}`;
                 }
             };
+            // Update time immediately and then every second
             updateTimeDate();
             setInterval(updateTimeDate, 1000);
 
