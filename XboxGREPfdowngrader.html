@@ -86,19 +86,20 @@
         /* --- Top Bar Styling using Tailwind --- */
         .top-bar {
             @apply fixed top-0 left-0 right-0 z-50 w-full px-4 py-2 flex justify-between items-center min-h-[50px];
+            /* Base light theme for top bar */
             @apply bg-white/90 backdrop-blur-sm border-b border-gray-200;
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        /* Adjust top bar background/border for darker body backgrounds */
-        body.era-original .top-bar, body.era-nxe .top-bar, body.era-metro .top-bar {
+        /* Dark theme styles specifically for the top bar when it has the 'top-bar-dark-theme' class */
+        .top-bar.top-bar-dark-theme {
              @apply bg-gray-800/90 border-gray-700;
         }
 
         .time-date {
-            @apply text-sm text-gray-500 whitespace-nowrap;
+            @apply text-sm text-gray-500 whitespace-nowrap transition-colors duration-300;
         }
-         body.era-original .time-date, body.era-nxe .time-date, body.era-metro .time-date {
+         .top-bar.top-bar-dark-theme .time-date {
              @apply text-gray-400;
          }
 
@@ -107,10 +108,12 @@
         }
         .btn-top-bar {
             @apply w-[34px] h-[34px] inline-flex items-center justify-center rounded-full transition-all duration-200;
-            @apply bg-gray-200 text-gray-600; /* Default light */
-            @apply hover:bg-gray-300 hover:text-blue-600 hover:scale-105; /* Hover light */
+            /* Base light theme button */
+            @apply bg-gray-200 text-gray-600;
+            @apply hover:bg-gray-300 hover:text-blue-600 hover:scale-105;
         }
-         body.era-original .btn-top-bar, body.era-nxe .btn-top-bar, body.era-metro .btn-top-bar {
+         /* Dark theme button styles for top bar */
+         .top-bar.top-bar-dark-theme .btn-top-bar {
              @apply bg-gray-700 text-gray-400;
              @apply hover:bg-gray-600 hover:text-blue-400;
          }
@@ -119,63 +122,65 @@
             @apply text-sm;
         }
 
-        /* --- Theme switch styling (Restored but visually disabled) --- */
+        /* --- Theme switch styling (Re-enabled) --- */
         .theme-switch-wrapper {
-            @apply flex items-center space-x-2 opacity-50 cursor-not-allowed; /* Added opacity and cursor */
+            @apply flex items-center space-x-2; /* Removed opacity/cursor */
         }
+        /* Icon colors now depend on the top bar's theme class */
         .theme-switch-wrapper .fa-sun { @apply text-yellow-500 text-lg; }
         .theme-switch-wrapper .fa-moon { @apply text-gray-400 text-lg; }
-        /* Dark mode icon colors (won't change based on JS, but set for potential static dark mode) */
-        /* body.era-original .theme-switch-wrapper .fa-sun, body.era-nxe .theme-switch-wrapper .fa-sun, body.era-metro .theme-switch-wrapper .fa-sun { @apply text-gray-500; }
-        body.era-original .theme-switch-wrapper .fa-moon, body.era-nxe .theme-switch-wrapper .fa-moon, body.era-metro .theme-switch-wrapper .fa-moon { @apply text-indigo-400; } */
-        /* Simplified: just use default muted colors when disabled */
-         .theme-switch-wrapper .fa-sun, .theme-switch-wrapper .fa-moon { @apply text-gray-400; }
-         body.era-original .theme-switch-wrapper .fa-sun, body.era-nxe .theme-switch-wrapper .fa-sun, body.era-metro .theme-switch-wrapper .fa-sun,
-         body.era-original .theme-switch-wrapper .fa-moon, body.era-nxe .theme-switch-wrapper .fa-moon, body.era-metro .theme-switch-wrapper .fa-moon {
-              @apply text-gray-500; /* Muted color on dark backgrounds */
-         }
+
+        .top-bar.top-bar-dark-theme .theme-switch-wrapper .fa-sun { @apply text-gray-500; }
+        .top-bar.top-bar-dark-theme .theme-switch-wrapper .fa-moon { @apply text-indigo-400; }
 
 
         /* Tailwind Toggle Switch Styling */
         .toggle-label {
-            @apply relative block w-10 h-6 rounded-full;
-            @apply bg-gray-300; /* Default background */
+            @apply relative block w-10 h-6 rounded-full cursor-pointer;
+            @apply bg-gray-300; /* Base light background */
             transition: background-color 0.3s ease;
         }
-         body.era-original .toggle-label, body.era-nxe .toggle-label, body.era-metro .toggle-label {
-              @apply bg-gray-600; /* Darker background for toggle on dark body */
+        /* Dark theme toggle background */
+         .top-bar.top-bar-dark-theme .toggle-label {
+              @apply bg-gray-600;
          }
 
         .toggle-checkbox {
-            @apply absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none;
-             border-color: #e5e7eb; /* Match light background */
+            @apply absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer;
+             border-color: #e5e7eb; /* Base light border */
             top: 2px;
             left: 2px;
             transition: all 0.3s ease-in-out;
         }
-         body.era-original .toggle-checkbox, body.era-nxe .toggle-checkbox, body.era-metro .toggle-checkbox {
-             background-color: #adb5bd; /* Darker handle */
-             border-color: #4a5568; /* Match dark background */
+         /* Dark theme toggle handle */
+         .top-bar.top-bar-dark-theme .toggle-checkbox {
+             background-color: #adb5bd;
+             border-color: #4a5568;
          }
 
-        /* Styles for checked state (won't be triggered by user) */
+        /* Styles for checked state */
         .toggle-checkbox:checked {
-            right: 0;
-            border-color: #68D391;
+            @apply right-0; /* Moves handle right */
+            transform: translateX(100%); /* Alternative way to move */
+             border-color: #68D391; /* Checked border color (light mode) */
         }
+         .top-bar.top-bar-dark-theme .toggle-checkbox:checked {
+             border-color: #34D399; /* Checked border color (dark mode) */
+         }
+
         .toggle-checkbox:checked + .toggle-label {
-             @apply bg-green-400;
+             @apply bg-green-400; /* Checked background color (light mode) */
         }
+         .top-bar.top-bar-dark-theme .toggle-checkbox:checked + .toggle-label {
+             @apply bg-green-500; /* Checked background color (dark mode) */
+         }
         /* End Theme Switch Styling */
 
-        /* Red strip styling */
-         .top-bar .red-strip {
-             @apply absolute bottom-0 left-0 right-0 h-0.5 bg-red-600;
-         }
+        /* Removed Red strip styling */
 
     </style>
 </head>
-<body class="era-blades"> <div class="top-bar">
+<body class="era-blades"> <div class="top-bar" id="top-bar-element">
         <div class="time-date" id="time-date-display">Loading...</div>
 
         <div class="top-bar-controls">
@@ -190,14 +195,13 @@
             <div class="theme-switch-wrapper">
                 <i class="fas fa-sun"></i>
                  <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                    <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox pointer-events-none" disabled/>
+                    <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
                     <label for="themeSwitch" class="toggle-label"></label>
                 </div>
                  <i class="fas fa-moon"></i>
              </div>
         </div>
-        <div class="red-strip"></div>
-    </div>
+        </div>
     <div class="content-wrapper">
         <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/Xbox-360-Era-PFP-Downgrader-06-04-2025.png?raw=true"
              alt="Xbox 360 Era PFP Downgrader Title"
@@ -251,8 +255,64 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- Top Bar JS ---
-            // Note: Theme switching JS logic removed
+            const themeSwitch = document.getElementById('themeSwitch');
+            // *** Target the top bar element itself for theme class toggling ***
+            const topBarElement = document.getElementById('top-bar-element');
             const timeDateDisplay = document.getElementById('time-date-display');
+
+            /**
+             * Applies the specified theme *only* to the top bar.
+             * Adds or removes the 'top-bar-dark-theme' class on the top bar element.
+             * Updates the state of the theme switch checkbox.
+             * @param {string} theme - The theme to apply ('light' or 'dark').
+             */
+            const applyTopBarTheme = (theme) => {
+                if (topBarElement) {
+                    if (theme === 'dark') {
+                        topBarElement.classList.add('top-bar-dark-theme');
+                    } else {
+                        topBarElement.classList.remove('top-bar-dark-theme');
+                    }
+                }
+                // Sync the checkbox state with the applied theme
+                if (themeSwitch) {
+                    themeSwitch.checked = (theme === 'dark');
+                }
+            };
+
+            /**
+             * Determines the preferred theme for the top bar.
+             * Checks localStorage first for a saved preference ('topBarTheme').
+             * Defaults to 'light' if no preference is found.
+             * @returns {string} The preferred theme ('light' or 'dark').
+             */
+            const getPreferredTopBarTheme = () => {
+                // *** Use a specific key for top bar theme ***
+                const storedTheme = localStorage.getItem('topBarTheme');
+                if (storedTheme) {
+                    return storedTheme; // Return saved theme
+                }
+                return 'light'; // Default to light theme
+            };
+
+            // Set the initial theme for the top bar when the page loads
+            const currentTopBarTheme = getPreferredTopBarTheme();
+            applyTopBarTheme(currentTopBarTheme);
+
+            // Add event listener for the theme switch toggle, if it exists
+            if (themeSwitch) {
+                themeSwitch.addEventListener('change', () => {
+                    // Determine the new theme based on the switch's checked state
+                    const newTheme = themeSwitch.checked ? 'dark' : 'light';
+                    // Apply the new theme visually *to the top bar*
+                    applyTopBarTheme(newTheme);
+                    // Save the new preference to localStorage for persistence
+                    // *** Use a specific key for top bar theme ***
+                    localStorage.setItem('topBarTheme', newTheme);
+                });
+            } else {
+                console.warn("Theme switch element with ID 'themeSwitch' not found.");
+            }
 
             /**
              * Updates the time and date display element.
@@ -284,7 +344,7 @@
             setInterval(updateTimeDate, 1000);
 
 
-            // --- Original Xbox Downgrader JS ---
+            // --- Original Xbox Downgrader JS (Unchanged) ---
             const eraConfigs = {
                 'original': { targetSize: 64, jpegQuality: 0.2, smoothing: false, filter: 'grayscale(100%) contrast(1.1)', bodyClass: 'era-original' },
                 'blades': { targetSize: 96, jpegQuality: 0.4, smoothing: false, filter: 'none', bodyClass: 'era-blades' },
