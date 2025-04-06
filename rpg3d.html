@@ -3,32 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mine RPG</title>
+    <title>Mine RPG 2D</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/examples/js/controls/PointerLockControls.js"></script>
     <style>
         body {
             font-family: 'Press Start 2P', cursive;
             margin: 0;
             overflow: hidden;
-            background-color: #111827; /* Dark background */
+            background-color: #111827;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         #gameCanvas {
-            width: 100%;
-            height: 100vh;
-            display: block;
-            cursor: grab;
-            position: fixed;
+            border: 2px solid #374151;
+            border-radius: 8px;
+            background-color: #1f2937;
+            display: none;
+            position: absolute;
             top: 0;
             left: 0;
             z-index: 0;
-        }
-        #gameCanvas:active {
-            cursor: grabbing;
         }
         .ui-container {
             position: absolute;
@@ -41,7 +40,7 @@
         .xp-bar {
             width: 200px;
             height: 16px;
-            background-color: #4a5568; /* Darker grey */
+            background-color: #4a5568;
             border-radius: 8px;
             margin-top: 5px;
             position: relative;
@@ -49,7 +48,7 @@
         }
         .xp-bar-fill {
             height: 100%;
-            background-color: #84cc16; /* Green */
+            background-color: #84cc16;
             border-radius: 8px;
             width: 0;
             transition: width 0.3s ease;
@@ -63,14 +62,14 @@
             top: 10px;
             right: 10px;
             z-index: 1;
-            background-color: rgba(243, 244, 246, 0.8); /* Light semi-transparent background */
+            background-color: rgba(243, 244, 246, 0.8);
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             display: none;
             max-height: 80vh;
             overflow-y: auto;
-            width: 250px; /* Increased width of the inventory */
+            width: 250px;
         }
         #inventory h2 {
             font-size: 1.2rem;
@@ -88,19 +87,18 @@
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             justify-content: space-between;
-            align-items: center; /* Vertically center item name and quantity */
+            align-items: center;
             color: #374151;
         }
         #inventory li:last-child {
             border-bottom: none;
         }
         #inventory li span:first-child {
-             margin-right: auto; /* Push item name to the left */
+             margin-right: auto;
         }
         .item-name {
-            font-weight: 500; /* Make item names bold */
+            font-weight: 500;
         }
-
         #inventory-toggle {
             position: absolute;
             top: 10px;
@@ -116,17 +114,15 @@
             transition: background-color 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-
         #inventory-toggle:hover {
             background-color: #45a01a;
         }
-
         #quests {
             position: absolute;
             top: 100px;
             left: 10px;
             z-index: 1;
-            background-color: rgba(243, 244, 246, 0.8); /* Light semi-transparent background */
+            background-color: rgba(243, 244, 246, 0.8);
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -181,13 +177,12 @@
         #quest-toggle:hover {
             background-color: #7c3aed;
         }
-
         #message-box {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(55, 65, 81, 0.9); /* Dark semi-transparent background */
+            background-color: rgba(55, 65, 81, 0.9);
             color: #ffffff;
             padding: 15px;
             border-radius: 8px;
@@ -199,12 +194,10 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
-
         #message-box.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
-
         #message-box.hide {
             opacity: 0;
             transform: translateX(-50%) translateY(20px);
@@ -219,7 +212,6 @@
             z-index: 10;
             display: none;
         }
-
         .game-over-content {
             text-align: center;
             padding: 20px;
@@ -227,17 +219,170 @@
             border: 4px solid #dc2626;
             background-color: #fee2e2;
         }
-
         .game-over-title {
             font-size: 2rem;
             color: #b91c1c;
             margin-bottom: 1rem;
         }
-
         .game-over-message {
             font-size: 1.25rem;
             color: #374151;
             margin-bottom: 1.5rem;
+        }
+        .menu-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(243, 244, 246, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 2;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+        }
+        .menu-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        .menu-container button {
+            padding: 0.75rem 1.5rem;
+            background-color: #4CAF20;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            margin: 0.5rem;
+            width: 100%;
+        }
+        .menu-container button:hover {
+            background-color: #45a01a;
+        }
+        .menu-container .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .menu-container .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+            font-size: 0.8rem;
+        }
+        .menu-container .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        #char-creation {
+            display: none;
+        }
+        #class-selection {
+            display: none;
+        }
+        .skill-selection-container {
+            display: none;
+            max-height: 70vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .skill-selection-container h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+            text-align: center;
+        }
+        .skill-selection-container ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .skill-selection-container li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .skill-selection-container li:last-child {
+            border-bottom: none;
+        }
+        .skill-selection-container li span {
+            margin-right: auto;
+        }
+        .skill-selection-container li button {
+            padding: 0.25rem 0.5rem;
+            background-color: #8b5cf6;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: background-color 0.3s ease;
+        }
+        .skill-selection-container li button:hover {
+            background-color: #7c3aed;
+        }
+        .skill-selection-container li button.selected {
+            background-color: #16a34a;
+        }
+        .hud-container {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .health-bar {
+            width: 200px;
+            height: 16px;
+            background-color: #4a5568;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            background-color: #84cc16;
+            border-radius: 8px;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .mana-bar {
+            width: 200px;
+            height: 16px;
+            background-color: #4a5568;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mana-bar-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 8px;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .hud-text {
+            font-size: 0.8rem;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
 
     </style>
@@ -250,6 +395,16 @@
             <div class="xp-bar-fill" id="xp-bar-fill"></div>
         </div>
         <div>Gold: <span id="gold">0</span></div>
+    </div>
+    <div class="hud-container">  
+        <div class="health-bar">
+            <div class="health-bar-fill" id="health-bar-fill"></div>
+        </div>
+        <span class="hud-text">HP: <span id="hp-text">100</span></span>
+        <div class="mana-bar">
+            <div class="mana-bar-fill" id="mana-bar-fill"></div>
+        </div>
+        <span class="hud-text">Mana: <span id="mana-text">100</span></span>
     </div>
     <button id="inventory-toggle">Inventory</button>
     <div id="inventory">
@@ -271,56 +426,159 @@
         </div>
     </div>
 
+    <div id="menu" class="menu-container">
+        <h2>Welcome to Mine RPG</h2>
+        <button id="start-game">Start New Game</button>
+        <button id="load-game">Load Game</button>
+    </div>
+
+    <div id="char-creation" class="menu-container">
+        <h2>Character Creation</h2>
+        <div class="input-group">
+            <label for="char-name">Name:</label>
+            <input type="text" id="char-name" placeholder="Enter your name">
+        </div>
+        <button id="select-class">Select Class</button>
+    </div>
+
+    <div id="class-selection" class="menu-container">
+        <h2>Class Selection</h2>
+        <button data-class="warrior">Warrior</button>
+    </div>
+
+    <div id="skill-selection" class="skill-selection-container">
+        <h3>Select Skills (5 Max)</h3>
+        <ul>
+        </ul>
+        <button id="finish-skills">Finish Selection</button>
+    </div>
+
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas });
-        const canvasContainer = document.querySelector('body');
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x111827); // Match body background
+        const menuContainer = document.getElementById('menu');
+        const startGameButton = document.getElementById('start-game');
+        const loadGameButton = document.getElementById('load-game');
+        const charCreationScreen = document.getElementById('char-creation');
+        const charNameInput = document.getElementById('char-name');
+        const selectClassButton = document.getElementById('select-class');
+        const classSelectionScreen = document.getElementById('class-selection');
+        const skillSelectionScreen = document.getElementById('skill-selection');
+        const skillList = skillSelectionScreen.querySelector('ul');
+        const finishSkillsButton = document.getElementById('finish-skills');
+        const inventoryDiv = document.getElementById('inventory');
+        const inventoryList = inventoryDiv.querySelector('ul');
+        const inventoryToggle = document.getElementById('inventory-toggle');
+        const questsDiv = document.getElementById('quests');
+        const questsList = questsDiv.querySelector('ul');
+        const questToggle = document.getElementById('quest-toggle');
+        const messageBox = document.getElementById('message-box');
+        const gameOverOverlay = document.querySelector('.game-over-overlay');
 
-        // Lighting
-        const ambientLight = new THREE.HemisphereLight(0xffffff, 0x404040, 0.7); // Sky color, ground color, intensity
-        scene.add(ambientLight);
+        // Get references to the new HUD elements
+        const healthBarFill = document.getElementById('health-bar-fill');
+        const hpText = document.getElementById('hp-text');
+        const manaBarFill = document.getElementById('mana-bar-fill');
+        const manaText = document.getElementById('mana-text');
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2); // Add a directional light
-        directionalLight.position.set(1, 1, 0); // Position the light
-        scene.add(directionalLight);
 
-        // Player
-        let player = {
-            x: 0,
-            y: 0,
-            z: 5,
-            level: 1,
-            xp: 0,
-            gold: 100,
-            inventory: {
-                pickaxe: { name: 'Pickaxe', quantity: 1, level: 1 },
-                torch: { name: 'Torch', quantity: 5 },
-                healthPotion: { name: 'Health Potion', quantity: 3 },
-                "Iron Ore": { name: "Iron Ore", quantity: 0 },
-                "Copper Ore": { name: "Copper Ore", quantity: 0 },
-                "Silver Ore": { name: "Silver Ore", quantity: 0 },
-                "Gold Ore": { name: "Gold Ore", quantity: 0 },
+        let gameRunning = false;
+        let player = null;
+        let selectedClass = null;
+        let selectedSkills = [];
+        let skillPoints = 5;
+        let npcs = [];
+        let currentDialog = null;
+
+        // Set the canvas dimensions
+        const canvasSize = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+        const worldSize = 64;
+        let tileSize = canvasSize / worldSize;
+
+
+        const classes = {
+            warrior: {
+                name: 'Warrior',
+                description: 'A strong fighter with high health.',
+                stats: { strength: 12, dexterity: 7, vitality: 18, intelligence: 5, wisdom: 5 },
+                skills: ['Swordsmanship', 'Blocking', 'Heavy Armor', 'Athletics', 'Intimidation'],
             },
-            health: 100,
-            maxHealth: 100,
-            damage: 10, // Base damage
-            attackSpeed: 1, // Attacks per second
-            isMining: false,
-            miningTarget: null,
-            miningProgress: 0,
-            weapon: null, // Equipped weapon
-            armor: null,   // Equipped armor
+        };
+
+        const allSkills = {
+            Swordsmanship: { name: 'Swordsmanship', description: 'Increases damage with swords.', type: 'combat' },
+            Blocking: { name: 'Blocking', description: 'Reduces damage taken when blocking.', type: 'combat' },
+            "Heavy Armor": { name: "Heavy Armor", description: "Increases defense with heavy armor.", type: "combat" },
+            Athletics: { name: 'Athletics', description: 'Increases stamina and movement speed.', type: 'general' },
+            Intimidation: { name: 'Intimidation', description: 'Improves chances to scare enemies.', type: 'social' },
+            "Fire Magic": { name: "Fire Magic", description: "Increases fire spell damage.", type: 'magic' },
+            "Ice Magic": { name: "Ice Magic", description: "Increases ice spell damage and slows enemies.", type: 'magic' },
+            "Lightning Magic": { name: "Lightning Magic", description: "Increases lightning spell damage and chance to stun.", type: 'magic' },
+            "Arcane Magic": { name: 'Arcane Magic', description: 'Increases damage and reduces mana cost of arcane spells.', type: 'magic' },
+            Meditation: { name: 'Meditation', description: 'Increases mana regeneration rate.', type: 'magic' },
+            Archery: { name: 'Archery', description: 'Increases damage with bows.', type: 'combat' },
+            Marksmanship: { name: 'Marksmanship', description: 'Increases accuracy with ranged weapons.', type: 'combat' },
+            Acrobatics: { name: 'Acrobatics', description: 'Increases evasion and movement speed.', type: 'general' },
+            Stealth: { name: 'Stealth', description: 'Increases ability to remain hidden.', type: 'general' },
+            Survival: { name: 'Survival', description: 'Increases ability to find resources in the wild.', type: 'general' },
+            "Dagger Mastery": { name: "Dagger Mastery", description: "Increases damage and attack speed with daggers.", type: "combat" },
+            Sneaking: { name: 'Sneaking', description: 'Improves ability to move silently.', type: 'general' },
+            Lockpicking: { name: 'Lockpicking', description: 'Increases ability to open locked doors and chests.', type: 'general' },
+            Pickpocketing: { name: 'Pickpocketing', description: 'Increases ability to steal items.', type: 'general' },
+        };
+
+        const initPlayer = () => {
+            player = {
+                x: canvasSize / 2,
+                y: canvasSize / 2,
+                size: 10,
+                level: 1,
+                xp: 0,
+                gold: 100,
+                inventory: {
+                    pickaxe: { name: 'Pickaxe', quantity: 1, level: 1 },
+                    torch: { name: 'Torch', quantity: 5 },
+                    healthPotion: { name: 'Health Potion', quantity: 3 },
+                    "Iron Ore": { name: "Iron Ore", quantity: 0 },
+                    "Copper Ore": { name: "Copper Ore", quantity: 0 },
+                    "Silver Ore": { name: "Silver Ore", quantity: 0 },
+                    "Gold Ore": { name: "Gold Ore", quantity: 0 },
+                },
+                health: 100,
+                maxHealth: 100,
+                damage: 15,
+                attackSpeed: 1,
+                attackRange: tileSize,
+                isMining: false,
+                miningTarget: null,
+                miningProgress: 0,
+                weapon: null,
+                armor: null,
+                direction: 0,
+                class: selectedClass,
+                skills: selectedSkills,
+                stats: {
+                    strength: classes[selectedClass].stats.strength,
+                    dexterity: classes[selectedClass].stats.dexterity,
+                    vitality: classes[selectedClass].stats.vitality,
+                    intelligence: classes[selectedClass].stats.intelligence,
+                    wisdom: classes[selectedClass].stats.wisdom,
+                },
+                mana: 100,
+                maxMana: 100,
+                currentAction: 'idle',
+                target: null,
+                name: charNameInput.value,
+            };
         };
 
         const levelCaps = [];
         for (let i = 1; i <= 99; i++) {
-            levelCaps.push(i * 100); // Example: Level 1: 100, Level 2: 200, etc.
+            levelCaps.push(i * 100);
         }
 
         const getLevelCap = (level) => {
@@ -336,57 +594,47 @@
             const prevLevel = player.level;
             while (player.xp >= getLevelCap(player.level) && player.level < 99) {
                 player.level++;
-                player.damage += 5; // Increase damage per level
-                player.maxHealth += 10; // Increase max health per level
-                player.health = player.maxHealth;  // Fully heal on level up
+                player.damage += 7;
+                player.maxHealth += 15;
+                player.health = player.maxHealth;
+                player.maxMana += 10;
+                player.mana = player.maxMana;
+                showMessage(`Leveled up to level ${player.level}!`);
             }
             if (player.level > prevLevel) {
                 showMessage(`Leveled up to level ${player.level}!`);
             }
             levelDisplay.textContent = player.level;
             const levelCap = getLevelCap(player.level);
-            const xpPercentage = Math.min(100, (player.xp / levelCap) * 100); // Cap at 100%
+            const xpPercentage = Math.min(100, (player.xp / levelCap) * 100);
             xpBarFill.style.width = `${xpPercentage}%`;
         };
 
-        const inventoryDiv = document.getElementById('inventory');
-        const inventoryList = inventoryDiv.querySelector('ul');
-        const inventoryToggle = document.getElementById('inventory-toggle');
-        let inventoryOpen = false;
-
-        inventoryToggle.addEventListener('click', () => {
-            inventoryOpen = !inventoryOpen;
-            inventoryDiv.style.display = inventoryOpen ? 'block' : 'none';
-            if (inventoryOpen) {
-                updateInventoryDisplay();
-            }
-        });
-
         function updateInventoryDisplay() {
-            inventoryList.innerHTML = ''; // Clear the list
+            if (!player) return;
+            inventoryList.innerHTML = '';
             for (const [itemKey, item] of Object.entries(player.inventory)) {
-              const li = document.createElement('li');
-              const itemNameSpan = document.createElement('span');
-              itemNameSpan.className = 'item-name';
-              itemNameSpan.textContent = item.name;
+                const li = document.createElement('li');
+                const itemNameSpan = document.createElement('span');
+                itemNameSpan.className = 'item-name';
+                itemNameSpan.textContent = item.name;
 
-              const quantitySpan = document.createElement('span');
-              quantitySpan.textContent = `x${item.quantity}`;
+                const quantitySpan = document.createElement('span');
+                quantitySpan.textContent = `x${item.quantity}`;
 
-              li.appendChild(itemNameSpan);
-              li.appendChild(quantitySpan);
+                li.appendChild(itemNameSpan);
+                li.appendChild(quantitySpan);
 
-              // Add an "Equip" button if it's a weapon or armor
-              if (item.level) { //  Weapons or Armor have a level property
-                  const equipButton = document.createElement('button');
-                  equipButton.textContent = 'Equip';
-                  equipButton.className = "bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded";
-                  equipButton.addEventListener('click', () => {
-                      equipItem(itemKey);
-                  });
-                  li.appendChild(equipButton);
-              }
-              inventoryList.appendChild(li);
+                if (item.level) {
+                    const equipButton = document.createElement('button');
+                    equipButton.textContent = 'Equip';
+                    equipButton.className = "bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded";
+                    equipButton.addEventListener('click', () => {
+                        equipItem(itemKey);
+                    });
+                    li.appendChild(equipButton);
+                }
+                inventoryList.appendChild(li);
             }
         }
 
@@ -394,67 +642,56 @@
             const item = player.inventory[itemKey];
             if (!item) return;
 
-            if (item.level) { // Check if it has a level, indicating it's equipable
+            if (item.level) {
                 if (item.name.includes('Pickaxe')) {
-                    player.weapon = item; // Equip as weapon
+                    player.weapon = item;
                     showMessage(`Equipped ${item.name}!`);
                 }
             }
             updateInventoryDisplay();
         }
 
-        // Example quest data
         const questData = [
             {
                 id: 'quest1',
                 title: 'Gather Iron Ore',
-                description: 'Collect 20 Iron Ore.',
-                objective: { type: 'collect', item: 'Iron Ore', quantity: 20 },
-                reward: { type: 'xp', amount: 200 },
+                description: 'Collect 30 Iron Ore.',
+                objective: { type: 'collect', item: 'Iron Ore', quantity: 30 },
+                reward: { type: 'xp', amount: 300 },
                 completed: false,
             },
             {
                 id: 'quest2',
-                title: 'Mine Copper',
-                description: 'Mine 15 Copper Ore',
-                objective: { type: 'collect', item: 'Copper Ore', quantity: 15 },
-                reward: { type: 'xp', amount: 150 },
+                title: 'Clear the Forest',
+                description: 'Defeat 10 Goblins.',
+                objective: { type: 'kill', monster: 'goblin', quantity: 10 },
+                reward: { type: 'xp', amount: 250 },
                 completed: false,
             },
             {
                 id: 'quest3',
-                title: 'Reach Level 5',
-                description: 'Reach level 5.',
-                objective: { type: 'level', level: 5 },
-                reward: { type: 'gold', amount: 500 },
-                completed: false
-            }
+                title: "Find the Lost Artifact",
+                description: "Find the artifact hidden in the Abandoned Tower.",
+                objective: { type: "find", artifact: "Lost Artifact" },
+                reward: { type: "gold", amount: 750 },
+                completed: false,
+            },
         ];
 
         let activeQuests = [];
 
-        const questsDiv = document.getElementById('quests');
-        const questsList = questsDiv.querySelector('ul');
-        const questToggle = document.getElementById('quest-toggle');
-        let questsOpen = false;
-
-        questToggle.addEventListener('click', () => {
-            questsOpen = !questsOpen;
-            questsDiv.style.display = questsOpen ? 'block' : 'none';
-            if (questsOpen) {
-                updateQuestsDisplay();
-            }
-        });
-
         function updateQuestsDisplay() {
-            questsList.innerHTML = ''; // Clear the list
+            if (!player) return;
+            questsList.innerHTML = '';
             activeQuests.forEach(quest => {
                 const li = document.createElement('li');
                 li.innerHTML = `<strong>${quest.title}</strong><br>${quest.description}<br>Progress: `;
                 if (quest.objective.type === 'collect') {
-                  li.innerHTML += `${player.inventory[quest.objective.item]?.quantity || 0}/${quest.objective.quantity} ${quest.objective.item}`;
-                } else if (quest.objective.type === 'level') {
-                    li.innerHTML += `${player.level}/${quest.objective.level} Levels`;
+                    li.innerHTML += `${player.inventory[quest.objective.item]?.quantity || 0}/${quest.objective.quantity} ${quest.objective.item}`;
+                } else if (quest.objective.type === 'kill') {
+                    li.innerHTML += `${quest.killed}/${quest.objective.quantity} ${quest.objective.monster}s`;
+                } else if (quest.objective.type === 'find') {
+                    li.innerHTML += quest.found ? 'Found' : 'Not Found';
                 }
 
                 if (quest.completed) {
@@ -470,7 +707,12 @@
             if (quest && !activeQuests.includes(quest)) {
                 activeQuests.push(quest);
                 showMessage(`Quest "${quest.title}" started!`);
-                updateQuestsDisplay(); // Update display after adding quest
+                updateQuestsDisplay();
+                 if (quest.objective.type === 'kill') {
+                    quest.killed = 0;
+                } else if (quest.objective.type === 'find') {
+                    quest.found = false;
+                }
             }
         }
 
@@ -480,8 +722,10 @@
             if (quest.objective.type === 'collect') {
                 const collectedQuantity = player.inventory[quest.objective.item]?.quantity || 0;
                 completed = collectedQuantity >= quest.objective.quantity;
-            } else if (quest.objective.type === 'level') {
-                completed = player.level >= quest.objective.level;
+            } else if (quest.objective.type === 'kill') {
+                completed = quest.killed >= quest.objective.quantity;
+            } else if (quest.objective.type === 'find') {
+                completed = quest.found;
             }
 
             if (completed) {
@@ -493,14 +737,13 @@
                 } else if (quest.reward.type === 'gold') {
                     player.gold += quest.reward.amount;
                     document.getElementById('gold').textContent = player.gold;
-                     showMessage(`Quest "${quest.title}" completed!  Received ${quest.reward.amount} Gold.`);
+                    showMessage(`Quest "${quest.title}" completed!  Received ${quest.reward.amount} Gold.`);
                 }
                 updateQuestsDisplay();
             }
         }
 
         function showMessage(message) {
-            const messageBox = document.getElementById('message-box');
             messageBox.textContent = message;
             messageBox.classList.remove('hide');
             messageBox.classList.add('show');
@@ -510,37 +753,68 @@
             }, 3000);
         }
 
-        // World generation (basic for now)
-        const worldSize = 200;
+        // World generation
         const tileMap = {};
-        const chunkSize = 20;
-        const loadedChunks = new Set();
-        const miningSpeed = 50; // Mining speed in ms per unit of hardness.  Inverse of speed.
+        const TILE_SIZE = 32;
 
-        function generateChunk(chunkX, chunkY) {
-            const chunkKey = `${chunkX},${chunkY}`;
-            if (loadedChunks.has(chunkKey)) return;
-
-            for (let x = chunkX * chunkSize; x < (chunkX + 1) * chunkSize; x++) {
-                for (let y = chunkY * chunkSize; y < (chunkY + 1) * chunkSize; y++) {
-                    const tileType = Math.random() < 0.8 ? 'stone' : Math.random() < 0.5 ? 'iron' : 'copper';
-                    let hardness = 100;
-                    if (tileType === 'iron') {
-                        hardness = 150;
-                    } else if (tileType === 'copper') {
-                        hardness = 120;
+        function generateWorld() {
+            for (let x = 0; x < worldSize; x++) {
+                for (let y = 0; y < worldSize; y++) {
+                    let tileType = 'grass';
+                    if (x > 10 && x < 30 && y > 10 && y < 30) {
+                        tileType = 'stone';
+                    }  else if (x > 40 && x < 50 && y > 40 && y < 50){
+                        tileType = 'water';
                     }
-                    tileMap[`${x},${y}`] = { type: tileType, mined: false, hardness: hardness };
+                    else if (Math.random() < 0.2) {
+                        tileType = 'tree';
+                    }
+                    tileMap[`${x},${y}`] = { type: tileType, mined: false, hardness: 100 };
                 }
             }
-            loadedChunks.add(chunkKey);
+            // Add a house
+            createBuilding(5, 5, 4, 4, 'house');
+            //add a tower
+            createBuilding(15,15, 3,5, 'tower')
+            //create path
+            createPath(0,0,10,0);
+            createPath(10,0,10,10);
+            //add npcs
+            spawnNpc(8, 8, 'villager');
+            spawnNpc(20, 20, 'merchant');
+        }
+
+        function createPath(startX, startY, endX, endY){
+            let x = startX;
+            let y = startY;
+            while(x !== endX || y !== endY){
+                if(x < endX){
+                    x++;
+                } else if (x > endX){
+                    x--;
+                } else if (y < endY){
+                    y++;
+                } else if (y > endY){
+                    y--;
+                }
+                tileMap[`${x},${y}`] = { type: 'path', mined: false, hardness: 100 };
+            }
+
+        }
+
+        function createBuilding(x, y, width, height, type) {
+            for (let i = 0; i < width; i++) {
+                for (let j = 0; j < height; j++) {
+                    tileMap[`${x + i},${y + j}`] = { type: type, mined: false, hardness: 100 };
+                }
+            }
         }
 
         function getTile(x, y) {
             const tile = tileMap[`${x},${y}`];
-             if (!tile) {
-                  return { type: 'stone', mined: true, hardness: 100 }; // Return a mined stone.
-             }
+            if (!tile) {
+                return { type: 'grass', mined: true, hardness: 100 };
+            }
             return tile;
         }
 
@@ -552,39 +826,47 @@
             }
         }
 
+        const tileImages = {
+            'grass': new Image(),
+            'stone': new Image(),
+            'tree': new Image(),
+            'house': new Image(),
+            'tower': new Image(),
+            'path': new Image(),
+            'water': new Image(),
+        };
+
+        tileImages['grass'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+        tileImages['stone'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+        tileImages['tree'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+        tileImages['house'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+        tileImages['tower'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+        tileImages['path'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+        tileImages['water'].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABjMvFQAAAABmJLR0QA/wzLwKQAAAAlwSFlzAAALEwAACxMBAjZJmAAAAAd0lEQVRYw+2XwQkAIADAyM/9B4nVgYkKxKCIlhjO4e+8KZuKCJjyxKkAAAAASUVORK5CYII=';
+
+
         function drawTile(x, y, tileType, mined) {
+            const drawX = x * tileSize;
+            const drawY = y * tileSize;
+
             if (mined) {
-                ctx.fillStyle = '#1f2937'; // Darker color for mined tiles
+                ctx.fillStyle = '#1f2937';
+                ctx.fillRect(drawX, drawY, tileSize, tileSize);
             } else {
-                switch (tileType) {
-                    case 'stone':
-                        ctx.fillStyle = '#9ca3af';
-                        break;
-                    case 'iron':
-                        ctx.fillStyle = '#b91c1c';
-                        break;
-                    case 'copper':
-                        ctx.fillStyle = '#d97706';
-                        break;
-                    default:
-                        ctx.fillStyle = '#6b7280';
+                let img = tileImages[tileType];
+                if(img){
+                     ctx.drawImage(img, drawX, drawY, tileSize, tileSize);
+                }
+                else{
+                    ctx.fillStyle = '#6b7280';
+                    ctx.fillRect(drawX, drawY, tileSize, tileSize);
                 }
             }
-            ctx.fillRect(x * 10, y * 10, 10, 10);
         }
 
         function drawWorld() {
-            const centerX = Math.floor(player.x / chunkSize);
-            const centerY = Math.floor(player.y / chunkSize);
-
-            for (let i = -2; i <= 2; i++) {
-                for (let j = -2; j <= 2; j++) {
-                    generateChunk(centerX + i, centerY + j);
-                }
-            }
-
-            for (let x = Math.floor((player.x - 50) / 10); x < Math.ceil((player.x + 50) / 10); x++) {
-                for (let y = Math.floor((player.y - 50) / 10); y < Math.ceil((player.y + 50) / 10); y++) {
+            for (let x = 0; x < worldSize; x++) {
+                for (let y = 0; y < worldSize; y++) {
                     const tile = getTile(x, y);
                     drawTile(x, y, tile.type, tile.mined);
                 }
@@ -594,9 +876,9 @@
         // Simple AABB collision detection
         function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
             return x1 < x2 + w2 &&
-                   x1 + w1 > x2 &&
-                   y1 < y2 + h2 &&
-                   y1 + h1 > y2;
+                x1 + w1 > x2 &&
+                y1 < y2 + h2 &&
+                y1 + h1 > y2;
         }
 
         // Monster stuff
@@ -606,18 +888,23 @@
         function spawnMonster(x, y, type = 'goblin') {
             let health = 20;
             let damage = 5;
-            let speed = 0.5;
-            let size = 10;
+            let speed = 0.7;
+            let size = 24;
             if (type === 'goblin') {
                 health = 20;
                 damage = 5;
-                speed = 0.5;
-                size = 10;
+                speed = 0.7;
+                size = 24;
             } else if (type === 'orc') {
                 health = 50;
                 damage = 10;
-                speed = 0.3;
-                size = 15;
+                speed = 0.5;
+                size = 32;
+            }  else if (type === 'skeleton'){
+                health = 30;
+                damage = 8;
+                speed = 0.6;
+                size = 20;
             }
 
             const monster = {
@@ -625,15 +912,16 @@
                 x: x,
                 y: y,
                 type: type,
-health: health,
+                health: health,
                 maxHealth: health,
                 damage: damage,
                 speed: speed,
                 size: size,
-                color: type === 'goblin' ? '#16a34a' : '#78350f', // green, brown
+                color: type === 'goblin' ? '#16a34a' : type === 'orc' ? '#78350f' : '#e2e8f0',
                 dead: false,
-                attackCooldown: 0, // Time until next attack
-                attackSpeed: 1,  // Attacks per second
+                attackCooldown: 0,
+                attackSpeed: 1,
+                attackRange: tileSize,
             };
             monsters.push(monster);
         }
@@ -642,8 +930,7 @@ health: health,
             if (monster.dead) return;
             ctx.fillStyle = monster.color;
             ctx.fillRect(monster.x - monster.size / 2, monster.y - monster.size / 2, monster.size, monster.size);
-            // Draw health bar
-            ctx.fillStyle = '#ef4444'; // Red
+            ctx.fillStyle = '#ef4444';
             ctx.fillRect(monster.x - monster.size / 2, monster.y - monster.size - 5, monster.size * (monster.health / monster.maxHealth), 3);
         }
 
@@ -660,6 +947,26 @@ health: health,
             }
         }
 
+        function attackTarget(attacker, target) {
+            if (!target) return;
+
+            if (target.health !== undefined) {
+                target.health -= attacker.damage;
+                showMessage(`${attacker.name} attacks ${target.type} for ${attacker.damage} damage!`);
+                 if (target.health <= 0) {
+                    if (target.type === 'monster') {
+                        damageMonster(target, attacker.damage);
+                    } else {
+                        target.dead = true;
+                        target.health = 0;
+                        showMessage(`${target.name} dies!`);
+                    }
+
+                }
+                updateHealthBar();
+            }
+        }
+
         function monsterAttack(monster) {
             if (monster.dead) return;
             if (monster.attackCooldown > 0) return;
@@ -668,10 +975,9 @@ health: health,
             const dy = player.y - monster.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < monster.size / 2 + 5) { // 5 is arbitrary, half of player size.
-                player.health -= monster.damage;
-                showMessage(`You were hit by a ${monster.type} for ${monster.damage} damage!`);
-                monster.attackCooldown = 1 / monster.attackSpeed; // Reset cooldown
+            if (distance < monster.attackRange) {
+                attackTarget(monster, player);
+                monster.attackCooldown = 1 / monster.attackSpeed;
                 updateHealthBar();
                 if (player.health <= 0) {
                     gameOver();
@@ -681,13 +987,22 @@ health: health,
 
         function handleMonsterAttackCooldown(monster) {
             if (monster.attackCooldown > 0) {
-                monster.attackCooldown -= deltaTime; //  * 0.001 if delta is in ms
+                monster.attackCooldown -= deltaTime;
             }
         }
 
         function checkMonsterCollision(monster) {
             if (monster.dead) return false;
-            return checkCollision(player.x - 5, player.y - 5, 10, 10, monster.x - monster.size / 2, monster.y - monster.size / 2, monster.size, monster.size);
+            return checkCollision(
+                player.x - player.size / 2,
+                player.y - player.size / 2,
+                player.size,
+                player.size,
+                monster.x - monster.size / 2,
+                monster.y - monster.size / 2,
+                monster.size,
+                monster.size
+            );
         }
 
         function damageMonster(monster, damage) {
@@ -695,106 +1010,117 @@ health: health,
             monster.health -= damage;
             if (monster.health <= 0) {
                 monster.dead = true;
-                player.xp += 20; // Example XP reward
+                player.xp += 20;
                 player.gold += 10;
                 updateLevel();
                 document.getElementById('gold').textContent = player.gold;
                 showMessage(`Killed a ${monster.type}!`);
+                 if (quest.objective.type === 'kill' && quest.monster === monster.type) {
+                    quest.killed++;
+                }
             }
         }
 
         // Get the game over overlay
-        const gameOverOverlay = document.querySelector('.game-over-overlay');
 
         // Function to show the game over screen
         function gameOver() {
-            gameOverOverlay.style.display = 'flex'; // Show the overlay
-            // You might want to stop the game loop here
+            gameOverOverlay.style.display = 'flex';
             gameRunning = false;
         }
 
-        // Event listener for restarting the game (you can add a button in the overlay)
-        // For now, let's just reload the page on click
+        // Event listener for restarting the game
         gameOverOverlay.addEventListener('click', () => {
-            window.location.reload(); // Reload the page to restart
+            window.location.reload();
         });
 
+        let keys = {};
 
-        // Initial world generation and monster spawn
-        generateChunk(0, 0);
-        spawnMonster(20, 20, 'goblin');
-        spawnMonster(-20, -20, 'orc');
-        spawnMonster(30, -10, 'goblin');
-
-
-        let isDragging = false;
-        let previousMousePosition = { x: 0, y: 0 };
-        const sensitivity = 0.1;
-        let cameraTarget = { x: 0, y: 0, z: 5 }; // Add a target for camera
-
-        canvas.addEventListener('mousedown', (event) => {
-            isDragging = true;
-            previousMousePosition = {
-                x: event.clientX,
-                y: event.clientY
-            };
-            canvas.style.cursor = 'grabbing';
+        document.addEventListener('keydown', (event) => {
+            keys[event.key] = true;
         });
 
-        canvas.addEventListener('mousemove', (event) => {
-            if (isDragging) {
-                const deltaX = event.clientX - previousMousePosition.x;
-                const deltaY = event.clientY - previousMousePosition.y;
-
-                cameraTarget.x -= deltaX * sensitivity;
-                cameraTarget.y += deltaY * sensitivity;
-
-                // Clamp the camera target
-                cameraTarget.x = Math.max(-worldSize / 2, Math.min(worldSize / 2, cameraTarget.x));
-                cameraTarget.y = Math.max(-worldSize / 2, Math.min(worldSize / 2, cameraTarget.y));
-
-                previousMousePosition = {
-                    x: event.clientX,
-                    y: event.clientY
-                };
-            }
-        });
-
-        canvas.addEventListener('mouseup', () => {
-            isDragging = false;
-            canvas.style.cursor = 'grab';
-        });
-
-        canvas.addEventListener('mouseleave', () => {
-            isDragging = false;
-            canvas.style.cursor = 'grab';
+        document.addEventListener('keyup', (event) => {
+            keys[event.key] = false;
         });
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            const newSize = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+            canvas.width = newSize;
+            canvas.height = newSize;
+            tileSize = newSize / worldSize;
+            drawWorld();
+            monsters.forEach(drawMonster);
+            npcs.forEach(drawNpc);
+            if (player) {
+                player.x = Math.max(player.size / 2, Math.min(player.x, newSize - player.size / 2));
+                player.y = Math.max(player.size / 2, Math.min(player.y, newSize - player.size / 2));
+            }
         });
 
         document.addEventListener('keydown', (event) => {
             if (event.key === 'e') {
-                const miningX = Math.floor(player.x / 10);
-                const miningY = Math.floor(player.y / 10);
-                const tile = getTile(miningX, miningY);
+                const tileX = Math.floor(player.x / tileSize);
+                const tileY = Math.floor(player.y / tileSize);
+                const tile = getTile(tileX, tileY);
                 if (tile && !tile.mined) {
-                    mineTile(miningX, miningY);
+                    mineTile(tileX, tileY);
                 }
             }
-             if (event.key === 'h') {
+            if (event.key === 'h') {
                 player.health = Math.min(player.health + 20, player.maxHealth);
                 updateHealthBar();
                 showMessage("Used Health Potion");
+            }
+             if (event.key === 'f') {
+                const tileX = Math.floor(player.x / tileSize);
+                const tileY = Math.floor(player.y / tileSize);
+                const tile = getTile(tileX, tileY);
+                if (tile.type === 'tower') {
+                    showMessage("Found the Lost Artifact!");
+                    activeQuests.forEach(quest => {
+                        if (quest.objective.type === 'find' && quest.artifact === 'Lost Artifact') {
+                            quest.found = true;
+                        }
+                    });
+                }
+            }
+            if (event.key === ' ') {
+                event.preventDefault();
+                if (player && player.currentAction === 'idle') {
+                    interactWithNpc();
+                } else if (player && player.currentAction === 'talking') {
+                    advanceDialog();
+                }
             }
         });
 
         let lastTime = 0;
         let deltaTime = 0;
-        let gameRunning = true;
+        const playerSpeed = 3;
+
+        function updatePlayerPosition() {
+            if (!player) return;
+            if (keys['ArrowRight'] || keys['d']) {
+                player.x += playerSpeed;
+                player.direction = 0;
+            }
+            if (keys['ArrowDown'] || keys['s']) {
+                player.y += playerSpeed;
+                player.direction = 1;
+            }
+            if (keys['ArrowLeft'] || keys['a']) {
+                player.x -= playerSpeed;
+                player.direction = 2;
+            }
+            if (keys['ArrowUp'] || keys['w']) {
+                player.y -= playerSpeed;
+                player.direction = 3;
+            }
+
+            player.x = Math.max(player.size / 2, Math.min(player.x, canvasSize - player.size / 2));
+            player.y = Math.max(player.size / 2, Math.min(player.y, canvasSize - player.size / 2));
+        }
 
         function animate() {
             if (!gameRunning) return;
@@ -804,31 +1130,24 @@ health: health,
             deltaTime = time - lastTime;
             lastTime = time;
 
-            // Camera follow with damping
-              const cameraSpeed = 0.05; // Adjust for smoothing
-              camera.position.x += (cameraTarget.x - camera.position.x) * cameraSpeed;
-              camera.position.y += (cameraTarget.y - camera.position.y) * cameraSpeed;
-              camera.position.z = 5; // Keep Z constant
+            updatePlayerPosition();
 
-            if (isDragging) {
-                player.x = camera.position.x;
-                player.y = camera.position.y;
-            }
-
-            if (player.isMining) {
-                const tile = getTile(player.miningTarget.x, player.miningTarget.y);
+            if (player && player.isMining) {
+                const tileX = player.miningTarget.x;
+                const tileY = player.miningTarget.y;
+                const tile = getTile(tileX, tileY);
                 if (tile && !tile.mined) {
                     player.miningProgress += deltaTime / tile.hardness;
                     if (player.miningProgress >= 1) {
                         tile.mined = true;
-                         if (tile.type === 'iron') {
+                        if (tile.type === 'stone') {
                             player.inventory["Iron Ore"].quantity++;
                             showMessage("Mined Iron Ore!");
-                         }
-                         if (tile.type === 'copper') {
+                        }
+                        if (tile.type === 'copper') {
                             player.inventory["Copper Ore"].quantity++;
                             showMessage("Mined Copper Ore!");
-                         }
+                        }
                         player.isMining = false;
                         player.miningProgress = 0;
                         updateInventoryDisplay();
@@ -845,42 +1164,323 @@ health: health,
                 handleMonsterAttackCooldown(monster);
             });
 
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawWorld();
             monsters.forEach(drawMonster);
+            npcs.forEach(drawNpc);
 
-            ctx.fillStyle = '#007bff';
-            ctx.fillRect(player.x - 5, player.y - 5, 10, 10);
+            //draw player
+            if(player){
+                ctx.fillStyle = '#007bff';
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.size / 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.closePath();
+            }
 
-            //Check collisions
-            monsters.forEach(monster => {
-                if (checkMonsterCollision(monster)) {
-                    // Handle collision (e.g., take damage)
-                    // For now, just log it
-                    // console.log('Collision with monster!');
-                }
-            });
             activeQuests.forEach(checkQuestCompletion);
+            if(player){
+                updateLevel();
+                updateHealthBar();
+                updateManaBar();
+            }
+            drawDialog();
         }
 
         function updateHealthBar() {
-            const healthBar = document.getElementById('xp-bar-fill'); // Reuse xp bar
-            const healthPercentage = Math.max(0, (player.health / player.maxHealth) * 100); // Ensure >= 0
-            healthBar.style.width = `${healthPercentage}%`;
-            healthBar.style.backgroundColor = healthPercentage > 20 ? '#84cc16' : '#ef4444'; // Green or Red
+            if (!player) return;
+            const healthBarFill = document.getElementById('health-bar-fill');
+            const healthPercentage = Math.max(0, (player.health / player.maxHealth) * 100);
+            healthBarFill.style.width = `${healthPercentage}%`;
+            healthBarFill.style.backgroundColor = healthPercentage > 20 ? '#84cc16' : '#ef4444';
+            hpText.textContent = `${player.health}/${player.maxHealth}`;
+        }
+
+        function updateManaBar() {
+            if (!player) return;
+            const manaBarFill = document.getElementById('mana-bar-fill');
+            const manaPercentage = Math.max(0, (player.mana / player.maxMana) * 100);
+            manaBarFill.style.width = `${manaPercentage}%`;
+            manaText.textContent = `${player.mana}/${player.maxMana}`;
+        }
+
+        function startGame() {
+            menuContainer.style.display = 'none';
+            charCreationScreen.style.display = 'block';
+        }
+
+        function selectClassFunc() {
+            if (!charNameInput.value.trim()) {
+                showMessage('Please enter a character name.');
+                return;
+            }
+            charCreationScreen.style.display = 'none';
+            classSelectionScreen.style.display = 'block';
+        }
+
+        function selectClassHandler(event) {
+            selectedClass = event.target.dataset.class;
+            classSelectionScreen.style.display = 'none';
+            skillSelectionScreen.style.display = 'block';
+            populateSkillList(selectedClass);
+        }
+
+        function populateSkillList(selectedClass) {
+            skillList.innerHTML = '';
+            const availableSkills = classes[selectedClass].skills;
+            availableSkills.forEach(skillName => {
+                const skill = allSkills[skillName];
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${skill.name} - ${skill.description}</span>`;
+                const selectButton = document.createElement('button');
+                selectButton.textContent = 'Select';
+                selectButton.dataset.skill = skillName;
+                selectButton.addEventListener('click', () => {
+                    toggleSkill(skillName);
+                });
+                li.appendChild(selectButton);
+                skillList.appendChild(li);
+            });
+        }
+
+        function toggleSkill(skillName) {
+            const skill = allSkills[skillName];
+             if (selectedSkills.includes(skillName)) {
+                selectedSkills = selectedSkills.filter(s => s !== skillName);
+                skillPoints++;
+            } else if (skillPoints > 0) {
+                selectedSkills.push(skillName);
+                skillPoints--;
+            }
+
+            const selectedButton = skillList.querySelector(`[data-skill="${skillName}"]`);
+            if (selectedButton) {
+                selectedButton.classList.toggle('selected', selectedSkills.includes(skillName));
+            }
+            if (skillPoints === 0) {
+                 showMessage('You have selected the maximum number of skills.');
+            }
+        }
+
+        function finishSkillSelection() {
+            if (selectedSkills.length !== 5) {
+                showMessage('Please select 5 skills.');
+                return;
+            }
+            skillSelectionScreen.style.display = 'none';
+            initPlayer();
+            generateWorld();
+            spawnMonster(canvasSize / 4, canvasSize / 4, 'goblin');
+            spawnMonster(canvasSize * 3 / 4, canvasSize / 4, 'orc');
+            spawnMonster(canvasSize / 3, canvasSize * 2 / 3, 'goblin');
+            spawnMonster(canvasSize / 5, canvasSize / 5, 'skeleton');
+            spawnNpc(8, 8, 'villager');
+            spawnNpc(20, 20, 'merchant');
+            startGameLoop();
+            canvas.style.display = 'block';
+            inventoryDiv.style.display = 'block';
+            questsDiv.style.display = 'block';
+        }
+
+        function startGameLoop() {
+            gameRunning = true;
+            lastTime = performance.now();
+            animate();
+        }
+
+        function loadGame() {
+            const savedGame = localStorage.getItem('mineRPGSave');
+            if (savedGame) {
+                const gameState = JSON.parse(savedGame);
+                player = gameState.player;
+                tileMap = gameState.tileMap;
+                monsters = gameState.monsters;
+                activeQuests = gameState.activeQuests;
+                selectedClass = gameState.selectedClass;
+                npcs = gameState.npcs;
+                currentDialog = gameState.currentDialog;
+
+                //fixme
+                if(!player.skills){
+                    player.skills = [];
+                }
+
+                menuContainer.style.display = 'none';
+                canvas.style.display = 'block';
+                inventoryDiv.style.display = 'block';
+                questsDiv.style.display = 'block';
+                gameRunning = true;
+                lastTime = performance.now();
+                animate();
+                showMessage('Game loaded!');
+            } else {
+                showMessage('No saved game found.');
+            }
+        }
+
+        function saveGame() {
+            const gameState = {
+                player: player,
+                tileMap: tileMap,
+                monsters: monsters,
+                activeQuests: activeQuests,
+                selectedClass: selectedClass,
+                npcs: npcs,
+                currentDialog: currentDialog,
+            };
+            localStorage.setItem('mineRPGSave', JSON.stringify(gameState));
+            showMessage('Game saved!');
         }
 
 
-        // Add initial quests
-        startQuest('quest1');
-        startQuest('quest2');
-        startQuest('quest3');
+        startGameButton.addEventListener('click', startGame);
+        loadGameButton.addEventListener('click', loadGame);
+        selectClassButton.addEventListener('click', selectClassFunc);
+        classSelectionScreen.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', selectClassHandler);
+        });
+        finishSkillsButton.addEventListener('click', finishSkillSelection);
+        inventoryToggle.addEventListener('click', () => {
+            inventoryOpen = !inventoryOpen;
+            inventoryDiv.style.display = inventoryOpen ? 'block' : 'none';
+            if (inventoryOpen) {
+                updateInventoryDisplay();
+            }
+        });
 
-        updateLevel();
+        questToggle.addEventListener('click', () => {
+            questsOpen = !questsOpen;
+            questsDiv.style.display = questsOpen ? 'block' : 'none';
+            if (questsOpen) {
+                updateQuestsDisplay();
+            }
+        });
+
+        window.addEventListener('beforeunload', (event) => {
+            if (gameRunning) {
+                saveGame();
+                event.preventDefault();
+                event.returnValue = 'Do you want to save your game before leaving?';
+            }
+        });
+
+        // Initial values
         updateInventoryDisplay();
-        updateHealthBar();
+        updateQuestsDisplay();
 
-        // Make sure the animate function is called to start the rendering loop.
-        animate();
+
+
+        // NPC stuff
+        function spawnNpc(x, y, type) {
+            let npc = {
+                id: nextMonsterId++,
+                x: x,
+                y: y,
+                type: type,
+                size: 24,
+                color: '#b0bec5',
+                dialog: null,
+                name: type === 'villager' ? 'Villager' : 'Merchant',
+                dead: false,
+            };
+            if (type === 'villager') {
+                npc.dialog = {
+                    lines: [
+                        "Hello there!  Welcome to our town.",
+                        "The forest can be dangerous, so be careful!",
+                        "You can find some useful items in the shop.",
+                    ],
+                    currentLine: 0,
+                };
+            } else if (type === 'merchant') {
+                npc.dialog = {
+                    lines: [
+                        "Welcome to my shop!  I have many wares for sale.",
+                        "Take a look at my inventory.  I have potions, weapons, and armor.",
+                        "I also buy rare items if you have any to sell.",
+                    ],
+                    currentLine: 0,
+                    itemsForSale: [
+                        { name: 'Health Potion', price: 10, quantity: 5 },
+                        { name: 'Iron Sword', price: 50, quantity: 1 },
+                        { name: 'Leather Armor', price: 40, quantity: 1 },
+                    ],
+                };
+            }
+            npcs.push(npc);
+        }
+
+        function drawNpc(npc) {
+            if(npc.dead) return;
+            ctx.fillStyle = npc.color;
+            ctx.fillRect(npc.x - npc.size / 2, npc.y - npc.size / 2, npc.size, npc.size);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(npc.name, npc.x - npc.size / 2, npc.y - npc.size / 2 - 5);
+        }
+
+        function getClosestNpc() {
+            let closestNpc = null;
+            let minDistance = Infinity;
+            for (const npc of npcs) {
+                if(npc.dead) continue;
+                const distance = Math.sqrt(Math.pow(player.x - npc.x, 2) + Math.pow(player.y - npc.y, 2));
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestNpc = npc;
+                }
+            }
+            return closestNpc;
+        }
+
+        function startDialog(npc) {
+            currentDialog = npc.dialog;
+            player.currentAction = 'talking';
+            player.target = npc;
+        }
+
+        function drawDialog() {
+            if (!currentDialog) return;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(50, canvasSize - 150, canvasSize - 100, 100);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '1rem "Press Start 2P"';
+            ctx.fillText(currentDialog.lines[currentDialog.currentLine], 60, canvasSize - 120, canvasSize - 120);
+        }
+
+        function advanceDialog() {
+            if (!currentDialog) return;
+
+            currentDialog.currentLine++;
+            if (currentDialog.currentLine >= currentDialog.lines.length) {
+                currentDialog = null;
+                player.currentAction = 'idle';
+                player.target = null;
+            }
+        }
+
+        function interactWithNpc() {
+            const closestNpc = getClosestNpc();
+            if (closestNpc && Math.sqrt(Math.pow(player.x - closestNpc.x, 2) + Math.pow(player.y - closestNpc.y, 2)) < tileSize) {
+                if (player.currentAction === 'idle') {
+                    startDialog(closestNpc);
+                } else if (player.currentAction === 'talking') {
+                    advanceDialog();
+                }
+            }
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ') {
+                event.preventDefault();
+                if (player && player.currentAction === 'idle') {
+                    interactWithNpc();
+                } else if (player && player.currentAction === 'talking') {
+                    advanceDialog();
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
