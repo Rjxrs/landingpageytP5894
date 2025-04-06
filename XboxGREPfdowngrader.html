@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xbox Era PFP Downgrader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        /* Base body styles */
+        body {
+            @apply font-sans flex flex-col items-center min-h-screen p-4 transition-all duration-500; /* Added transition for background and color */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Keep background fixed during scroll */
+        }
+        /* Default background (now set dynamically, but keep a base fallback) */
+        body {
+             background-color: #e5e7eb; /* Fallback color */
+        }
+
+        /* Background styles for different eras (applied via JS) */
+        body.era-original {
+            background-color: #1a1a1a; /* Fallback color */
+            background-image: url('https://static.wikia.nocookie.net/xbox/images/4/49/The-original-dynamic-background.gif/revision/latest?cb=20220323013547');
+        }
+        body.era-blades {
+             background-color: #e5e7eb; /* Fallback color */
+             background-image: url('https://i.redd.it/ijpbtu5dd3211.gif');
+        }
+        body.era-nxe {
+             background-color: #4b5563; /* Fallback color */
+             background-image: url('https://static.wikia.nocookie.net/xbox/images/e/ec/Xbox360-dynamic-background.gif/revision/latest?cb=20220323020528');
+        }
+         body.era-metro {
+            background-color: #107C10; /* Fallback color (Xbox Green) */
+             /* Updated background image URL for Metro */
+            background-image: url('https://i.redd.it/ctownureqwl91.gif');
+        }
+
+        .content-wrapper {
+            @apply w-full max-w-4xl mx-auto; /* Center content */
+        }
+        .title-image {
+            @apply w-full max-w-lg mx-auto mb-6 block; /* Center title image */
+        }
+        .card {
+            @apply bg-white p-6 rounded-lg shadow-md w-full max-w-md mb-6 mx-auto transition-colors duration-300; /* Center control card, added transition */
+        }
+        .image-card {
+            @apply bg-white p-4 rounded-lg shadow-md text-center flex-1 min-w-[250px] transition-colors duration-300; /* Ensure minimum width, added transition */
+        }
+        img.pfp-image { /* Specific class for preview/result images */
+            @apply border border-gray-300 rounded mt-2 mx-auto w-48 h-48 object-contain bg-gray-200; /* Fixed size, contain image */
+        }
+        #result-img {
+            /* Enhance pixelated look for display */
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        select {
+             @apply block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm;
+        }
+        .file-label {
+            @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
+        }
+        button {
+            @apply bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
+        }
+        a.button {
+             @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200 text-sm no-underline;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* --- Adjust text/card color for dark/colored backgrounds --- */
+
+        /* Original Era */
+        body.era-original .card, body.era-original .image-card {
+             @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm;
+        }
+         body.era-original p, body.era-original h2, body.era-original .placeholder-text, body.era-original label {
+             @apply text-gray-100;
+         }
+         body.era-original select { @apply bg-gray-700 text-white border-gray-600; }
+
+        /* NXE Era */
+         body.era-nxe .card, body.era-nxe .image-card {
+             @apply bg-gray-800 bg-opacity-75 backdrop-blur-sm;
+         }
+         body.era-nxe p, body.era-nxe h2, body.era-nxe .placeholder-text, body.era-nxe label {
+             @apply text-gray-100;
+         }
+         body.era-nxe select { @apply bg-gray-700 text-white border-gray-600; }
+
+
+        /* Metro Era - Updated for new background */
+        body.era-metro .card, body.era-metro .image-card {
+             /* Dark semi-transparent card for dark background */
+             @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm;
+        }
+         body.era-metro p, body.era-metro h2, body.era-metro .placeholder-text, body.era-metro label {
+             /* Light text */
+             @apply text-gray-100;
+         }
+         body.era-metro select { @apply bg-gray-700 text-white border-gray-600; } /* Adjust select for dark bg */
+
+
+        /* Blades Era (Default) */
+         body.era-blades .card, body.era-blades .image-card {
+             @apply bg-white bg-opacity-85 backdrop-blur-sm;
+         }
+         body.era-blades p, body.era-blades h2, body.era-blades .placeholder-text, body.era-blades label {
+             @apply text-gray-800;
+         }
+         body.era-blades select { @apply bg-white text-gray-900 border-gray-300; }
+
+    </style>
+</head>
+<body>
+
+    <div class="content-wrapper">
+        <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/Xbox-360-Era-PFP-Downgrader-06-04-2025.png?raw=true"
+             alt="Xbox 360 Era PFP Downgrader Title"
+             class="title-image"
+             onerror="this.style.display='none'; document.getElementById('fallback-title').classList.remove('hidden');"
+        >
+        <h1 id="fallback-title" class="hidden text-3xl font-bold text-green-700 mb-4 text-center">Xbox Era PFP Downgrader</h1>
+
+        <p class="text-gray-600 mb-6 text-center max-w-lg mx-auto">Upload an image and select an Xbox era to give it a retro profile picture look!</p>
+
+        <div class="card">
+            <div class="mb-4">
+                <label for="era-select" class="block text-sm font-medium mb-1">Select Era:</label>
+                <select id="era-select">
+                    <option value="blades" selected>Xbox 360 - Blades (2005)</option>
+                    <option value="nxe">Xbox 360 - NXE (2008)</option>
+                    <option value="original">Original Xbox (2001)</option>
+                    <option value="metro">Xbox One - Metro (2013)</option>
+                </select>
+            </div>
+            <div class="flex items-center justify-center space-x-4">
+                 <label for="file-input" class="file-label">Choose Image</label>
+                 <input type="file" id="file-input" class="hidden" accept="image/*">
+                 <button id="process-button" disabled>Downgrade Image</button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden text-orange-600 font-semibold my-4 text-center">
+            Processing... Please wait.
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-6 w-full mt-6">
+            <div class="image-card">
+                <h2 class="text-lg font-semibold">Original Preview</h2>
+                <img id="preview-img" src="#" alt="Image Preview" class="pfp-image hidden">
+                <div id="preview-placeholder" class="pfp-image flex items-center justify-center text-gray-500 placeholder-text">Select Image</div>
+            </div>
+
+            <div class="image-card">
+                <h2 class="text-lg font-semibold">Downgraded Result</h2>
+                <img id="result-img" src="#" alt="Processed Image" class="pfp-image hidden">
+                 <div id="result-placeholder" class="pfp-image flex items-center justify-center text-gray-500 placeholder-text">Result</div>
+                <a id="download-link" href="#" class="button mt-4 hidden" download="downgraded_pfp.jpg">Download Result</a>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="processing-canvas" class="hidden"></canvas>
+
+    <script>
+        // --- Era Configurations ---
+        const eraConfigs = {
+            'original': {
+                targetSize: 64,
+                jpegQuality: 0.2,
+                smoothing: false,
+                filter: 'grayscale(100%) contrast(1.1)',
+                bodyClass: 'era-original'
+            },
+            'blades': {
+                targetSize: 96,
+                jpegQuality: 0.4,
+                smoothing: false,
+                filter: 'none',
+                bodyClass: 'era-blades'
+            },
+            'nxe': {
+                targetSize: 128,
+                jpegQuality: 0.3,
+                smoothing: true,
+                filter: 'none',
+                bodyClass: 'era-nxe'
+            },
+            'metro': {
+                targetSize: 192,
+                jpegQuality: 0.7,
+                smoothing: true,
+                filter: 'none',
+                bodyClass: 'era-metro'
+            }
+        };
+
+        // --- DOM Elements ---
+        const fileInput = document.getElementById('file-input');
+        const processButton = document.getElementById('process-button');
+        const previewImg = document.getElementById('preview-img');
+        const resultImg = document.getElementById('result-img');
+        const processingCanvas = document.getElementById('processing-canvas');
+        const downloadLink = document.getElementById('download-link');
+        const loadingDiv = document.getElementById('loading');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        const resultPlaceholder = document.getElementById('result-placeholder');
+        const eraSelect = document.getElementById('era-select');
+        const bodyElement = document.body;
+        // ---
+
+        let originalImageSrc = null;
+
+        // --- Functions ---
+        function updateBackground(selectedEra) {
+            const config = eraConfigs[selectedEra];
+            // Remove existing era classes first to prevent conflicts
+            Object.values(eraConfigs).forEach(conf => {
+                if (conf.bodyClass) bodyElement.classList.remove(conf.bodyClass);
+            });
+            // Add the new era class
+            if (config && config.bodyClass) {
+                bodyElement.classList.add(config.bodyClass);
+            } else {
+                 // Fallback to blades style if config not found (shouldn't happen)
+                 bodyElement.classList.add(eraConfigs['blades'].bodyClass);
+            }
+        }
+
+
+        // --- Event Listeners ---
+        eraSelect.addEventListener('change', (event) => {
+            updateBackground(event.target.value);
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    originalImageSrc = e.target.result;
+                    previewImg.src = originalImageSrc;
+                    previewImg.classList.remove('hidden');
+                    previewPlaceholder.classList.add('hidden');
+                    resultImg.src = "#";
+                    resultImg.classList.add('hidden');
+                    resultPlaceholder.classList.remove('hidden');
+                    downloadLink.classList.add('hidden');
+                    processButton.disabled = false;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                originalImageSrc = null;
+                previewImg.src = "#";
+                previewImg.classList.add('hidden');
+                previewPlaceholder.classList.remove('hidden');
+                processButton.disabled = true;
+            }
+        });
+
+        processButton.addEventListener('click', () => {
+            if (!originalImageSrc) {
+                alert("Please select an image first.");
+                return;
+            }
+
+            const selectedEra = eraSelect.value;
+            const config = eraConfigs[selectedEra] || eraConfigs['blades'];
+
+            loadingDiv.classList.remove('hidden');
+            resultImg.classList.add('hidden');
+            resultPlaceholder.classList.remove('hidden');
+            downloadLink.classList.add('hidden');
+            processButton.disabled = true;
+
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                try {
+                    const ctx = processingCanvas.getContext('2d');
+                    const targetSize = config.targetSize;
+                    const jpegQuality = config.jpegQuality;
+                    processingCanvas.width = targetSize;
+                    processingCanvas.height = targetSize;
+                    ctx.imageSmoothingEnabled = config.smoothing;
+
+                    const originalWidth = tempImg.naturalWidth;
+                    const originalHeight = tempImg.naturalHeight;
+                    let sourceX = 0, sourceY = 0;
+                    let sourceWidth = originalWidth;
+                    let sourceHeight = originalHeight;
+                    const targetAspectRatio = 1;
+
+                    if (originalWidth / originalHeight > targetAspectRatio) {
+                        sourceWidth = originalHeight * targetAspectRatio;
+                        sourceX = (originalWidth - sourceWidth) / 2;
+                    } else if (originalWidth / originalHeight < targetAspectRatio) {
+                        sourceHeight = originalWidth / targetAspectRatio;
+                        sourceY = (originalHeight - sourceHeight) / 2;
+                    }
+
+                    ctx.clearRect(0, 0, targetSize, targetSize);
+                    if (config.filter && config.filter !== 'none') {
+                        ctx.filter = config.filter;
+                    } else {
+                        ctx.filter = 'none';
+                    }
+
+                    ctx.drawImage(
+                        tempImg, sourceX, sourceY, sourceWidth, sourceHeight,
+                        0, 0, targetSize, targetSize
+                    );
+
+                    const downgradedImageDataUrl = processingCanvas.toDataURL('image/jpeg', jpegQuality);
+
+                    resultImg.src = downgradedImageDataUrl;
+                    resultImg.classList.remove('hidden');
+                    resultPlaceholder.classList.add('hidden');
+                    downloadLink.href = downgradedImageDataUrl;
+                    downloadLink.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error("Error during image processing:", error);
+                    alert("An error occurred while processing the image. Please try again.");
+                } finally {
+                    loadingDiv.classList.add('hidden');
+                    processButton.disabled = false;
+                }
+            };
+            tempImg.onerror = () => {
+                alert("Failed to load the selected image. It might be corrupted or in an unsupported format.");
+                loadingDiv.classList.add('hidden');
+                processButton.disabled = false;
+            };
+            tempImg.src = originalImageSrc;
+        });
+
+        // --- Initialization ---
+        updateBackground(eraSelect.value); // Set initial background/styles
+
+    </script>
+
+</body>
+</html>
