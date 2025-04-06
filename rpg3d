@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine RPG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/examples/js/controls/PointerLockControls.js"></script>
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            overflow: hidden;
+            background-color: #111827; /* Dark background */
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100vh;
+            display: block;
+            cursor: grab;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        #gameCanvas:active {
+            cursor: grabbing;
+        }
+        .ui-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+            color: #ffffff;
+            padding: 10px;
+        }
+        .xp-bar {
+            width: 200px;
+            height: 16px;
+            background-color: #4a5568; /* Darker grey */
+            border-radius: 8px;
+            margin-top: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            background-color: #84cc16; /* Green */
+            border-radius: 8px;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .level-display {
+            font-size: 0.8rem;
+            color: #ffffff;
+        }
+        #inventory {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+            background-color: rgba(243, 244, 246, 0.8); /* Light semi-transparent background */
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 250px; /* Increased width of the inventory */
+        }
+        #inventory h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #1f2937;
+            text-align: center;
+        }
+        #inventory ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #inventory li {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* Vertically center item name and quantity */
+            color: #374151;
+        }
+        #inventory li:last-child {
+            border-bottom: none;
+        }
+        #inventory li span:first-child {
+             margin-right: auto; /* Push item name to the left */
+        }
+        .item-name {
+            font-weight: 500; /* Make item names bold */
+        }
+
+        #inventory-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+            padding: 8px 16px;
+            background-color: #4CAF20;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #inventory-toggle:hover {
+            background-color: #45a01a;
+        }
+
+        #quests {
+            position: absolute;
+            top: 100px;
+            left: 10px;
+            z-index: 1;
+            background-color: rgba(243, 244, 246, 0.8); /* Light semi-transparent background */
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-height: 60vh;
+            overflow-y: auto;
+            width: 300px;
+            display: none;
+        }
+        #quests h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #1f2937;
+            text-align: center;
+        }
+        #quests ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #quests li {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        #quests li:last-child {
+            border-bottom: none;
+        }
+        #quests li strong {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        #quests li.completed {
+            color: #6b7280;
+            font-style: italic;
+        }
+        #quest-toggle {
+            position: absolute;
+            top: 55px;
+            right: 10px;
+            z-index: 1;
+            padding: 8px 16px;
+            background-color: #8b5cf6;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #quest-toggle:hover {
+            background-color: #7c3aed;
+        }
+
+        #message-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(55, 65, 81, 0.9); /* Dark semi-transparent background */
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 200px;
+            max-width: 400px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        #message-box.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #message-box.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+        .game-over-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            display: none;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            border: 4px solid #dc2626;
+            background-color: #fee2e2;
+        }
+
+        .game-over-title {
+            font-size: 2rem;
+            color: #b91c1c;
+            margin-bottom: 1rem;
+        }
+
+        .game-over-message {
+            font-size: 1.25rem;
+            color: #374151;
+            margin-bottom: 1.5rem;
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div class="ui-container">
+        <div class="level-display">Level: <span id="level">1</span></div>
+        <div class="xp-bar">
+            <div class="xp-bar-fill" id="xp-bar-fill"></div>
+        </div>
+        <div>Gold: <span id="gold">0</span></div>
+    </div>
+    <button id="inventory-toggle">Inventory</button>
+    <div id="inventory">
+        <h2>Inventory</h2>
+        <ul>
+            </ul>
+    </div>
+    <button id="quest-toggle">Quests</button>
+    <div id="quests">
+        <h2>Quests</h2>
+        <ul>
+            </ul>
+    </div>
+    <div id="message-box" class="message-box hide"></div>
+    <div class="game-over-overlay">
+        <div class="game-over-content">
+            <h2 class="game-over-title">Game Over</h2>
+            <p class="game-over-message">You have died.  Game Over.</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+        const canvasContainer = document.querySelector('body');
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x111827); // Match body background
+
+        // Lighting
+        const ambientLight = new THREE.HemisphereLight(0xffffff, 0x404040, 0.7); // Sky color, ground color, intensity
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2); // Add a directional light
+        directionalLight.position.set(1, 1, 0); // Position the light
+        scene.add(directionalLight);
+
+        // Player
+        let player = {
+            x: 0,
+            y: 0,
+            z: 5,
+            level: 1,
+            xp: 0,
+            gold: 100,
+            inventory: {
+                pickaxe: { name: 'Pickaxe', quantity: 1, level: 1 },
+                torch: { name: 'Torch', quantity: 5 },
+                healthPotion: { name: 'Health Potion', quantity: 3 },
+                "Iron Ore": { name: "Iron Ore", quantity: 0 },
+                "Copper Ore": { name: "Copper Ore", quantity: 0 },
+                "Silver Ore": { name: "Silver Ore", quantity: 0 },
+                "Gold Ore": { name: "Gold Ore", quantity: 0 },
+            },
+            health: 100,
+            maxHealth: 100,
+            damage: 10, // Base damage
+            attackSpeed: 1, // Attacks per second
+            isMining: false,
+            miningTarget: null,
+            miningProgress: 0,
+            weapon: null, // Equipped weapon
+            armor: null,   // Equipped armor
+        };
+
+        const levelCaps = [];
+        for (let i = 1; i <= 99; i++) {
+            levelCaps.push(i * 100); // Example: Level 1: 100, Level 2: 200, etc.
+        }
+
+        const getLevelCap = (level) => {
+            if (level <= 99) {
+                return levelCaps[level - 1];
+            }
+            return Infinity;
+        };
+
+        const updateLevel = () => {
+            const levelDisplay = document.getElementById('level');
+            const xpBarFill = document.getElementById('xp-bar-fill');
+            const prevLevel = player.level;
+            while (player.xp >= getLevelCap(player.level) && player.level < 99) {
+                player.level++;
+                player.damage += 5; // Increase damage per level
+                player.maxHealth += 10; // Increase max health per level
+                player.health = player.maxHealth;  // Fully heal on level up
+            }
+            if (player.level > prevLevel) {
+                showMessage(`Leveled up to level ${player.level}!`);
+            }
+            levelDisplay.textContent = player.level;
+            const levelCap = getLevelCap(player.level);
+            const xpPercentage = Math.min(100, (player.xp / levelCap) * 100); // Cap at 100%
+            xpBarFill.style.width = `${xpPercentage}%`;
+        };
+
+        const inventoryDiv = document.getElementById('inventory');
+        const inventoryList = inventoryDiv.querySelector('ul');
+        const inventoryToggle = document.getElementById('inventory-toggle');
+        let inventoryOpen = false;
+
+        inventoryToggle.addEventListener('click', () => {
+            inventoryOpen = !inventoryOpen;
+            inventoryDiv.style.display = inventoryOpen ? 'block' : 'none';
+            if (inventoryOpen) {
+                updateInventoryDisplay();
+            }
+        });
+
+        function updateInventoryDisplay() {
+            inventoryList.innerHTML = ''; // Clear the list
+            for (const [itemKey, item] of Object.entries(player.inventory)) {
+              const li = document.createElement('li');
+              const itemNameSpan = document.createElement('span');
+              itemNameSpan.className = 'item-name';
+              itemNameSpan.textContent = item.name;
+
+              const quantitySpan = document.createElement('span');
+              quantitySpan.textContent = `x${item.quantity}`;
+
+              li.appendChild(itemNameSpan);
+              li.appendChild(quantitySpan);
+
+              // Add an "Equip" button if it's a weapon or armor
+              if (item.level) { //  Weapons or Armor have a level property
+                  const equipButton = document.createElement('button');
+                  equipButton.textContent = 'Equip';
+                  equipButton.className = "bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded";
+                  equipButton.addEventListener('click', () => {
+                      equipItem(itemKey);
+                  });
+                  li.appendChild(equipButton);
+              }
+              inventoryList.appendChild(li);
+            }
+        }
+
+        function equipItem(itemKey) {
+            const item = player.inventory[itemKey];
+            if (!item) return;
+
+            if (item.level) { // Check if it has a level, indicating it's equipable
+                if (item.name.includes('Pickaxe')) {
+                    player.weapon = item; // Equip as weapon
+                    showMessage(`Equipped ${item.name}!`);
+                }
+            }
+            updateInventoryDisplay();
+        }
+
+        // Example quest data
+        const questData = [
+            {
+                id: 'quest1',
+                title: 'Gather Iron Ore',
+                description: 'Collect 20 Iron Ore.',
+                objective: { type: 'collect', item: 'Iron Ore', quantity: 20 },
+                reward: { type: 'xp', amount: 200 },
+                completed: false,
+            },
+            {
+                id: 'quest2',
+                title: 'Mine Copper',
+                description: 'Mine 15 Copper Ore',
+                objective: { type: 'collect', item: 'Copper Ore', quantity: 15 },
+                reward: { type: 'xp', amount: 150 },
+                completed: false,
+            },
+            {
+                id: 'quest3',
+                title: 'Reach Level 5',
+                description: 'Reach level 5.',
+                objective: { type: 'level', level: 5 },
+                reward: { type: 'gold', amount: 500 },
+                completed: false
+            }
+        ];
+
+        let activeQuests = [];
+
+        const questsDiv = document.getElementById('quests');
+        const questsList = questsDiv.querySelector('ul');
+        const questToggle = document.getElementById('quest-toggle');
+        let questsOpen = false;
+
+        questToggle.addEventListener('click', () => {
+            questsOpen = !questsOpen;
+            questsDiv.style.display = questsOpen ? 'block' : 'none';
+            if (questsOpen) {
+                updateQuestsDisplay();
+            }
+        });
+
+        function updateQuestsDisplay() {
+            questsList.innerHTML = ''; // Clear the list
+            activeQuests.forEach(quest => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${quest.title}</strong><br>${quest.description}<br>Progress: `;
+                if (quest.objective.type === 'collect') {
+                  li.innerHTML += `${player.inventory[quest.objective.item]?.quantity || 0}/${quest.objective.quantity} ${quest.objective.item}`;
+                } else if (quest.objective.type === 'level') {
+                    li.innerHTML += `${player.level}/${quest.objective.level} Levels`;
+                }
+
+                if (quest.completed) {
+                    li.classList.add('completed');
+                    li.innerHTML += '<br>Completed!';
+                }
+                questsList.appendChild(li);
+            });
+        }
+
+        function startQuest(questId) {
+            const quest = questData.find(q => q.id === questId);
+            if (quest && !activeQuests.includes(quest)) {
+                activeQuests.push(quest);
+                showMessage(`Quest "${quest.title}" started!`);
+                updateQuestsDisplay(); // Update display after adding quest
+            }
+        }
+
+        function checkQuestCompletion(quest) {
+            if (quest.completed) return;
+            let completed = false;
+            if (quest.objective.type === 'collect') {
+                const collectedQuantity = player.inventory[quest.objective.item]?.quantity || 0;
+                completed = collectedQuantity >= quest.objective.quantity;
+            } else if (quest.objective.type === 'level') {
+                completed = player.level >= quest.objective.level;
+            }
+
+            if (completed) {
+                quest.completed = true;
+                if (quest.reward.type === 'xp') {
+                    player.xp += quest.reward.amount;
+                    updateLevel();
+                    showMessage(`Quest "${quest.title}" completed!  Received ${quest.reward.amount} XP.`);
+                } else if (quest.reward.type === 'gold') {
+                    player.gold += quest.reward.amount;
+                    document.getElementById('gold').textContent = player.gold;
+                     showMessage(`Quest "${quest.title}" completed!  Received ${quest.reward.amount} Gold.`);
+                }
+                updateQuestsDisplay();
+            }
+        }
+
+        function showMessage(message) {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.classList.remove('hide');
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+                messageBox.classList.add('hide');
+            }, 3000);
+        }
+
+        // World generation (basic for now)
+        const worldSize = 200;
+        const tileMap = {};
+        const chunkSize = 20;
+        const loadedChunks = new Set();
+        const miningSpeed = 50; // Mining speed in ms per unit of hardness.  Inverse of speed.
+
+        function generateChunk(chunkX, chunkY) {
+            const chunkKey = `${chunkX},${chunkY}`;
+            if (loadedChunks.has(chunkKey)) return;
+
+            for (let x = chunkX * chunkSize; x < (chunkX + 1) * chunkSize; x++) {
+                for (let y = chunkY * chunkSize; y < (chunkY + 1) * chunkSize; y++) {
+                    const tileType = Math.random() < 0.8 ? 'stone' : Math.random() < 0.5 ? 'iron' : 'copper';
+                    let hardness = 100;
+                    if (tileType === 'iron') {
+                        hardness = 150;
+                    } else if (tileType === 'copper') {
+                        hardness = 120;
+                    }
+                    tileMap[`${x},${y}`] = { type: tileType, mined: false, hardness: hardness };
+                }
+            }
+            loadedChunks.add(chunkKey);
+        }
+
+        function getTile(x, y) {
+            const tile = tileMap[`${x},${y}`];
+             if (!tile) {
+                  return { type: 'stone', mined: true, hardness: 100 }; // Return a mined stone.
+             }
+            return tile;
+        }
+
+        function mineTile(x, y) {
+            if (!player.isMining) {
+                player.isMining = true;
+                player.miningTarget = { x, y };
+                player.miningProgress = 0;
+            }
+        }
+
+        function drawTile(x, y, tileType, mined) {
+            if (mined) {
+                ctx.fillStyle = '#1f2937'; // Darker color for mined tiles
+            } else {
+                switch (tileType) {
+                    case 'stone':
+                        ctx.fillStyle = '#9ca3af';
+                        break;
+                    case 'iron':
+                        ctx.fillStyle = '#b91c1c';
+                        break;
+                    case 'copper':
+                        ctx.fillStyle = '#d97706';
+                        break;
+                    default:
+                        ctx.fillStyle = '#6b7280';
+                }
+            }
+            ctx.fillRect(x * 10, y * 10, 10, 10);
+        }
+
+        function drawWorld() {
+            const centerX = Math.floor(player.x / chunkSize);
+            const centerY = Math.floor(player.y / chunkSize);
+
+            for (let i = -2; i <= 2; i++) {
+                for (let j = -2; j <= 2; j++) {
+                    generateChunk(centerX + i, centerY + j);
+                }
+            }
+
+            for (let x = Math.floor((player.x - 50) / 10); x < Math.ceil((player.x + 50) / 10); x++) {
+                for (let y = Math.floor((player.y - 50) / 10); y < Math.ceil((player.y + 50) / 10); y++) {
+                    const tile = getTile(x, y);
+                    drawTile(x, y, tile.type, tile.mined);
+                }
+            }
+        }
+
+        // Simple AABB collision detection
+        function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) {
+            return x1 < x2 + w2 &&
+                   x1 + w1 > x2 &&
+                   y1 < y2 + h2 &&
+                   y1 + h1 > y2;
+        }
+
+        // Monster stuff
+        let monsters = [];
+        let nextMonsterId = 0;
+
+        function spawnMonster(x, y, type = 'goblin') {
+            let health = 20;
+            let damage = 5;
+            let speed = 0.5;
+            let size = 10;
+            if (type === 'goblin') {
+                health = 20;
+                damage = 5;
+                speed = 0.5;
+                size = 10;
+            } else if (type === 'orc') {
+                health = 50;
+                damage = 10;
+                speed = 0.3;
+                size = 15;
+            }
+
+            const monster = {
+                id: nextMonsterId++,
+                x: x,
+                y: y,
+                type: type,
+health: health,
+                maxHealth: health,
+                damage: damage,
+                speed: speed,
+                size: size,
+                color: type === 'goblin' ? '#16a34a' : '#78350f', // green, brown
+                dead: false,
+                attackCooldown: 0, // Time until next attack
+                attackSpeed: 1,  // Attacks per second
+            };
+            monsters.push(monster);
+        }
+
+        function drawMonster(monster) {
+            if (monster.dead) return;
+            ctx.fillStyle = monster.color;
+            ctx.fillRect(monster.x - monster.size / 2, monster.y - monster.size / 2, monster.size, monster.size);
+            // Draw health bar
+            ctx.fillStyle = '#ef4444'; // Red
+            ctx.fillRect(monster.x - monster.size / 2, monster.y - monster.size - 5, monster.size * (monster.health / monster.maxHealth), 3);
+        }
+
+        function moveMonster(monster) {
+            if (monster.dead) return;
+
+            const dx = player.x - monster.x;
+            const dy = player.y - monster.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 1) {
+                monster.x += (dx / distance) * monster.speed;
+                monster.y += (dy / distance) * monster.speed;
+            }
+        }
+
+        function monsterAttack(monster) {
+            if (monster.dead) return;
+            if (monster.attackCooldown > 0) return;
+
+            const dx = player.x - monster.x;
+            const dy = player.y - monster.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < monster.size / 2 + 5) { // 5 is arbitrary, half of player size.
+                player.health -= monster.damage;
+                showMessage(`You were hit by a ${monster.type} for ${monster.damage} damage!`);
+                monster.attackCooldown = 1 / monster.attackSpeed; // Reset cooldown
+                updateHealthBar();
+                if (player.health <= 0) {
+                    gameOver();
+                }
+            }
+        }
+
+        function handleMonsterAttackCooldown(monster) {
+            if (monster.attackCooldown > 0) {
+                monster.attackCooldown -= deltaTime; //  * 0.001 if delta is in ms
+            }
+        }
+
+        function checkMonsterCollision(monster) {
+            if (monster.dead) return false;
+            return checkCollision(player.x - 5, player.y - 5, 10, 10, monster.x - monster.size / 2, monster.y - monster.size / 2, monster.size, monster.size);
+        }
+
+        function damageMonster(monster, damage) {
+            if (monster.dead) return;
+            monster.health -= damage;
+            if (monster.health <= 0) {
+                monster.dead = true;
+                player.xp += 20; // Example XP reward
+                player.gold += 10;
+                updateLevel();
+                document.getElementById('gold').textContent = player.gold;
+                showMessage(`Killed a ${monster.type}!`);
+            }
+        }
+
+        // Get the game over overlay
+        const gameOverOverlay = document.querySelector('.game-over-overlay');
+
+        // Function to show the game over screen
+        function gameOver() {
+            gameOverOverlay.style.display = 'flex'; // Show the overlay
+            // You might want to stop the game loop here
+            gameRunning = false;
+        }
+
+        // Event listener for restarting the game (you can add a button in the overlay)
+        // For now, let's just reload the page on click
+        gameOverOverlay.addEventListener('click', () => {
+            window.location.reload(); // Reload the page to restart
+        });
+
+
+        // Initial world generation and monster spawn
+        generateChunk(0, 0);
+        spawnMonster(20, 20, 'goblin');
+        spawnMonster(-20, -20, 'orc');
+        spawnMonster(30, -10, 'goblin');
+
+
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        const sensitivity = 0.1;
+        let cameraTarget = { x: 0, y: 0, z: 5 }; // Add a target for camera
+
+        canvas.addEventListener('mousedown', (event) => {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+            canvas.style.cursor = 'grabbing';
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (isDragging) {
+                const deltaX = event.clientX - previousMousePosition.x;
+                const deltaY = event.clientY - previousMousePosition.y;
+
+                cameraTarget.x -= deltaX * sensitivity;
+                cameraTarget.y += deltaY * sensitivity;
+
+                // Clamp the camera target
+                cameraTarget.x = Math.max(-worldSize / 2, Math.min(worldSize / 2, cameraTarget.x));
+                cameraTarget.y = Math.max(-worldSize / 2, Math.min(worldSize / 2, cameraTarget.y));
+
+                previousMousePosition = {
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'e') {
+                const miningX = Math.floor(player.x / 10);
+                const miningY = Math.floor(player.y / 10);
+                const tile = getTile(miningX, miningY);
+                if (tile && !tile.mined) {
+                    mineTile(miningX, miningY);
+                }
+            }
+             if (event.key === 'h') {
+                player.health = Math.min(player.health + 20, player.maxHealth);
+                updateHealthBar();
+                showMessage("Used Health Potion");
+            }
+        });
+
+        let lastTime = 0;
+        let deltaTime = 0;
+        let gameRunning = true;
+
+        function animate() {
+            if (!gameRunning) return;
+            requestAnimationFrame(animate);
+
+            const time = performance.now();
+            deltaTime = time - lastTime;
+            lastTime = time;
+
+            // Camera follow with damping
+              const cameraSpeed = 0.05; // Adjust for smoothing
+              camera.position.x += (cameraTarget.x - camera.position.x) * cameraSpeed;
+              camera.position.y += (cameraTarget.y - camera.position.y) * cameraSpeed;
+              camera.position.z = 5; // Keep Z constant
+
+            if (isDragging) {
+                player.x = camera.position.x;
+                player.y = camera.position.y;
+            }
+
+            if (player.isMining) {
+                const tile = getTile(player.miningTarget.x, player.miningTarget.y);
+                if (tile && !tile.mined) {
+                    player.miningProgress += deltaTime / tile.hardness;
+                    if (player.miningProgress >= 1) {
+                        tile.mined = true;
+                         if (tile.type === 'iron') {
+                            player.inventory["Iron Ore"].quantity++;
+                            showMessage("Mined Iron Ore!");
+                         }
+                         if (tile.type === 'copper') {
+                            player.inventory["Copper Ore"].quantity++;
+                            showMessage("Mined Copper Ore!");
+                         }
+                        player.isMining = false;
+                        player.miningProgress = 0;
+                        updateInventoryDisplay();
+                    }
+                } else {
+                    player.isMining = false;
+                    player.miningProgress = 0;
+                }
+            }
+
+            monsters.forEach(monster => {
+                moveMonster(monster);
+                monsterAttack(monster);
+                handleMonsterAttackCooldown(monster);
+            });
+
+            drawWorld();
+            monsters.forEach(drawMonster);
+
+            ctx.fillStyle = '#007bff';
+            ctx.fillRect(player.x - 5, player.y - 5, 10, 10);
+
+            //Check collisions
+            monsters.forEach(monster => {
+                if (checkMonsterCollision(monster)) {
+                    // Handle collision (e.g., take damage)
+                    // For now, just log it
+                    // console.log('Collision with monster!');
+                }
+            });
+            activeQuests.forEach(checkQuestCompletion);
+        }
+
+        function updateHealthBar() {
+            const healthBar = document.getElementById('xp-bar-fill'); // Reuse xp bar
+            const healthPercentage = Math.max(0, (player.health / player.maxHealth) * 100); // Ensure >= 0
+            healthBar.style.width = `${healthPercentage}%`;
+            healthBar.style.backgroundColor = healthPercentage > 20 ? '#84cc16' : '#ef4444'; // Green or Red
+        }
+
+
+        // Add initial quests
+        startQuest('quest1');
+        startQuest('quest2');
+        startQuest('quest3');
+
+        updateLevel();
+        updateInventoryDisplay();
+        updateHealthBar();
+
+        // Make sure the animate function is called to start the rendering loop.
+        animate();
+    </script>
+</body>
+</html>
