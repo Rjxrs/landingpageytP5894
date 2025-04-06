@@ -16,134 +16,79 @@
     <style type="text/tailwindcss">
         /* Base body styles from original page */
         body {
-            @apply font-sans flex flex-col items-center min-h-screen p-4 transition-colors duration-500; /* Removed background transition here */
+            @apply font-sans flex flex-col items-center min-h-screen p-4 transition-colors duration-500;
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            /* Add padding-top to prevent content from hiding under fixed top bar */
             padding-top: 70px; /* Adjust height based on top bar */
              @apply bg-gray-200; /* Default light body bg */
         }
 
         /* Background styles for different eras (applied via JS) */
-        /* Added transition for background image/color changes */
         body.era-original, body.era-blades, body.era-nxe, body.era-metro {
             @apply transition-all duration-500 ease-in-out;
         }
 
         body.era-original {
-            background-color: #1a1a1a; /* Fallback color */
+            background-color: #1a1a1a;
             background-image: url('https://static.wikia.nocookie.net/xbox/images/4/49/The-original-dynamic-background.gif/revision/latest?cb=20220323013547');
         }
         body.era-blades {
-            background-color: #e5e7eb; /* Fallback color */
+            background-color: #e5e7eb;
             background-image: url('https://i.redd.it/ijpbtu5dd3211.gif');
         }
         body.era-nxe {
-            background-color: #4b5563; /* Fallback color */
+            background-color: #4b5563;
             background-image: url('https://static.wikia.nocookie.net/xbox/images/e/ec/Xbox360-dynamic-background.gif/revision/latest?cb=20220323020528');
         }
          body.era-metro {
-            background-color: #107C10; /* Fallback color (Xbox Green) */
+            background-color: #107C10;
             background-image: url('https://i.redd.it/ctownureqwl91.gif');
         }
 
         /* Original Page Content Styling */
-        .content-wrapper {
-            @apply w-full max-w-4xl mx-auto; /* Center content */
-        }
-        .title-image {
-            @apply w-full max-w-lg mx-auto mb-6 block; /* Center title image */
-        }
-        .card {
-            @apply bg-white p-6 rounded-lg shadow-md w-full max-w-md mb-6 mx-auto transition-colors duration-300;
-             /* Default card styles */
-             @apply bg-opacity-85 backdrop-blur-sm;
-        }
-        .image-card {
-            @apply bg-white p-4 rounded-lg shadow-md text-center flex-1 min-w-[250px] transition-colors duration-300;
-             /* Default card styles */
-             @apply bg-opacity-85 backdrop-blur-sm;
-        }
-        img.pfp-image { /* Specific class for preview/result images */
-            @apply border border-gray-300 rounded mt-2 mx-auto w-48 h-48 object-contain bg-gray-200;
-        }
-        #result-img {
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-        select {
-             @apply block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm;
-             @apply bg-white text-gray-900; /* Default select colors */
-        }
-        .file-label {
-             @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
-        }
-        button {
-             @apply bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
-        }
-        a.button {
-             @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200 text-sm no-underline;
-        }
-        .hidden {
-            display: none;
-        }
-        /* Placeholder text color */
-        .placeholder-text {
-            @apply text-gray-500;
-        }
-         /* Base text colors */
-         p, h1, h2, label {
-            @apply text-gray-800; /* Default text color */
-         }
-         #fallback-title { @apply text-green-700; }
-         #loading { @apply text-orange-600; }
-
+        .content-wrapper { @apply w-full max-w-4xl mx-auto; }
+        .title-image { @apply w-full max-w-lg mx-auto mb-6 block; }
+        .card { @apply bg-white p-6 rounded-lg shadow-md w-full max-w-md mb-6 mx-auto transition-colors duration-300 bg-opacity-85 backdrop-blur-sm; }
+        .image-card { @apply bg-white p-4 rounded-lg shadow-md text-center flex-1 min-w-[250px] transition-colors duration-300 bg-opacity-85 backdrop-blur-sm; }
+        img.pfp-image { @apply border border-gray-300 rounded mt-2 mx-auto w-48 h-48 object-contain bg-gray-200; }
+        #result-img { image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; }
+        select { @apply block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white text-gray-900; }
+        .file-label { @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200; }
+        button { @apply bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200; }
+        a.button { @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200 text-sm no-underline; }
+        .hidden { display: none; }
+        .placeholder-text { @apply text-gray-500; }
+        p, h1, h2, label { @apply text-gray-800; }
+        #fallback-title { @apply text-green-700; }
+        #loading { @apply text-orange-600; }
 
         /* --- Adjust text/card color for dark/colored backgrounds --- */
-        /* These override the default styles when specific body classes are present */
-        body.era-original .card, body.era-original .image-card {
-             @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm;
-        }
-         body.era-original p, body.era-original h2, body.era-original .placeholder-text, body.era-original label, body.era-original #fallback-title {
-             @apply text-gray-100;
-         }
-         body.era-original select { @apply bg-gray-700 text-white border-gray-600; }
-         body.era-original img.pfp-image { @apply border-gray-600 bg-gray-700; }
-         body.era-original .placeholder-text { @apply text-gray-400; }
+        body.era-original .card, body.era-original .image-card { @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm; }
+        body.era-original p, body.era-original h2, body.era-original .placeholder-text, body.era-original label, body.era-original #fallback-title { @apply text-gray-100; }
+        body.era-original select { @apply bg-gray-700 text-white border-gray-600; }
+        body.era-original img.pfp-image { @apply border-gray-600 bg-gray-700; }
+        body.era-original .placeholder-text { @apply text-gray-400; }
 
+        body.era-nxe .card, body.era-nxe .image-card { @apply bg-gray-800 bg-opacity-75 backdrop-blur-sm; }
+        body.era-nxe p, body.era-nxe h2, body.era-nxe .placeholder-text, body.era-nxe label, body.era-nxe #fallback-title { @apply text-gray-100; }
+        body.era-nxe select { @apply bg-gray-700 text-white border-gray-600; }
+        body.era-nxe img.pfp-image { @apply border-gray-600 bg-gray-700; }
+        body.era-nxe .placeholder-text { @apply text-gray-400; }
 
-        body.era-nxe .card, body.era-nxe .image-card {
-             @apply bg-gray-800 bg-opacity-75 backdrop-blur-sm;
-         }
-         body.era-nxe p, body.era-nxe h2, body.era-nxe .placeholder-text, body.era-nxe label, body.era-nxe #fallback-title {
-             @apply text-gray-100;
-         }
-         body.era-nxe select { @apply bg-gray-700 text-white border-gray-600; }
-         body.era-nxe img.pfp-image { @apply border-gray-600 bg-gray-700; }
-         body.era-nxe .placeholder-text { @apply text-gray-400; }
-
-
-        body.era-metro .card, body.era-metro .image-card {
-             @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm;
-        }
-         body.era-metro p, body.era-metro h2, body.era-metro .placeholder-text, body.era-metro label, body.era-metro #fallback-title {
-             @apply text-gray-100;
-         }
-         body.era-metro select { @apply bg-gray-700 text-white border-gray-600; }
-         body.era-metro img.pfp-image { @apply border-gray-600 bg-gray-700; }
-         body.era-metro .placeholder-text { @apply text-gray-400; }
+        body.era-metro .card, body.era-metro .image-card { @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm; }
+        body.era-metro p, body.era-metro h2, body.era-metro .placeholder-text, body.era-metro label, body.era-metro #fallback-title { @apply text-gray-100; }
+        body.era-metro select { @apply bg-gray-700 text-white border-gray-600; }
+        body.era-metro img.pfp-image { @apply border-gray-600 bg-gray-700; }
+        body.era-metro .placeholder-text { @apply text-gray-400; }
 
         /* --- Top Bar Styling using Tailwind --- */
         .top-bar {
-            /* Using fixed for locking */
             @apply fixed top-0 left-0 right-0 z-50 w-full px-4 py-2 flex justify-between items-center min-h-[50px];
-            /* Semi-transparent background, adapts slightly based on body class */
             @apply bg-white/90 backdrop-blur-sm border-b border-gray-200;
-            font-family: 'Inter', sans-serif; /* Use Inter font */
-            transition: background-color 0.3s ease, border-color 0.3s ease; /* Transition for bg */
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         /* Adjust top bar background/border for darker body backgrounds */
         body.era-original .top-bar, body.era-nxe .top-bar, body.era-metro .top-bar {
@@ -151,7 +96,6 @@
         }
 
         .time-date {
-            /* Text color adapts based on body class */
             @apply text-sm text-gray-500 whitespace-nowrap;
         }
          body.era-original .time-date, body.era-nxe .time-date, body.era-metro .time-date {
@@ -159,25 +103,75 @@
          }
 
         .top-bar-controls {
-            @apply flex items-center space-x-3; /* Use space-x for gap */
+            @apply flex items-center space-x-3;
         }
         .btn-top-bar {
             @apply w-[34px] h-[34px] inline-flex items-center justify-center rounded-full transition-all duration-200;
-            /* Base colors adapt based on body class */
             @apply bg-gray-200 text-gray-600; /* Default light */
             @apply hover:bg-gray-300 hover:text-blue-600 hover:scale-105; /* Hover light */
         }
-        /* Darker background button styles */
          body.era-original .btn-top-bar, body.era-nxe .btn-top-bar, body.era-metro .btn-top-bar {
              @apply bg-gray-700 text-gray-400;
              @apply hover:bg-gray-600 hover:text-blue-400;
          }
 
         .btn-top-bar i {
-            @apply text-sm; /* Icon size */
+            @apply text-sm;
         }
 
-        /* Removed Theme switch CSS */
+        /* --- Theme switch styling (Restored but visually disabled) --- */
+        .theme-switch-wrapper {
+            @apply flex items-center space-x-2 opacity-50 cursor-not-allowed; /* Added opacity and cursor */
+        }
+        .theme-switch-wrapper .fa-sun { @apply text-yellow-500 text-lg; }
+        .theme-switch-wrapper .fa-moon { @apply text-gray-400 text-lg; }
+        /* Dark mode icon colors (won't change based on JS, but set for potential static dark mode) */
+        /* body.era-original .theme-switch-wrapper .fa-sun, body.era-nxe .theme-switch-wrapper .fa-sun, body.era-metro .theme-switch-wrapper .fa-sun { @apply text-gray-500; }
+        body.era-original .theme-switch-wrapper .fa-moon, body.era-nxe .theme-switch-wrapper .fa-moon, body.era-metro .theme-switch-wrapper .fa-moon { @apply text-indigo-400; } */
+        /* Simplified: just use default muted colors when disabled */
+         .theme-switch-wrapper .fa-sun, .theme-switch-wrapper .fa-moon { @apply text-gray-400; }
+         body.era-original .theme-switch-wrapper .fa-sun, body.era-nxe .theme-switch-wrapper .fa-sun, body.era-metro .theme-switch-wrapper .fa-sun,
+         body.era-original .theme-switch-wrapper .fa-moon, body.era-nxe .theme-switch-wrapper .fa-moon, body.era-metro .theme-switch-wrapper .fa-moon {
+              @apply text-gray-500; /* Muted color on dark backgrounds */
+         }
+
+
+        /* Tailwind Toggle Switch Styling */
+        .toggle-label {
+            @apply relative block w-10 h-6 rounded-full;
+            @apply bg-gray-300; /* Default background */
+            transition: background-color 0.3s ease;
+        }
+         body.era-original .toggle-label, body.era-nxe .toggle-label, body.era-metro .toggle-label {
+              @apply bg-gray-600; /* Darker background for toggle on dark body */
+         }
+
+        .toggle-checkbox {
+            @apply absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none;
+             border-color: #e5e7eb; /* Match light background */
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease-in-out;
+        }
+         body.era-original .toggle-checkbox, body.era-nxe .toggle-checkbox, body.era-metro .toggle-checkbox {
+             background-color: #adb5bd; /* Darker handle */
+             border-color: #4a5568; /* Match dark background */
+         }
+
+        /* Styles for checked state (won't be triggered by user) */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+             @apply bg-green-400;
+        }
+        /* End Theme Switch Styling */
+
+        /* Red strip styling */
+         .top-bar .red-strip {
+             @apply absolute bottom-0 left-0 right-0 h-0.5 bg-red-600;
+         }
 
     </style>
 </head>
@@ -193,8 +187,16 @@
                 <i class="fas fa-headphones"></i>
             </a>
 
-            </div>
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
+            <div class="theme-switch-wrapper">
+                <i class="fas fa-sun"></i>
+                 <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                    <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox pointer-events-none" disabled/>
+                    <label for="themeSwitch" class="toggle-label"></label>
+                </div>
+                 <i class="fas fa-moon"></i>
+             </div>
+        </div>
+        <div class="red-strip"></div>
     </div>
     <div class="content-wrapper">
         <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/Xbox-360-Era-PFP-Downgrader-06-04-2025.png?raw=true"
@@ -249,7 +251,7 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- Top Bar JS ---
-            // Note: Theme switching JS removed
+            // Note: Theme switching JS logic removed
             const timeDateDisplay = document.getElementById('time-date-display');
 
             /**
