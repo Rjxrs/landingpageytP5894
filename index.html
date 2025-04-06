@@ -184,7 +184,7 @@
         /* --- Section Styling --- */
         .section { padding: 80px 0; }
         .section-title { text-align: center; margin-bottom: 50px; font-weight: bold; color: var(--heading-color); animation: fadeIn 1s ease-out; }
-        .section.bg-light { background-color: var(--section-bg-darker); }
+        /* .section.bg-light { background-color: var(--section-bg-darker); } */ /* Removed as #videos section is deleted */
 
 
         /* --- Shorts Carousel Styling --- */
@@ -197,7 +197,8 @@
         .carousel-indicators .active { background-color: var(--indicator-active-color); }
 
 
-        /* --- Video Card Styling --- */
+        /* --- Video Card Styling (No longer used, but kept for potential future use) --- */
+        /*
         .video-card {
             border: 1px solid var(--card-border); border-radius: 15px; overflow: hidden; background-color: var(--card-bg);
             box-shadow: 0 4px 15px var(--shadow-color);
@@ -209,7 +210,7 @@
         .video-card .card-body { background-color: transparent; }
         .video-card .card-title { font-weight: bold; color: var(--heading-color); font-size: 1.1rem; margin-bottom: 5px; }
         .video-card .card-text { color: var(--muted-text-color); font-size: 0.9rem; }
-
+        */
 
         /* --- Social Buttons Styling --- */
         .social-buttons-container {
@@ -252,8 +253,8 @@
         @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 
         /* Animation Trigger Class (Add via JS) */
-        .animate-on-scroll { opacity: 0; transition: opacity 0.8s ease-out, transform 0.8s ease-out; transform: translateY(20px); }
-        .animate-on-scroll.animated { opacity: 1; transform: translateY(0) !important; }
+        /* .animate-on-scroll { opacity: 0; transition: opacity 0.8s ease-out, transform 0.8s ease-out; transform: translateY(20px); } */ /* No longer needed for video cards */
+        /* .animate-on-scroll.animated { opacity: 1; transform: translateY(0) !important; } */
 
     </style>
 </head>
@@ -341,58 +342,6 @@
         </div>
     </section>
 
-    <section id="videos" class="section bg-light">
-        <div class="container">
-            <h2 class="section-title">Top Videos</h2>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-4 animate-on-scroll">
-                    <div class="video-card">
-                         <a href="https://www.youtube.com/embed/7KkPs-ZvcEw" target="_blank" rel="noopener noreferrer">
-                            <img src="https://placehold.co/600x337/aaa/fff?text=Video+1+Thumbnail" class="card-img-top" alt="Video 1 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
-                        </a>
-                        <div class="card-body">
-                             <h5 class="card-title">Asking AI To Extend Songs | Angel Wings...</h5>
-                             <p class="card-text">Click to watch the video about extending Angel Wings from Rocket League using AI.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 animate-on-scroll" style="animation-delay: 0.1s;">
-                    <div class="video-card">
-                         <a href="https://www.youtube.com/embed/i8PRC30QMHU" target="_blank" rel="noopener noreferrer">
-                             <img src="https://placehold.co/600x337/bbb/fff?text=Video+2+Thumbnail" class="card-img-top" alt="Video 2 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
-                        </a>
-                        <div class="card-body">
-                             <h5 class="card-title">Meme Templates Collection (WWE...)</h5>
-                             <p class="card-text">Check out this collection of meme templates from WWE WrestleMania 2025.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 animate-on-scroll" style="animation-delay: 0.2s;">
-                    <div class="video-card">
-                         <a href="https://www.youtube.com/embed/2h2e8lybrwA" target="_blank" rel="noopener noreferrer">
-                             <img src="https://placehold.co/600x337/ccc/fff?text=Video+3+Thumbnail" class="card-img-top" alt="Video 3 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
-                        </a>
-                        <div class="card-body">
-                             <h5 class="card-title">Asking AI To Extend Songs | House Of...</h5>
-                             <p class="card-text">Watch AI extend the song House Of Memories.</p>
-                        </div>
-                    </div>
-                </div>
-                 <div class="col-md-6 col-lg-4 animate-on-scroll" style="animation-delay: 0.3s;">
-                    <div class="video-card">
-                         <a href="https://www.youtube.com/embed/_2Z09Fm2ya4" target="_blank" rel="noopener noreferrer">
-                             <img src="https://placehold.co/600x337/ddd/fff?text=Video+4+Thumbnail" class="card-img-top" alt="Video 4 Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/600x337/eee/ccc?text=Error';">
-                        </a>
-                        <div class="card-body">
-                             <h5 class="card-title">A Drunken Fish - Official Music Video...</h5>
-                             <p class="card-text">The official short music video for A Drunken Fish.</p>
-                        </div>
-                    </div>
-                </div>
-                 </div>
-        </div>
-    </section>
-
     <section id="social" class="section">
         <div class="container">
              <div class="social-buttons-container">
@@ -472,6 +421,8 @@
             setInterval(updateTimeDate, 1000);
 
             // --- Scroll Animations ---
+            // Note: .animate-on-scroll class is no longer used since #videos section is removed
+            /*
             const isInViewport = (element) => {
                 const rect = element.getBoundingClientRect();
                 const verticalInView = rect.top <= (window.innerHeight || document.documentElement.clientHeight) - 100 && rect.bottom >= 100;
@@ -489,6 +440,7 @@
             };
             window.addEventListener('scroll', animateOnScroll);
             animateOnScroll(); // Initial check
+            */
         });
     </script>
 </body>
