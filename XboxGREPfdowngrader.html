@@ -21,7 +21,7 @@
             background-position: center center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            /* Add padding-top to prevent content from hiding under sticky top bar */
+            /* Add padding-top to prevent content from hiding under fixed top bar */
             padding-top: 70px; /* Adjust height based on top bar */
         }
         /* Default body background */
@@ -129,7 +129,8 @@
 
         /* --- Top Bar Styling using Tailwind --- */
         .top-bar {
-            @apply sticky top-0 z-50 w-full px-4 py-2 flex justify-between items-center min-h-[50px];
+            /* Changed sticky to fixed, added left-0 right-0 */
+            @apply fixed top-0 left-0 right-0 z-50 w-full px-4 py-2 flex justify-between items-center min-h-[50px];
             @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700;
             font-family: 'Inter', sans-serif; /* Use Inter font */
         }
@@ -184,6 +185,10 @@
         <div class="time-date" id="time-date-display">Loading...</div>
 
         <div class="top-bar-controls">
+             <a href="https://rjxrs.github.io/landingpageytP5894/" class="btn-top-bar" title="Homepage">
+                <i class="fas fa-home"></i>
+            </a>
+
             <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="btn-top-bar" target="_blank" rel="noopener noreferrer" title="MP3 Player">
                 <i class="fas fa-headphones"></i>
             </a>
