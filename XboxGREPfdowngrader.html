@@ -4,19 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xbox Era PFP Downgrader</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style type="text/tailwindcss">
-        /* Base body styles */
+        /* Base body styles from original page */
         body {
-            @apply font-sans flex flex-col items-center min-h-screen p-4 transition-all duration-500; /* Added transition for background and color */
+            @apply font-sans flex flex-col items-center min-h-screen p-4 transition-all duration-500;
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
-            background-attachment: fixed; /* Keep background fixed during scroll */
+            background-attachment: fixed;
+            /* Add padding-top to prevent content from hiding under sticky top bar */
+            padding-top: 70px; /* Adjust height based on top bar */
         }
-        /* Default background (now set dynamically, but keep a base fallback) */
+        /* Default body background */
         body {
-             background-color: #e5e7eb; /* Fallback color */
+             @apply bg-gray-200 dark:bg-gray-900; /* Default light/dark body bg */
         }
 
         /* Background styles for different eras (applied via JS) */
@@ -25,19 +35,19 @@
             background-image: url('https://static.wikia.nocookie.net/xbox/images/4/49/The-original-dynamic-background.gif/revision/latest?cb=20220323013547');
         }
         body.era-blades {
-             background-color: #e5e7eb; /* Fallback color */
-             background-image: url('https://i.redd.it/ijpbtu5dd3211.gif');
+            background-color: #e5e7eb; /* Fallback color */
+            background-image: url('https://i.redd.it/ijpbtu5dd3211.gif');
         }
         body.era-nxe {
-             background-color: #4b5563; /* Fallback color */
-             background-image: url('https://static.wikia.nocookie.net/xbox/images/e/ec/Xbox360-dynamic-background.gif/revision/latest?cb=20220323020528');
+            background-color: #4b5563; /* Fallback color */
+            background-image: url('https://static.wikia.nocookie.net/xbox/images/e/ec/Xbox360-dynamic-background.gif/revision/latest?cb=20220323020528');
         }
          body.era-metro {
             background-color: #107C10; /* Fallback color (Xbox Green) */
-             /* Updated background image URL for Metro */
             background-image: url('https://i.redd.it/ctownureqwl91.gif');
         }
 
+        /* Original Page Content Styling */
         .content-wrapper {
             @apply w-full max-w-4xl mx-auto; /* Center content */
         }
@@ -45,28 +55,33 @@
             @apply w-full max-w-lg mx-auto mb-6 block; /* Center title image */
         }
         .card {
-            @apply bg-white p-6 rounded-lg shadow-md w-full max-w-md mb-6 mx-auto transition-colors duration-300; /* Center control card, added transition */
+            @apply bg-white p-6 rounded-lg shadow-md w-full max-w-md mb-6 mx-auto transition-colors duration-300;
+             /* Add dark mode styling for cards */
+             @apply dark:bg-gray-800 dark:bg-opacity-80 dark:backdrop-blur-sm;
         }
         .image-card {
-            @apply bg-white p-4 rounded-lg shadow-md text-center flex-1 min-w-[250px] transition-colors duration-300; /* Ensure minimum width, added transition */
+            @apply bg-white p-4 rounded-lg shadow-md text-center flex-1 min-w-[250px] transition-colors duration-300;
+             /* Add dark mode styling for cards */
+             @apply dark:bg-gray-800 dark:bg-opacity-80 dark:backdrop-blur-sm;
         }
         img.pfp-image { /* Specific class for preview/result images */
-            @apply border border-gray-300 rounded mt-2 mx-auto w-48 h-48 object-contain bg-gray-200; /* Fixed size, contain image */
+            @apply border border-gray-300 dark:border-gray-600 rounded mt-2 mx-auto w-48 h-48 object-contain bg-gray-200 dark:bg-gray-700; /* Fixed size, contain image */
         }
         #result-img {
-            /* Enhance pixelated look for display */
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
         }
         select {
              @apply block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm;
+             @apply dark:bg-gray-700 dark:border-gray-600 dark:text-white; /* Dark mode select */
         }
         .file-label {
-            @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
+             @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
         }
         button {
-            @apply bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
+             @apply bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
+             @apply dark:bg-gray-600 dark:hover:bg-gray-700 dark:disabled:bg-gray-500;
         }
         a.button {
              @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200 text-sm no-underline;
@@ -74,62 +89,126 @@
         .hidden {
             display: none;
         }
+        /* Placeholder text color */
+        .placeholder-text {
+            @apply text-gray-500 dark:text-gray-400;
+        }
+         /* Base text colors */
+         p, h1, h2, label {
+            @apply text-gray-800 dark:text-gray-100;
+         }
+         #fallback-title { @apply text-green-700 dark:text-green-400; }
+         #loading { @apply text-orange-600 dark:text-orange-400; }
+
 
         /* --- Adjust text/card color for dark/colored backgrounds --- */
-
-        /* Original Era */
+        /* These override the default dark: styles when specific body classes are present */
         body.era-original .card, body.era-original .image-card {
              @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm;
         }
-         body.era-original p, body.era-original h2, body.era-original .placeholder-text, body.era-original label {
+         body.era-original p, body.era-original h2, body.era-original .placeholder-text, body.era-original label, body.era-original #fallback-title {
              @apply text-gray-100;
          }
          body.era-original select { @apply bg-gray-700 text-white border-gray-600; }
 
-        /* NXE Era */
-         body.era-nxe .card, body.era-nxe .image-card {
+        body.era-nxe .card, body.era-nxe .image-card {
              @apply bg-gray-800 bg-opacity-75 backdrop-blur-sm;
          }
-         body.era-nxe p, body.era-nxe h2, body.era-nxe .placeholder-text, body.era-nxe label {
+         body.era-nxe p, body.era-nxe h2, body.era-nxe .placeholder-text, body.era-nxe label, body.era-nxe #fallback-title {
              @apply text-gray-100;
          }
          body.era-nxe select { @apply bg-gray-700 text-white border-gray-600; }
 
-
-        /* Metro Era - Updated for new background */
         body.era-metro .card, body.era-metro .image-card {
-             /* Dark semi-transparent card for dark background */
              @apply bg-gray-900 bg-opacity-80 backdrop-blur-sm;
         }
-         body.era-metro p, body.era-metro h2, body.era-metro .placeholder-text, body.era-metro label {
-             /* Light text */
+         body.era-metro p, body.era-metro h2, body.era-metro .placeholder-text, body.era-metro label, body.era-metro #fallback-title {
              @apply text-gray-100;
          }
-         body.era-metro select { @apply bg-gray-700 text-white border-gray-600; } /* Adjust select for dark bg */
+         body.era-metro select { @apply bg-gray-700 text-white border-gray-600; }
 
+        /* --- Top Bar Styling using Tailwind --- */
+        .top-bar {
+            @apply sticky top-0 z-50 w-full px-4 py-2 flex justify-between items-center min-h-[50px];
+            @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700;
+            font-family: 'Inter', sans-serif; /* Use Inter font */
+        }
+        .time-date {
+            @apply text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap;
+        }
+        .top-bar-controls {
+            @apply flex items-center space-x-3; /* Use space-x for gap */
+        }
+        .btn-top-bar {
+            @apply w-[34px] h-[34px] inline-flex items-center justify-center rounded-full transition-all duration-200;
+            @apply bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400; /* Base colors */
+            @apply hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105; /* Hover colors */
+        }
+        .btn-top-bar i {
+            @apply text-sm; /* Icon size */
+        }
 
-        /* Blades Era (Default) */
-         body.era-blades .card, body.era-blades .image-card {
-             @apply bg-white bg-opacity-85 backdrop-blur-sm;
-         }
-         body.era-blades p, body.era-blades h2, body.era-blades .placeholder-text, body.era-blades label {
-             @apply text-gray-800;
-         }
-         body.era-blades select { @apply bg-white text-gray-900 border-gray-300; }
+        /* Theme switch specific styling */
+        .theme-switch-wrapper {
+            @apply flex items-center space-x-2;
+        }
+        .theme-switch-wrapper .fa-sun { @apply text-yellow-500 text-lg; }
+        .theme-switch-wrapper .fa-moon { @apply text-gray-400 text-lg; }
+        .dark .theme-switch-wrapper .fa-sun { @apply text-gray-500; }
+        .dark .theme-switch-wrapper .fa-moon { @apply text-indigo-400; }
+
+        /* Tailwind Toggle Switch - adapted from examples */
+        .toggle-checkbox:checked {
+            @apply right-0 border-green-400;
+            right: 0;
+            border-color: #68D391; /* Example color */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+             @apply bg-green-400; /* Example color */
+        }
+        .toggle-checkbox {
+            @apply absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease-in-out;
+        }
+        .toggle-label {
+            @apply relative block w-10 h-6 rounded-full cursor-pointer;
+            @apply bg-gray-300 dark:bg-gray-600;
+            transition: background-color 0.3s ease;
+        }
 
     </style>
 </head>
-<body>
+<body class="era-blades"> <div class="top-bar">
+        <div class="time-date" id="time-date-display">Loading...</div>
 
+        <div class="top-bar-controls">
+            <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="btn-top-bar" target="_blank" rel="noopener noreferrer" title="MP3 Player">
+                <i class="fas fa-headphones"></i>
+            </a>
+
+            <a href="https://rjxrs.github.io/landingpageytP5894/XboxGREPfdowngrader.html" class="btn-top-bar" target="_blank" rel="noopener noreferrer" title="Xbox Downgrader">
+                <i class="fab fa-xbox"></i>
+            </a>
+
+            <div class="theme-switch-wrapper">
+                <i class="fas fa-sun"></i> <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
+                    <label for="themeSwitch" class="toggle-label"></label>
+                </div>
+                 <i class="fas fa-moon"></i> </div>
+        </div>
+    </div>
     <div class="content-wrapper">
         <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/Xbox-360-Era-PFP-Downgrader-06-04-2025.png?raw=true"
              alt="Xbox 360 Era PFP Downgrader Title"
              class="title-image"
              onerror="this.style.display='none'; document.getElementById('fallback-title').classList.remove('hidden');"
         >
-        <h1 id="fallback-title" class="hidden text-3xl font-bold text-green-700 mb-4 text-center">Xbox Era PFP Downgrader</h1>
+        <h1 id="fallback-title" class="hidden text-3xl font-bold text-center mb-4">Xbox Era PFP Downgrader</h1>
 
-        <p class="text-gray-600 mb-6 text-center max-w-lg mx-auto">Upload an image and select an Xbox era to give it a retro profile picture look!</p>
+        <p class="mb-6 text-center max-w-lg mx-auto">Upload an image and select an Xbox era to give it a retro profile picture look!</p>
 
         <div class="card">
             <div class="mb-4">
@@ -148,203 +227,279 @@
             </div>
         </div>
 
-        <div id="loading" class="hidden text-orange-600 font-semibold my-4 text-center">
-            Processing... Please wait.
+        <div id="loading" class="hidden font-semibold my-4 text-center">
+             Processing... Please wait.
         </div>
 
         <div class="flex flex-wrap justify-center gap-6 w-full mt-6">
             <div class="image-card">
                 <h2 class="text-lg font-semibold">Original Preview</h2>
                 <img id="preview-img" src="#" alt="Image Preview" class="pfp-image hidden">
-                <div id="preview-placeholder" class="pfp-image flex items-center justify-center text-gray-500 placeholder-text">Select Image</div>
+                <div id="preview-placeholder" class="pfp-image flex items-center justify-center placeholder-text">Select Image</div>
             </div>
 
             <div class="image-card">
                 <h2 class="text-lg font-semibold">Downgraded Result</h2>
                 <img id="result-img" src="#" alt="Processed Image" class="pfp-image hidden">
-                 <div id="result-placeholder" class="pfp-image flex items-center justify-center text-gray-500 placeholder-text">Result</div>
+                 <div id="result-placeholder" class="pfp-image flex items-center justify-center placeholder-text">Result</div>
                 <a id="download-link" href="#" class="button mt-4 hidden" download="downgraded_pfp.jpg">Download Result</a>
             </div>
         </div>
     </div>
 
     <canvas id="processing-canvas" class="hidden"></canvas>
-
     <script>
-        // --- Era Configurations ---
-        const eraConfigs = {
-            'original': {
-                targetSize: 64,
-                jpegQuality: 0.2,
-                smoothing: false,
-                filter: 'grayscale(100%) contrast(1.1)',
-                bodyClass: 'era-original'
-            },
-            'blades': {
-                targetSize: 96,
-                jpegQuality: 0.4,
-                smoothing: false,
-                filter: 'none',
-                bodyClass: 'era-blades'
-            },
-            'nxe': {
-                targetSize: 128,
-                jpegQuality: 0.3,
-                smoothing: true,
-                filter: 'none',
-                bodyClass: 'era-nxe'
-            },
-            'metro': {
-                targetSize: 192,
-                jpegQuality: 0.7,
-                smoothing: true,
-                filter: 'none',
-                bodyClass: 'era-metro'
-            }
-        };
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
 
-        // --- DOM Elements ---
-        const fileInput = document.getElementById('file-input');
-        const processButton = document.getElementById('process-button');
-        const previewImg = document.getElementById('preview-img');
-        const resultImg = document.getElementById('result-img');
-        const processingCanvas = document.getElementById('processing-canvas');
-        const downloadLink = document.getElementById('download-link');
-        const loadingDiv = document.getElementById('loading');
-        const previewPlaceholder = document.getElementById('preview-placeholder');
-        const resultPlaceholder = document.getElementById('result-placeholder');
-        const eraSelect = document.getElementById('era-select');
-        const bodyElement = document.body;
-        // ---
+            // --- Top Bar JS ---
+            const themeSwitch = document.getElementById('themeSwitch');
+            const htmlElement = document.documentElement; // Target the <html> tag
+            const timeDateDisplay = document.getElementById('time-date-display');
 
-        let originalImageSrc = null;
+            /**
+             * Applies the specified theme to the page.
+             * Adds or removes the 'dark' class on the <html> element.
+             * Updates the state of the theme switch checkbox.
+             * @param {string} theme - The theme to apply ('light' or 'dark').
+             */
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    htmlElement.classList.add('dark');
+                } else {
+                    htmlElement.classList.remove('dark');
+                }
+                // Sync the checkbox state with the applied theme
+                if (themeSwitch) {
+                    themeSwitch.checked = (theme === 'dark');
+                }
+            };
 
-        // --- Functions ---
-        function updateBackground(selectedEra) {
-            const config = eraConfigs[selectedEra];
-            // Remove existing era classes first to prevent conflicts
-            Object.values(eraConfigs).forEach(conf => {
-                if (conf.bodyClass) bodyElement.classList.remove(conf.bodyClass);
-            });
-            // Add the new era class
-            if (config && config.bodyClass) {
-                bodyElement.classList.add(config.bodyClass);
+            /**
+             * Determines the preferred theme.
+             * Checks localStorage first for a saved preference.
+             * Optional: Checks system preference ('prefers-color-scheme').
+             * Defaults to 'light' if no preference is found.
+             * @returns {string} The preferred theme ('light' or 'dark').
+             */
+            const getPreferredTheme = () => {
+                const storedTheme = localStorage.getItem('theme');
+                if (storedTheme) {
+                    return storedTheme; // Return saved theme
+                }
+                // Optional: Check system preference if no theme is stored
+                // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                //     return 'dark';
+                // }
+                return 'light'; // Default to light theme
+            };
+
+            // Set the initial theme when the page loads
+            const currentTheme = getPreferredTheme();
+            applyTheme(currentTheme);
+
+            // Add event listener for the theme switch toggle, if it exists
+            if (themeSwitch) {
+                themeSwitch.addEventListener('change', () => {
+                    // Determine the new theme based on the switch's checked state
+                    const newTheme = themeSwitch.checked ? 'dark' : 'light';
+                    // Apply the new theme visually
+                    applyTheme(newTheme);
+                    // Save the new preference to localStorage for persistence
+                    localStorage.setItem('theme', newTheme);
+                });
             } else {
-                 // Fallback to blades style if config not found (shouldn't happen)
-                 bodyElement.classList.add(eraConfigs['blades'].bodyClass);
+                console.warn("Theme switch element with ID 'themeSwitch' not found.");
             }
-        }
+
+            /**
+             * Updates the time and date display element.
+             * Uses the browser's default locale settings for formatting.
+             */
+            const updateTimeDate = () => {
+                // Check if the display element exists
+                if (timeDateDisplay) {
+                    const now = new Date();
+                    // Define formatting options
+                    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
+
+                    // Format date and time using browser's default locale (undefined)
+                    const formattedDate = now.toLocaleDateString(undefined, optionsDate);
+                    const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
+
+                    // Update the text content of the display element
+                    // Shows time based on the user's system clock and timezone settings
+                    timeDateDisplay.textContent = `${formattedDate} | ${formattedTime}`;
+                } else {
+                    console.warn("Time/Date display element with ID 'time-date-display' not found.");
+                }
+            };
+
+            // Update the time immediately when the script runs
+            updateTimeDate();
+            // Set an interval to update the time every second (1000 milliseconds)
+            setInterval(updateTimeDate, 1000);
 
 
-        // --- Event Listeners ---
-        eraSelect.addEventListener('change', (event) => {
-            updateBackground(event.target.value);
-        });
+            // --- Original Xbox Downgrader JS ---
+            const eraConfigs = {
+                'original': { targetSize: 64, jpegQuality: 0.2, smoothing: false, filter: 'grayscale(100%) contrast(1.1)', bodyClass: 'era-original' },
+                'blades': { targetSize: 96, jpegQuality: 0.4, smoothing: false, filter: 'none', bodyClass: 'era-blades' },
+                'nxe': { targetSize: 128, jpegQuality: 0.3, smoothing: true, filter: 'none', bodyClass: 'era-nxe' },
+                'metro': { targetSize: 192, jpegQuality: 0.7, smoothing: true, filter: 'none', bodyClass: 'era-metro' }
+            };
 
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    originalImageSrc = e.target.result;
-                    previewImg.src = originalImageSrc;
-                    previewImg.classList.remove('hidden');
-                    previewPlaceholder.classList.add('hidden');
-                    resultImg.src = "#";
+            const fileInput = document.getElementById('file-input');
+            const processButton = document.getElementById('process-button');
+            const previewImg = document.getElementById('preview-img');
+            const resultImg = document.getElementById('result-img');
+            const processingCanvas = document.getElementById('processing-canvas');
+            const downloadLink = document.getElementById('download-link');
+            const loadingDiv = document.getElementById('loading');
+            const previewPlaceholder = document.getElementById('preview-placeholder');
+            const resultPlaceholder = document.getElementById('result-placeholder');
+            const eraSelect = document.getElementById('era-select');
+            const bodyElement = document.body;
+
+            let originalImageSrc = null;
+
+            function updateBackground(selectedEra) {
+                const config = eraConfigs[selectedEra];
+                Object.values(eraConfigs).forEach(conf => {
+                    if (conf.bodyClass) bodyElement.classList.remove(conf.bodyClass);
+                });
+                if (config && config.bodyClass) {
+                    bodyElement.classList.add(config.bodyClass);
+                } else {
+                    bodyElement.classList.add(eraConfigs['blades'].bodyClass);
+                }
+            }
+
+            if(eraSelect) {
+                eraSelect.addEventListener('change', (event) => {
+                    updateBackground(event.target.value);
+                });
+            }
+
+            if(fileInput) {
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            originalImageSrc = e.target.result;
+                            previewImg.src = originalImageSrc;
+                            previewImg.classList.remove('hidden');
+                            previewPlaceholder.classList.add('hidden');
+                            resultImg.src = "#";
+                            resultImg.classList.add('hidden');
+                            resultPlaceholder.classList.remove('hidden');
+                            downloadLink.classList.add('hidden');
+                            if(processButton) processButton.disabled = false;
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        originalImageSrc = null;
+                        previewImg.src = "#";
+                        previewImg.classList.add('hidden');
+                        previewPlaceholder.classList.remove('hidden');
+                        if(processButton) processButton.disabled = true;
+                    }
+                });
+            }
+
+            if(processButton) {
+                processButton.addEventListener('click', () => {
+                    if (!originalImageSrc) {
+                        alert("Please select an image first.");
+                        return;
+                    }
+                    if (!eraSelect || !processingCanvas || !resultImg || !downloadLink || !loadingDiv || !resultPlaceholder) {
+                        console.error("One or more required elements are missing.");
+                        return;
+                    }
+
+                    const selectedEra = eraSelect.value;
+                    const config = eraConfigs[selectedEra] || eraConfigs['blades'];
+
+                    loadingDiv.classList.remove('hidden');
                     resultImg.classList.add('hidden');
                     resultPlaceholder.classList.remove('hidden');
                     downloadLink.classList.add('hidden');
-                    processButton.disabled = false;
-                }
-                reader.readAsDataURL(file);
+                    processButton.disabled = true;
+
+                    const tempImg = new Image();
+                    tempImg.onload = () => {
+                        try {
+                            const ctx = processingCanvas.getContext('2d');
+                            const targetSize = config.targetSize;
+                            const jpegQuality = config.jpegQuality;
+                            processingCanvas.width = targetSize;
+                            processingCanvas.height = targetSize;
+                            ctx.imageSmoothingEnabled = config.smoothing;
+
+                            const originalWidth = tempImg.naturalWidth;
+                            const originalHeight = tempImg.naturalHeight;
+                            let sourceX = 0, sourceY = 0;
+                            let sourceWidth = originalWidth;
+                            let sourceHeight = originalHeight;
+                            const targetAspectRatio = 1;
+
+                            if (originalWidth / originalHeight > targetAspectRatio) {
+                                sourceWidth = originalHeight * targetAspectRatio;
+                                sourceX = (originalWidth - sourceWidth) / 2;
+                            } else if (originalWidth / originalHeight < targetAspectRatio) {
+                                sourceHeight = originalWidth / targetAspectRatio;
+                                sourceY = (originalHeight - sourceHeight) / 2;
+                            }
+
+                            ctx.clearRect(0, 0, targetSize, targetSize);
+                            if (config.filter && config.filter !== 'none') {
+                                ctx.filter = config.filter;
+                            } else {
+                                ctx.filter = 'none';
+                            }
+
+                            ctx.drawImage(
+                                tempImg, sourceX, sourceY, sourceWidth, sourceHeight,
+                                0, 0, targetSize, targetSize
+                            );
+
+                            const downgradedImageDataUrl = processingCanvas.toDataURL('image/jpeg', jpegQuality);
+
+                            resultImg.src = downgradedImageDataUrl;
+                            resultImg.classList.remove('hidden');
+                            resultPlaceholder.classList.add('hidden');
+                            downloadLink.href = downgradedImageDataUrl;
+                            downloadLink.classList.remove('hidden');
+
+                        } catch (error) {
+                            console.error("Error during image processing:", error);
+                            alert("An error occurred while processing the image. Please try again.");
+                        } finally {
+                            loadingDiv.classList.add('hidden');
+                            processButton.disabled = false;
+                        }
+                    };
+                    tempImg.onerror = () => {
+                        alert("Failed to load the selected image. It might be corrupted or in an unsupported format.");
+                        loadingDiv.classList.add('hidden');
+                        processButton.disabled = false;
+                    };
+                    tempImg.src = originalImageSrc;
+                });
+            }
+
+            // --- Initialization ---
+            if(eraSelect) {
+                updateBackground(eraSelect.value); // Set initial background/styles
             } else {
-                originalImageSrc = null;
-                previewImg.src = "#";
-                previewImg.classList.add('hidden');
-                previewPlaceholder.classList.remove('hidden');
-                processButton.disabled = true;
-            }
-        });
-
-        processButton.addEventListener('click', () => {
-            if (!originalImageSrc) {
-                alert("Please select an image first.");
-                return;
+                 // Apply default if eraSelect is missing (e.g., if top bar is used elsewhere)
+                 updateBackground('blades');
             }
 
-            const selectedEra = eraSelect.value;
-            const config = eraConfigs[selectedEra] || eraConfigs['blades'];
-
-            loadingDiv.classList.remove('hidden');
-            resultImg.classList.add('hidden');
-            resultPlaceholder.classList.remove('hidden');
-            downloadLink.classList.add('hidden');
-            processButton.disabled = true;
-
-            const tempImg = new Image();
-            tempImg.onload = () => {
-                try {
-                    const ctx = processingCanvas.getContext('2d');
-                    const targetSize = config.targetSize;
-                    const jpegQuality = config.jpegQuality;
-                    processingCanvas.width = targetSize;
-                    processingCanvas.height = targetSize;
-                    ctx.imageSmoothingEnabled = config.smoothing;
-
-                    const originalWidth = tempImg.naturalWidth;
-                    const originalHeight = tempImg.naturalHeight;
-                    let sourceX = 0, sourceY = 0;
-                    let sourceWidth = originalWidth;
-                    let sourceHeight = originalHeight;
-                    const targetAspectRatio = 1;
-
-                    if (originalWidth / originalHeight > targetAspectRatio) {
-                        sourceWidth = originalHeight * targetAspectRatio;
-                        sourceX = (originalWidth - sourceWidth) / 2;
-                    } else if (originalWidth / originalHeight < targetAspectRatio) {
-                        sourceHeight = originalWidth / targetAspectRatio;
-                        sourceY = (originalHeight - sourceHeight) / 2;
-                    }
-
-                    ctx.clearRect(0, 0, targetSize, targetSize);
-                    if (config.filter && config.filter !== 'none') {
-                        ctx.filter = config.filter;
-                    } else {
-                        ctx.filter = 'none';
-                    }
-
-                    ctx.drawImage(
-                        tempImg, sourceX, sourceY, sourceWidth, sourceHeight,
-                        0, 0, targetSize, targetSize
-                    );
-
-                    const downgradedImageDataUrl = processingCanvas.toDataURL('image/jpeg', jpegQuality);
-
-                    resultImg.src = downgradedImageDataUrl;
-                    resultImg.classList.remove('hidden');
-                    resultPlaceholder.classList.add('hidden');
-                    downloadLink.href = downgradedImageDataUrl;
-                    downloadLink.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error("Error during image processing:", error);
-                    alert("An error occurred while processing the image. Please try again.");
-                } finally {
-                    loadingDiv.classList.add('hidden');
-                    processButton.disabled = false;
-                }
-            };
-            tempImg.onerror = () => {
-                alert("Failed to load the selected image. It might be corrupted or in an unsupported format.");
-                loadingDiv.classList.add('hidden');
-                processButton.disabled = false;
-            };
-            tempImg.src = originalImageSrc;
-        });
-
-        // --- Initialization ---
-        updateBackground(eraSelect.value); // Set initial background/styles
-
+        }); // End DOMContentLoaded
     </script>
 
 </body>
