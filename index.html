@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* --- Base Variables & Smooth Transitions --- */
-        :root {
+        :root { /* Light Mode variables */
             --font-sans: 'Inter', sans-serif;
             --bg-color: #f8f9fa;
             --text-color: #212529;
@@ -40,14 +40,13 @@
             --top-bar-icon-hover-color: var(--link-color);
             --top-bar-btn-bg: var(--switch-bg); /* Match switch bg */
             --top-bar-btn-hover-bg: #ced4da;
-            /* Social Button Variables */
             --social-btn-bg: var(--section-bg-darker);
             --social-btn-icon-color: var(--muted-text-color);
             --social-btn-hover-bg: #d3d9df;
             --social-btn-hover-icon-color: var(--link-color);
         }
 
-        [data-bs-theme="dark"] {
+        [data-bs-theme="dark"] { /* Dark Mode variables */
             --bg-color: #212529;
             --text-color: #dee2e6;
             --card-bg: #343a40;
@@ -91,55 +90,46 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             overflow-x: hidden;
+            padding-top: 60px; /* Added padding for fixed top bar */
         }
         html { scroll-behavior: smooth; }
 
-        /* --- Top Bar (Time/Date & Theme Switch & MP3 Link) --- */
+        /* --- Top Bar --- */
         .top-bar {
-            background-color: rgba(var(--bs-body-bg-rgb), 0.9);
+            background-color: rgba(var(--bs-body-bg-rgb), 0.9); /* Use Bootstrap's body bg variable */
             backdrop-filter: blur(5px);
             padding: 8px 15px;
-            position: sticky; top: 0; z-index: 1030;
+            position: fixed; /* Changed to fixed */
+            top: 0; left: 0; right: 0; /* Ensure it spans width */
+            z-index: 1030;
             border-bottom: 1px solid var(--card-border);
             display: flex; justify-content: space-between; align-items: center;
             min-height: 50px;
         }
         .time-date { font-size: 0.9rem; color: var(--muted-text-color); white-space: nowrap; }
+        .top-bar-controls { display: flex; align-items: center; gap: 12px; }
 
-        /* Wrapper for controls on the right */
-        .top-bar-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Adjusted spacing */
-        }
-
-        /* Style for Icon Buttons in Top Bar */
+        /* Style for Icon Buttons in Top Bar (using Bootstrap variables/styles) */
         .btn-top-bar {
+            /* Using Bootstrap variables for sizing */
             --bs-btn-padding-x: 0.5rem;
             --bs-btn-padding-y: 0.25rem;
             --bs-btn-font-size: 0.9rem; /* Icon size */
-            width: 34px; /* Fixed width */
-            height: 34px; /* Fixed height */
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%; /* Make it circular */
+            width: 34px; height: 34px; /* Fixed size */
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%; /* Circular */
             background-color: var(--top-bar-btn-bg);
             color: var(--top-bar-icon-color);
-            border: none;
-            box-shadow: none;
+            border: none; box-shadow: none;
             text-decoration: none; /* Remove underline from link */
         }
         .btn-top-bar:hover, .btn-top-bar:focus {
             background-color: var(--top-bar-btn-hover-bg);
             color: var(--top-bar-icon-hover-color);
             transform: scale(1.05);
-            box-shadow: none;
+            box-shadow: none; /* Ensure no shadow on hover */
         }
-        .btn-top-bar i { /* Ensure icon fits */
-            line-height: 1;
-        }
-
+        .btn-top-bar i { line-height: 1; } /* Center icon */
 
         /* Theme switch styling */
         .theme-switch-wrapper { display: flex; align-items: center; gap: 8px; }
@@ -147,7 +137,6 @@
         .theme-switch-wrapper .fa-moon { color: var(--icon-inactive-color); font-size: 1.1rem; }
         [data-bs-theme="dark"] .theme-switch-wrapper .fa-sun { color: var(--icon-inactive-color); }
         [data-bs-theme="dark"] .theme-switch-wrapper .fa-moon { color: var(--icon-active-color); }
-
         .form-switch { padding-left: 0; display: flex; align-items: center; }
         .form-switch .form-check-input {
             cursor: pointer; width: 3em; height: 1.5em; margin-left: 0;
@@ -163,13 +152,11 @@
         .form-switch .form-check-input:checked { background-color: var(--switch-checked-bg); border-color: transparent; }
         .form-switch .form-check-input:checked::before { transform: translateX(1.5em); }
 
-
         /* --- Hero Section Styling --- */
         .hero-section {
             color: white; padding: 120px 0 100px; text-align: center;
             border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;
-            /* *** Updated banner URL *** */
-            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('https://yt3.googleusercontent.com/uoOyffkfdZQieJ3-2aaplzo4iOwC7VPm981rOAWg0ebzzT2RAgyWeuseOekLbbHWZqJsaDXubPM=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj') no-repeat center center;
+            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('https://yt3.googleusercontent.com/h7B24q1zSbYh6yrkQ5mA7Nq7Fk8g3yso7uEWxqJbU5XhFwWPG8j9BMSW9g7G5q0aKqf8e9d0=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj') no-repeat center center;
             background-size: cover;
         }
         .hero-section h1 { font-size: 3rem; font-weight: bold; animation: fadeInDown 1s ease-out; margin-bottom: 15px; }
@@ -180,12 +167,9 @@
         .hero-section .btn-danger { background-color: #dc3545; border-color: #dc3545; }
         .hero-section .btn-danger:hover { background-color: #bb2d3b; border-color: #b02a37; }
 
-
         /* --- Section Styling --- */
         .section { padding: 80px 0; }
         .section-title { text-align: center; margin-bottom: 50px; font-weight: bold; color: var(--heading-color); animation: fadeIn 1s ease-out; }
-        /* .section.bg-light { background-color: var(--section-bg-darker); } */ /* Removed as #videos section is deleted */
-
 
         /* --- Shorts Carousel Styling --- */
         #shortsCarousel { max-width: 350px; margin: 0 auto; background-color: var(--yt-embed-bg); border-radius: 15px; overflow: hidden; box-shadow: 0 6px 20px var(--shadow-color); }
@@ -196,31 +180,10 @@
         .carousel-indicators [data-bs-target] { background-color: var(--indicator-color); border-radius: 50%; width: 10px; height: 10px; margin: 0 5px; border: none; }
         .carousel-indicators .active { background-color: var(--indicator-active-color); }
 
-
-        /* --- Video Card Styling (No longer used, but kept for potential future use) --- */
-        /*
-        .video-card {
-            border: 1px solid var(--card-border); border-radius: 15px; overflow: hidden; background-color: var(--card-bg);
-            box-shadow: 0 4px 15px var(--shadow-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
-            opacity: 0; transform: translateY(20px); animation: fadeInUp 0.6s ease-out forwards;
-        }
-        .video-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 8px 25px var(--shadow-hover-color); }
-        .video-card img { border-bottom: 1px solid var(--card-border); aspect-ratio: 16 / 9; object-fit: cover; }
-        .video-card .card-body { background-color: transparent; }
-        .video-card .card-title { font-weight: bold; color: var(--heading-color); font-size: 1.1rem; margin-bottom: 5px; }
-        .video-card .card-text { color: var(--muted-text-color); font-size: 0.9rem; }
-        */
-
         /* --- Social Buttons Styling --- */
-        .social-buttons-container {
-            text-align: center; padding: 60px 0; background-color: var(--section-bg-darker); border-radius: 15px; margin-top: 60px;
-        }
+        .social-buttons-container { text-align: center; padding: 60px 0; background-color: var(--section-bg-darker); border-radius: 15px; margin-top: 60px; }
         .social-buttons-container h2 { margin-bottom: 40px; font-weight: bold; color: var(--heading-color); animation: fadeIn 1s ease-out; }
-        .social-buttons-wrapper {
-            display: flex; justify-content: center; align-items: center;
-            flex-wrap: wrap; gap: 15px;
-        }
+        .social-buttons-wrapper { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px; }
         .btn-social {
             display: inline-flex; justify-content: center; align-items: center;
             width: 50px; height: 50px; border-radius: 50%;
@@ -240,10 +203,8 @@
         .btn-social:nth-of-type(4) { animation-delay: 0.4s; }
         .btn-social:nth-of-type(5) { animation-delay: 0.5s; }
 
-
         /* --- Footer Styling --- */
         footer { background-color: var(--footer-bg); color: var(--footer-text); padding: 30px 0; text-align: center; margin-top: 80px; border-top-left-radius: 15px; border-top-right-radius: 15px; }
-
 
         /* --- Animations --- */
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
@@ -252,26 +213,20 @@
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 
-        /* Animation Trigger Class (Add via JS) */
-        /* .animate-on-scroll { opacity: 0; transition: opacity 0.8s ease-out, transform 0.8s ease-out; transform: translateY(20px); } */ /* No longer needed for video cards */
-        /* .animate-on-scroll.animated { opacity: 1; transform: translateY(0) !important; } */
-
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <div class="time-date" id="time-date-display">Loading...</div>
-
         <div class="top-bar-controls">
-            <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="btn btn-sm rounded-circle btn-top-bar mp3-link" target="_blank" rel="noopener noreferrer" title="MP3 Player">
+            <a href="mp3 player.html" class="btn btn-sm rounded-circle btn-top-bar mp3-link" target="_blank" rel="noopener noreferrer" title="MP3 Player">
                 <i class="fas fa-headphones"></i>
             </a>
-
-            <a href="https://rjxrs.github.io/landingpageytP5894/XboxGREPfdowngrader.html" class="btn btn-sm rounded-circle btn-top-bar xbox-link" target="_blank" rel="noopener noreferrer" title="Xbox Downgrader">
+            <a href="XboxGREPfdowngrader.html" class="btn btn-sm rounded-circle btn-top-bar xbox-link" target="_blank" rel="noopener noreferrer" title="Xbox Downgrader">
                 <i class="fab fa-xbox"></i>
             </a>
-
+            <a href="faceswap.html" class="btn btn-sm rounded-circle btn-top-bar" title="Face Swap App"> <i class="fas fa-face-smile"></i> </a>
             <div class="theme-switch-wrapper">
                 <i class="fas fa-sun"></i>
                 <div class="form-check form-switch">
@@ -289,14 +244,14 @@
              <p class="bio">For now I make random shit and uploads but consider subscribing, maybe in the future I'll grow my channel. Tnx and bye friend.</p>
              <div class="stats">
                  <span>33 subscribers</span> •
-                <span>31 videos</span> •
-                <span>20,559 views</span>
-                <br>
-                <small>(Stats need manual updates - check YouTube Studio or Social Blade)</small>
+                 <span>31 videos</span> •
+                 <span>20,559 views</span>
+                 <br>
+                 <small>(Stats need manual updates - check YouTube Studio or Social Blade)</small>
              </div>
-            <a href="https://www.youtube.com/channel/UCf21Sgd81QNu36-1XbCXa8A" class="btn btn-danger btn-lg" target="https://www.youtube.com/channel/UCf21Sgd81QNu36-1XbCXa8A" rel="noopener noreferrer">
-                <i class="fab fa-youtube me-2"></i>Subscribe on YouTube
-            </a>
+             <a href="https://www.youtube.com/@Heat_In_The_Desert_Guy" class="btn btn-danger btn-lg" target="_blank" rel="noopener noreferrer">
+                 <i class="fab fa-youtube me-2"></i>Subscribe on YouTube
+             </a>
         </div>
     </section>
 
@@ -309,33 +264,29 @@
                     <button type="button" data-bs-target="#shortsCarousel" data-bs-slide-to="1" aria-label="Short 2"></button>
                     <button type="button" data-bs-target="#shortsCarousel" data-bs-slide-to="2" aria-label="Short 3"></button>
                     <button type="button" data-bs-target="#shortsCarousel" data-bs-slide-to="3" aria-label="Short 4"></button>
-                </div>
+                 </div>
                 <div class="carousel-inner">
-
                     <div class="carousel-item active">
                         <div class="short-embed-wrapper">
-                            <iframe loading="lazy" src="https://www.youtube.com/embed/hig2LFBU8dI" title="homeless man kung fu #jjk #jjkedit #homeless #kungfu #homelesskungfuman #jujutsukaisen #anime" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                             <iframe loading="lazy" src="https://www.youtube.com/embed/y9rJ3e5pBAI" title="homeless man kung fu #jjk #jjkedit #homeless #kungfu #homelesskungfuman #jujutsukaisen #anime" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                     </div>
-
                     <div class="carousel-item">
                         <div class="short-embed-wrapper">
-                             <iframe loading="lazy" src="https://www.youtube.com/embed/6Gbk1DDgp_M" title="homeless man domain expansion - #jjk #jjkedit #anime #animeedit #shorts #trending #trendingshorts" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                             <iframe loading="lazy" src="https://www.youtube.com/embed/963z4iN-ZNQ" title="homeless man domain expansion - #jjk #jjkedit #anime #animeedit #shorts #trending #trendingshorts" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                     </div>
-
                     <div class="carousel-item">
                         <div class="short-embed-wrapper">
-                           <iframe loading="lazy" src="https://www.youtube.com/embed/DNZkD_oA6Qs" title="homeless man kung fu 2 #jjk #jjkedit #funny #memes #shorts #animeedit #jujutsukaisenedit" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            <iframe loading="lazy" src="https://www.youtube.com/embed/1H-wBqB7Y6Y" title="homeless man kung fu 2 #jjk #jjkedit #funny #memes #shorts #animeedit #jujutsukaisenedit" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                     </div>
-
                     <div class="carousel-item">
                         <div class="short-embed-wrapper">
-                           <iframe loading="lazy" src="https://www.youtube.com/embed/rZv4TA97zm4" title="Homeless man kung fu vs AI (Day 1) #edit #viral #short #meme  #viralshort #shortsfeed #fypage" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                             <iframe loading="lazy" src="https://www.youtube.com/embed/m2zTqgTj_tU" title="Homeless man kung fu vs AI (Day 1) #edit #viral #short #meme  #viralshort #shortsfeed #fypage" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                         </div>
                     </div>
-                    </div>
+                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#shortsCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span></button>
                 <button class="carousel-control-next" type="button" data-bs-target="#shortsCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span></button>
             </div>
@@ -347,23 +298,23 @@
              <div class="social-buttons-container">
                  <h2>Connect With Me</h2>
                  <div class="social-buttons-wrapper">
-                     <a href="#" class="btn-social" target="_blank" rel="noopener noreferrer" title="YouTube">
+                     <a href="https://www.youtube.com/@Heat_In_The_Desert_Guy" class="btn-social" target="_blank" rel="noopener noreferrer" title="YouTube">
                          <i class="fab fa-youtube"></i>
                      </a>
-                     <a href="#" class="btn-social" target="_blank" rel="noopener noreferrer" title="Twitter / X">
+                     <a href="https://x.com/WarenMurff" class="btn-social" target="_blank" rel="noopener noreferrer" title="Twitter / X">
                          <i class="fab fa-x-twitter"></i>
                      </a>
-                     <a href="#" class="btn-social" target="_blank" rel="noopener noreferrer" title="Instagram">
+                     <a href="https://www.instagram.com/heat_in_the_desert_guy/" class="btn-social" target="_blank" rel="noopener noreferrer" title="Instagram">
                          <i class="fab fa-instagram"></i>
                      </a>
-                     <a href="#" class="btn-social" target="_blank" rel="noopener noreferrer" title="Facebook">
+                     <a href="https://www.facebook.com/profile.php?id=61558527574375" class="btn-social" target="_blank" rel="noopener noreferrer" title="Facebook">
                          <i class="fab fa-facebook-f"></i>
                      </a>
-                     <a href="#" class="btn-social" target="_blank" rel="noopener noreferrer" title="TikTok">
+                     <a href="https://www.tiktok.com/@heat_in_the_desert_guy" class="btn-social" target="_blank" rel="noopener noreferrer" title="TikTok">
                          <i class="fab fa-tiktok"></i>
                      </a>
-                     </div>
-            </div>
+                  </div>
+             </div>
         </div>
     </section>
 
@@ -376,7 +327,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        // Standard JavaScript for theme switching, time/date, and scroll animations
+        // Standard JavaScript for theme switching, time/date
         document.addEventListener('DOMContentLoaded', () => {
             const themeSwitch = document.getElementById('themeSwitch');
             const htmlElement = document.documentElement;
@@ -392,10 +343,13 @@
             const getPreferredTheme = () => {
                 const storedTheme = localStorage.getItem('theme');
                 if (storedTheme) return storedTheme;
+                // Optional: Check system preference if no stored theme
+                // return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                 return 'light'; // Default to light
             };
             const currentTheme = getPreferredTheme();
             applyTheme(currentTheme);
+
             if (themeSwitch) {
                 themeSwitch.addEventListener('change', () => {
                     const newTheme = themeSwitch.checked ? 'dark' : 'light';
@@ -410,38 +364,15 @@
                     const now = new Date();
                     const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                     const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
-                    // Use browser's default locale
                     const formattedDate = now.toLocaleDateString(undefined, optionsDate);
                     const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
-                    // Display time based on user's system clock/timezone
                     timeDateDisplay.textContent = `${formattedDate} | ${formattedTime}`;
                 }
             };
             updateTimeDate();
             setInterval(updateTimeDate, 1000);
 
-            // --- Scroll Animations ---
-            // Note: .animate-on-scroll class is no longer used since #videos section is removed
-            /*
-            const isInViewport = (element) => {
-                const rect = element.getBoundingClientRect();
-                const verticalInView = rect.top <= (window.innerHeight || document.documentElement.clientHeight) - 100 && rect.bottom >= 100;
-                const horizontalInView = rect.left >= 0 && rect.right <= (window.innerWidth || document.documentElement.clientWidth);
-                return verticalInView && horizontalInView;
-            };
-            const animateOnScroll = () => {
-                const elements = document.querySelectorAll('.animate-on-scroll');
-                elements.forEach(el => {
-                    if (isInViewport(el) && !el.classList.contains('animated')) {
-                        const delay = parseFloat(el.style.animationDelay) || 0;
-                        setTimeout(() => { el.classList.add('animated'); }, delay * 1000);
-                    }
-                });
-            };
-            window.addEventListener('scroll', animateOnScroll);
-            animateOnScroll(); // Initial check
-            */
         });
     </script>
 </body>
-</html>
+</ht
