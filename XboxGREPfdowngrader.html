@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" class=""> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xbox Era PFP Downgrader</title>
@@ -66,11 +65,13 @@
         .top-bar-controls {
             @apply flex items-center space-x-3;
         }
+        /* Style applied to ALL buttons in the top bar */
         .btn-top-bar {
             @apply w-[34px] h-[34px] inline-flex items-center justify-center rounded-full transition-all duration-200;
             @apply bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400;
             @apply hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105;
         }
+        /* Ensure icon size is consistent */
         .btn-top-bar i { @apply text-sm; }
 
         /* Theme switch specific styling */
@@ -89,7 +90,7 @@
         /* --- Main Content Styling --- */
         .content-wrapper { @apply w-full max-w-4xl mx-auto; }
 
-        /* NEW: Container for the main app elements */
+        /* Container for the main app elements */
         .main-app-container {
              @apply w-full p-6 md:p-8 rounded-xl shadow-lg backdrop-blur-sm transition-colors duration-300 mt-6 mb-6; /* Added margin */
              @apply bg-gray-100/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50;
@@ -162,28 +163,30 @@
 
         /* Blades Era (Light Background) - Relies mostly on default light/dark styles */
 
-
     </style>
 </head>
 <body class="era-blades"> <div class="top-bar" id="top-bar-element">
         <div class="time-date" id="time-date-display">Loading...</div>
         <div class="top-bar-controls">
-            <a href="https://rjxrs.github.io/landingpageytP5894/" class="btn-top-bar" title="Homepage">
+            <a href="https://rjxrs.github.io/landingpageytP5894/" class="btn-top-bar" title="Homepage" target="_blank" rel="noopener noreferrer">
                 <i class="fas fa-home"></i>
             </a>
             <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" class="btn-top-bar" target="_blank" rel="noopener noreferrer" title="MP3 Player">
-                <i class="fas fa-headphones"></i>
+                 <i class="fas fa-headphones"></i>
+             </a>
+            <a href="faceswap.html" class="btn-top-bar" title="Face Swap App"> <i class="fas fa-face-smile"></i>
             </a>
             <div class="theme-switch-wrapper">
                 <i class="fas fa-sun"></i>
                  <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                    <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
-                    <label for="themeSwitch" class="toggle-label"></label>
-                </div>
+                     <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
+                     <label for="themeSwitch" class="toggle-label"></label>
+                 </div>
                  <i class="fas fa-moon"></i>
              </div>
         </div>
     </div>
+
     <div class="content-wrapper">
         <div class="main-app-container">
 
@@ -207,9 +210,9 @@
                     </select>
                 </div>
                 <div class="flex items-center justify-center space-x-4">
-                     <label for="file-input" class="file-label">Choose Image</label>
-                     <input type="file" id="file-input" class="hidden" accept="image/*">
-                     <button id="process-button" disabled>Downgrade Image</button>
+                    <label for="file-input" class="file-label">Choose Image</label>
+                    <input type="file" id="file-input" class="hidden" accept="image/*">
+                    <button id="process-button" disabled>Downgrade Image</button>
                 </div>
             </div>
 
@@ -238,26 +241,20 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- Top Bar JS ---
+            // (Keep existing Top Bar JS: theme switch, time/date)
             const themeSwitch = document.getElementById('themeSwitch');
-            const htmlElement = document.documentElement; // Target <html> for dark class toggle
+            const htmlElement = document.documentElement;
             const timeDateDisplay = document.getElementById('time-date-display');
 
             const applyGlobalTheme = (theme) => {
-                if (theme === 'dark') {
-                    htmlElement.classList.add('dark');
-                } else {
-                    htmlElement.classList.remove('dark');
-                }
-                if (themeSwitch) {
-                    themeSwitch.checked = (theme === 'dark');
-                }
+                if (theme === 'dark') { htmlElement.classList.add('dark'); }
+                else { htmlElement.classList.remove('dark'); }
+                if (themeSwitch) { themeSwitch.checked = (theme === 'dark'); }
             };
-
             const getPreferredGlobalTheme = () => {
                 const storedTheme = localStorage.getItem('theme');
-                return storedTheme ? storedTheme : 'light'; // Default to light
+                return storedTheme ? storedTheme : 'light'; // Defaulting to light now
             };
-
             const currentGlobalTheme = getPreferredGlobalTheme();
             applyGlobalTheme(currentGlobalTheme);
 
@@ -284,13 +281,13 @@
 
 
             // --- Original Xbox Downgrader JS ---
+            // (Keep existing Downgrader JS: eraConfigs, element selectors, updateBackground, event listeners, processing logic)
             const eraConfigs = {
                 'original': { targetSize: 64, jpegQuality: 0.2, smoothing: false, filter: 'grayscale(100%) contrast(1.1)', bodyClass: 'era-original' },
                 'blades': { targetSize: 96, jpegQuality: 0.4, smoothing: false, filter: 'none', bodyClass: 'era-blades' },
                 'nxe': { targetSize: 128, jpegQuality: 0.3, smoothing: true, filter: 'none', bodyClass: 'era-nxe' },
                 'metro': { targetSize: 192, jpegQuality: 0.7, smoothing: true, filter: 'none', bodyClass: 'era-metro' }
             };
-
             const fileInput = document.getElementById('file-input');
             const processButton = document.getElementById('process-button');
             const previewImg = document.getElementById('preview-img');
@@ -302,7 +299,6 @@
             const resultPlaceholder = document.getElementById('result-placeholder');
             const eraSelect = document.getElementById('era-select');
             const bodyElement = document.body;
-
             let originalImageSrc = null;
 
             function updateBackground(selectedEra) {
@@ -366,7 +362,7 @@
 
                     const tempImg = new Image();
                     tempImg.onload = () => {
-                        try {
+                         try {
                             const ctx = processingCanvas.getContext('2d');
                             if (!ctx) { throw new Error("Could not get canvas context"); }
 
@@ -412,4 +408,4 @@
     </script>
 
 </body>
-</html>
+</ht
