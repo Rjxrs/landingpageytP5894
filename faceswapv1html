@@ -109,16 +109,16 @@
         <div id="time-date-display" class="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">Loading...</div>
 
         <div class="top-bar-controls flex items-center space-x-2 sm:space-x-3">
-             <a href="https://rjxrs.github.io/landingpageytP5894/" target="_blank" rel="noopener noreferrer" title="Homepage"
+             <a href="https://heatinthedesertguy.netlify.app/" target="_blank" rel="noopener noreferrer" title="Homepage"
                 class="top-bar-icon-btn flex items-center justify-center w-8 h-8 rounded-full bg-icon-btn-light dark:bg-icon-btn-dark text-icon-color-light dark:text-icon-color-dark hover:bg-icon-btn-hover-light dark:hover:bg-icon-btn-hover-dark hover:text-icon-hover-light dark:hover:text-icon-hover-dark focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark">
                  <i class="fas fa-home text-sm"></i> </a>
 
-            <a href="https://rjxrs.github.io/landingpageytP5894/mp3%20player.html" target="_blank" rel="noopener noreferrer" title="MP3 Player"
+            <a href="https://heatinthedesertguy.netlify.app/mp3%20player.html" target="_blank" rel="noopener noreferrer" title="MP3 Player"
                class="top-bar-icon-btn flex items-center justify-center w-8 h-8 rounded-full bg-icon-btn-light dark:bg-icon-btn-dark text-icon-color-light dark:text-icon-color-dark hover:bg-icon-btn-hover-light dark:hover:bg-icon-btn-hover-dark hover:text-icon-hover-light dark:hover:text-icon-hover-dark focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark">
                 <i class="fas fa-headphones text-sm"></i>
             </a>
 
-            <a href="https://rjxrs.github.io/landingpageytP5894/XboxGREPfdowngrader.html" target="_blank" rel="noopener noreferrer" title="Xbox Downgrader"
+            <a href="https://heatinthedesertguy.netlify.app/XboxGREPfdowngrader.html" target="_blank" rel="noopener noreferrer" title="Xbox Downgrader"
                class="top-bar-icon-btn flex items-center justify-center w-8 h-8 rounded-full bg-icon-btn-light dark:bg-icon-btn-dark text-icon-color-light dark:text-icon-color-dark hover:bg-icon-btn-hover-light dark:hover:bg-icon-btn-hover-dark hover:text-icon-hover-light dark:hover:text-icon-hover-dark focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark">
                 <i class="fab fa-xbox text-sm"></i>
             </a>
