@@ -2,60 +2,122 @@
 <html lang="en" class=""> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ Face Swap Studio (HF Embed) ✨</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>✨ Face Swap Studio (Solid Theme) ✨</title> <script src="https://cdn.tailwindcss.com"></script>
+    <script
+        type="module"
+        src="https://gradio.s3-us-west-2.amazonaws.com/4.29.0/gradio.js"
+    ></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
-        // Tailwind config remains the same
+        // Tailwind config updated for solid theme colors
         tailwind.config = {
             darkMode: 'class',
             theme: {
-                extend: { /* ... same theme extensions ... */
+                extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'], },
                     colors: {
-                        'primary-light': '#3b82f6', 'primary-dark': '#60a5fa',
-                        'secondary-light': '#f8fafc', 'secondary-dark': '#111827',
-                        'panel-light': 'rgba(255, 255, 255, 0.8)', 'panel-dark': 'rgba(15, 23, 42, 0.8)',
-                        'text-main-light': '#1f2937', 'text-main-dark': '#f3f4f6',
-                        'text-secondary-light': '#4b5563', 'text-secondary-dark': '#9ca3af',
-                        'border-light': 'rgba(209, 213, 219, 0.3)', 'border-dark': 'rgba(55, 65, 81, 0.4)',
-                        'glow-light': 'rgba(59, 130, 246, 0.5)', 'glow-dark': 'rgba(96, 165, 250, 0.5)',
+                        // Adjusted semantic colors for solid backgrounds
+                        'primary-light': '#3b82f6', // blue-500
+                        'primary-dark': '#60a5fa', // blue-400
+
+                        // Backgrounds
+                        'bkg-light': '#ffffff', // white
+                        'bkg-dark': '#000000', // black
+                        'panel-light': '#f8fafc', // slate-50 (slightly off-white)
+                        'panel-dark': '#1e293b', // slate-800 (dark gray)
+
+                        // Text
+                        'text-main-light': '#1f2937', // gray-800 (on light panel)
+                        'text-main-dark': '#f1f5f9', // slate-100 (on dark panel)
+                        'text-secondary-light': '#4b5563', // gray-600 (on light panel)
+                        'text-secondary-dark': '#94a3b8', // slate-400 (on dark panel)
+
+                        // Borders
+                        'border-light': '#e2e8f0', // slate-200
+                        'border-dark': '#334155', // slate-700
+
+                        // Glows (can keep or adjust)
+                        'glow-light': 'rgba(59, 130, 246, 0.5)',
+                        'glow-dark': 'rgba(96, 165, 250, 0.5)',
                     },
-                    boxShadow: {
+                    boxShadow: { /* ... same shadows ... */
                         'soft-light': '0 4px 10px -1px rgba(0, 0, 0, 0.07), 0 2px 6px -2px rgba(0, 0, 0, 0.06)',
-                        'soft-dark': '0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 6px -2px rgba(0, 0, 0, 0.25)',
-                        'interactive-light': '0 0 0 3px rgba(59, 130, 246, 0.2)', 'interactive-dark': '0 0 0 3px rgba(96, 165, 250, 0.3)',
-                        'glow-primary-light': '0 0 15px theme(colors.glow-light)', 'glow-primary-dark': '0 0 15px theme(colors.glow-dark)',
+                        'soft-dark': '0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 6px -2px rgba(0, 0, 0, 0.25)', // Might need adjustment on pure black
+                        'interactive-light': '0 0 0 3px rgba(59, 130, 246, 0.2)',
+                        'interactive-dark': '0 0 0 3px rgba(96, 165, 250, 0.3)',
+                        'glow-primary-light': '0 0 15px theme(colors.glow-light)',
+                        'glow-primary-dark': '0 0 15px theme(colors.glow-dark)',
                     },
-                    keyframes: {
+                    keyframes: { /* ... same keyframes ... */
                         spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
-                        'gradient-move': { '0%': { 'background-position': '0% 50%' }, '50%': { 'background-position': '100% 50%' }, '100%': { 'background-position': '0% 50%' } },
+                        // gradient-move keyframe is no longer needed
                     },
-                    animation: {
+                    animation: { /* ... same animations ... */
                        spin: 'spin 0.8s linear infinite',
-                       'gradient': 'gradient-move 15s ease infinite',
+                       // gradient animation is no longer needed
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Styles remain the same */
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradient-move 15s ease infinite; }
-        .dark body { background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1f4287); background-size: 400% 400%; }
+        /* Updated base styles for solid background */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Solid background colors */
+            background-color: theme('colors.bkg-light');
+        }
+        .dark body {
+            background-color: theme('colors.bkg-dark');
+        }
+        /* Remove gradient animation */
+        /* animation: gradient-move 15s ease infinite; */
+
         * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, transform 0.2s ease; }
-        .main-panel { background-color: theme('colors.panel-light'); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid theme('colors.border-light'); }
-        .dark .main-panel { background-color: theme('colors.panel-dark'); border: 1px solid theme('colors.border-dark'); }
+
+        /* Updated Panel Styling */
+        .main-panel {
+            background-color: theme('colors.panel-light');
+            /* backdrop-filter: blur(12px); REMOVED */
+            /* -webkit-backdrop-filter: blur(12px); REMOVED */
+            border: 1px solid theme('colors.border-light');
+        }
+        .dark .main-panel {
+            background-color: theme('colors.panel-dark');
+            border: 1px solid theme('colors.border-dark');
+        }
+
+        /* Theme Toggle Styling (adjust background for contrast if needed) */
         #theme-toggle { background-color: theme('colors.slate.100'); color: theme('colors.slate.500'); border-radius: 9999px; padding: 0.5rem; line-height: 1; }
         #theme-toggle:hover { background-color: theme('colors.slate.200'); color: theme('colors.slate.700'); }
-        .dark #theme-toggle { background-color: theme('colors.slate.800'); color: theme('colors.slate.400'); }
-        .dark #theme-toggle:hover { background-color: theme('colors.slate.700'); color: theme('colors.slate.200'); }
+        .dark #theme-toggle { background-color: theme('colors.slate.700'); color: theme('colors.slate.300'); } /* Slightly lighter dark toggle bkg */
+        .dark #theme-toggle:hover { background-color: theme('colors.slate.600'); color: theme('colors.slate.100'); }
         #theme-toggle-light-icon, #theme-toggle-dark-icon { display: none; }
-        .iframe-container { width: 100%; height: 75vh; max-height: 800px; }
-        .iframe-container iframe { border-radius: 0.75rem; border: 1px solid theme('colors.border-light'); box-shadow: theme('boxShadow.soft-light'); }
-         .dark .iframe-container iframe { border: 1px solid theme('colors.border-dark'); box-shadow: theme('boxShadow.soft-dark'); }
+
+        /* Gradio component container styling */
+        .gradio-container {
+             width: 100%;
+             min-height: 600px;
+             /* Add a subtle border to distinguish it from the panel */
+             border: 1px solid theme('colors.border-light');
+             border-radius: 0.75rem; /* rounded-xl */
+             overflow: hidden; /* Ensure content respects border radius */
+        }
+         .dark .gradio-container {
+             border: 1px solid theme('colors.border-dark');
+         }
+
+        gradio-app {
+            display: block;
+            width: 100%;
+            height: 100%; /* Allow it to fill container */
+            min-height: 600px; /* Ensure minimum height */
+        }
+
     </style>
 </head>
 <body class="text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
@@ -70,34 +132,31 @@
             <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 bg-clip-text text-transparent">
                 Face Swap Studio
             </h1>
-            <p class="mt-2 text-lg text-text-secondary-light dark:text-text-secondary-dark opacity-90">Using the embedded Face Swap Space below.</p>
+            <p class="mt-2 text-lg text-text-secondary-light dark:text-text-secondary-dark">
+                Using the embedded Face Swap Space below.
+            </p>
         </header>
 
         <main>
-            <section class="iframe-container mx-auto">
-                <iframe
-                    id="hf-space-iframe"
-                    src="https://felixrosberg-face-swap.hf.space"
-                    frameborder="0"
-                    width="100%"
-                    height="100%"
-                ></iframe>
+            <section class="gradio-container mx-auto">
+                <gradio-app src="https://felixrosberg-face-swap.hf.space"></gradio-app>
             </section>
         </main>
 
         <footer class="text-center mt-10 pt-6 border-t border-border-light dark:border-border-dark">
-            <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark opacity-70">Embedding Hugging Face Space: felixrosberg-face-swap</p>
+            <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark opacity-70">
+                Embedding Hugging Face Space: felixrosberg-face-swap
+            </p>
         </footer>
     </div>
 
     <script>
         // --- Theme Toggle Logic ---
+        // (Remains the same - only affects the parent page)
         const themeToggleButton = document.getElementById('theme-toggle');
         const lightIcon = document.getElementById('theme-toggle-light-icon');
         const darkIcon = document.getElementById('theme-toggle-dark-icon');
         const htmlElement = document.documentElement;
-        const hfSpaceIframe = document.getElementById('hf-space-iframe'); // Get the iframe element
-        const baseIframeSrc = "https://felixrosberg-face-swap.hf.space"; // Base URL without theme
 
         function applyTheme(theme) {
             const isDark = theme === 'dark';
@@ -105,69 +164,20 @@
             darkIcon.style.display = isDark ? 'block' : 'none';
             lightIcon.style.display = isDark ? 'none' : 'block';
             localStorage.setItem('theme', theme);
-
-            // --- Update iframe source ---
-            if (hfSpaceIframe) {
-                try {
-                    // Construct the new URL with the theme parameter
-                    const currentIframeUrl = new URL(hfSpaceIframe.src); // Use current src to preserve other params if any
-                    const newUrl = new URL(baseIframeSrc); // Start with base URL
-
-                    // Copy existing search params EXCEPT __theme
-                     currentIframeUrl.searchParams.forEach((value, key) => {
-                        if (key !== '__theme') {
-                            newUrl.searchParams.set(key, value);
-                        }
-                    });
-
-                    // Add the new theme parameter
-                    newUrl.searchParams.set('__theme', isDark ? 'dark' : 'light');
-
-                    // Update the iframe src only if it's different, to avoid unnecessary reloads
-                    if (hfSpaceIframe.src !== newUrl.href) {
-                         console.log(`Attempting to set iframe theme: ${newUrl.href}`);
-                         hfSpaceIframe.src = newUrl.href;
-                         // Note: This will likely cause the iframe content to reload.
-                    }
-                } catch (e) {
-                    console.error("Error updating iframe URL:", e);
-                     // Fallback or simply don't update if URL parsing fails
-                     // You might want to just set a default theme parameter on initial load instead
-                }
-            }
         }
 
         themeToggleButton.addEventListener('click', () => {
             applyTheme(htmlElement.classList.contains('dark') ? 'light' : 'dark');
         });
 
-        // --- Initial Theme Application ---
         function initializeTheme() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-            // Apply theme to parent page AND set initial iframe URL
             applyTheme(initialTheme);
-
-             // Set initial iframe src with theme parameter *once* on load
-             // This avoids potential issues with applyTheme trying to read iframe.src before it's fully loaded
-             if (hfSpaceIframe) {
-                 try {
-                     const initialUrl = new URL(baseIframeSrc);
-                     initialUrl.searchParams.set('__theme', initialTheme);
-                     // Only set if different from the hardcoded src (which has no theme)
-                     if (hfSpaceIframe.getAttribute('src') !== initialUrl.href) {
-                         hfSpaceIframe.src = initialUrl.href;
-                     }
-                 } catch(e) {
-                     console.error("Error setting initial iframe URL:", e);
-                 }
-             }
         }
 
-        // Initialize theme when the page loads
         window.addEventListener('load', initializeTheme);
-
     </script>
 
 </body>
