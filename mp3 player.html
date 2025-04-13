@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" class=""> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced 3D Audio Visualizer</title>
@@ -54,11 +53,13 @@
         .top-bar-controls {
             @apply flex items-center space-x-3;
         }
+        /* Style applied to ALL buttons in the top bar */
         .btn-top-bar {
             @apply w-[34px] h-[34px] inline-flex items-center justify-center rounded-full transition-all duration-200;
             @apply bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400;
             @apply hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105;
         }
+        /* Ensure icon size is consistent */
         .btn-top-bar i { @apply text-sm; }
 
         /* Theme switch specific styling */
@@ -146,22 +147,26 @@
     <div class="top-bar" id="top-bar-element">
         <div class="time-date" id="time-date-display">Loading...</div>
         <div class="top-bar-controls">
-            <a href="https://rjxrs.github.io/landingpageytP5894/" class="btn-top-bar" title="Homepage">
+            <a href="https://rjxrs.github.io/landingpageytP5894/" class="btn-top-bar" title="Homepage" target="_blank" rel="noopener noreferrer">
                 <i class="fas fa-home"></i>
             </a>
             <a href="https://rjxrs.github.io/landingpageytP5894/XboxGREPfdowngrader.html" class="btn-top-bar" target="_blank" rel="noopener noreferrer" title="Xbox Downgrader">
                 <i class="fab fa-xbox"></i>
             </a>
+            <a href="faceswap.html" class="btn-top-bar" title="Face Swap App">
+                 <i class="fas fa-face-smile"></i>
+            </a>
             <div class="theme-switch-wrapper">
                 <i class="fas fa-sun"></i>
                  <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                    <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
-                    <label for="themeSwitch" class="toggle-label"></label>
-                </div>
+                     <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
+                     <label for="themeSwitch" class="toggle-label"></label>
+                 </div>
                  <i class="fas fa-moon"></i>
              </div>
         </div>
     </div>
+
     <div class="controls-container">
         <div>
             <p class="section-title">Select Audio Source</p>
@@ -171,7 +176,7 @@
             <div class="control-group mb-1">
                 <select id="radio-select" class="w-full">
                     <option value="">-- Or Select Radio Station --</option>
-                     <optgroup label="Chill / Ambient">
+                    <optgroup label="Chill / Ambient">
                         <option value="https://somafm.com/groovesalad.pls">SomaFM Groove Salad (PLS)</option>
                         <option value="http://stream-dc4.radioparadise.com/mellow-320">Radio Paradise Mellow Mix (MP3)</option>
                         <option value="https://icecast.radiofrance.fr/fip-hifi.aac">FIP (France) (AAC)</option>
@@ -228,7 +233,7 @@
             <p class="info-text">Radio streams depend on external sources & CORS.</p>
         </div>
 
-         <div>
+        <div>
             <p class="section-title">Audio Player</p>
             <audio id="audio-source" controls crossorigin="anonymous" class="w-full rounded"></audio>
          </div>
@@ -281,10 +286,12 @@
              <p class="info-text mt-2">Visualizer Controls: Left Mouse/1-Finger = Rotate, Middle Mouse/Scroll/2-Finger Pinch = Zoom, Right Mouse/2-Finger Drag = Pan.</p>
         </div>
     </div>
+
     <canvas id="visualizer-canvas"></canvas>
 
     <script>
         // --- Global Variables ---
+        // (Keep all existing visualizer variables)
         let scene, camera, renderer, controls, composer;
         let audioContext, analyser, source, dataArray, bufferLength;
         const bars = [];
@@ -299,9 +306,7 @@
         const BUILTIN_TRACK_NAME = "Lock In";
         let timeDateInterval;
         const textureLoader = new THREE.TextureLoader();
-        let bloomEnabled = true; // Variable to track bloom state
-
-        // *** Updated Preset Background URLs (Static Images) ***
+        let bloomEnabled = true;
         const predefinedBackgrounds = {
             preset_space: 'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?auto=format&fit=crop&w=1471&q=80',
             preset_abstract: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1473&q=80',
@@ -313,7 +318,7 @@
 
             // --- Top Bar JS ---
             const themeSwitch = document.getElementById('themeSwitch');
-            const htmlElement = document.documentElement; // Target <html> for dark class
+            const htmlElement = document.documentElement;
             const timeDateDisplay = document.getElementById('time-date-display');
 
             const applyGlobalTheme = (theme) => {
@@ -364,78 +369,71 @@
 
 
             // --- MP3 Visualizer JS ---
+            // (Keep all existing visualizer functions: initVisualizer, setupAudioContextAndSource, etc.)
+            function initVisualizer() { /* ... same ... */
+                 try {
+                     scene = new THREE.Scene();
+                     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                     camera.position.set(0, 15, 60);
+                     const canvas = document.getElementById('visualizer-canvas');
+                     if (!canvas) throw new Error("Visualizer canvas not found!");
 
-            function initVisualizer() {
-                try {
-                    scene = new THREE.Scene();
-                    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                    camera.position.set(0, 15, 60);
-                    const canvas = document.getElementById('visualizer-canvas');
-                    if (!canvas) throw new Error("Visualizer canvas not found!");
+                     renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+                     renderer.setSize(window.innerWidth, window.innerHeight);
+                     renderer.setPixelRatio(window.devicePixelRatio);
 
-                    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                    renderer.setPixelRatio(window.devicePixelRatio);
-                    // Initial background set via setupAudioEventListeners -> updateBackgroundDisplay
+                     controls = new THREE.OrbitControls(camera, renderer.domElement);
+                     controls.enableDamping = true; controls.dampingFactor = 0.05;
+                     controls.minDistance = 10; controls.maxDistance = 250; controls.target.set(0, 0, 0);
 
-                    controls = new THREE.OrbitControls(camera, renderer.domElement);
-                    controls.enableDamping = true; controls.dampingFactor = 0.05;
-                    controls.minDistance = 10; controls.maxDistance = 250; controls.target.set(0, 0, 0);
+                     const barRadius = 0.3, spacing = 0.3;
+                     const totalWidth = (barRadius * 2 + spacing) * NUM_BARS;
+                     const startX = -totalWidth / 2 + barRadius;
+                     const geometry = new THREE.CylinderGeometry(barRadius, barRadius, 1, 16);
+                     const material = new THREE.MeshPhongMaterial({
+                         color: baseBarColor.clone(), emissive: baseBarColor.clone().multiplyScalar(0.3),
+                         specular: 0x222222, shininess: 60, side: THREE.DoubleSide });
+                     bars.length = 0;
+                     for (let i = 0; i < NUM_BARS; i++) {
+                         const barMaterial = material.clone();
+                         const bar = new THREE.Mesh(geometry, barMaterial);
+                         bar.position.x = startX + i * (barRadius * 2 + spacing);
+                         bar.scale.y = 0.1;
+                         scene.add(bar); bars.push(bar);
+                     }
 
-                    // Create visualizer bars
-                    const barRadius = 0.3, spacing = 0.3;
-                    const totalWidth = (barRadius * 2 + spacing) * NUM_BARS;
-                    const startX = -totalWidth / 2 + barRadius;
-                    const geometry = new THREE.CylinderGeometry(barRadius, barRadius, 1, 16);
-                    const material = new THREE.MeshPhongMaterial({
-                        color: baseBarColor.clone(), emissive: baseBarColor.clone().multiplyScalar(0.3),
-                        specular: 0x222222, shininess: 60, side: THREE.DoubleSide });
-                    bars.length = 0;
-                    for (let i = 0; i < NUM_BARS; i++) {
-                        const barMaterial = material.clone();
-                        const bar = new THREE.Mesh(geometry, barMaterial);
-                        bar.position.x = startX + i * (barRadius * 2 + spacing);
-                        bar.scale.y = 0.1;
-                        scene.add(bar); bars.push(bar);
-                    }
+                     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambientLight);
+                     const pointLight = new THREE.PointLight(0xaaaaff, 0.8, 500); pointLight.position.set(0, 50, 60); scene.add(pointLight);
+                     const pointLight2 = new THREE.PointLight(0xffaaaa, 0.5, 500); pointLight2.position.set(-60, 30, 40); scene.add(pointLight2);
 
-                    // Lighting
-                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambientLight);
-                    const pointLight = new THREE.PointLight(0xaaaaff, 0.8, 500); pointLight.position.set(0, 50, 60); scene.add(pointLight);
-                    const pointLight2 = new THREE.PointLight(0xffaaaa, 0.5, 500); pointLight2.position.set(-60, 30, 40); scene.add(pointLight2);
+                     if (typeof THREE.EffectComposer !== 'undefined') {
+                         const renderScene = new THREE.RenderPass(scene, camera);
+                         const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
+                         composer = new THREE.EffectComposer(renderer);
+                         composer.addPass(renderScene); composer.addPass(bloomPass);
+                     } else { console.warn("Bloom effect disabled: Postprocessing components not found."); }
 
-                    // Post Processing (Bloom)
-                    if (typeof THREE.EffectComposer !== 'undefined') {
-                        const renderScene = new THREE.RenderPass(scene, camera);
-                        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
-                        composer = new THREE.EffectComposer(renderer);
-                        composer.addPass(renderScene); composer.addPass(bloomPass);
-                    } else { console.warn("Bloom effect disabled: Postprocessing components not found."); }
+                     setupAudioEventListeners();
+                     animate();
+                     window.addEventListener('resize', onWindowResize, false);
+                     console.log("Visualizer Initialized.");
 
-                    setupAudioEventListeners();
-                    animate();
-                    window.addEventListener('resize', onWindowResize, false);
-                    console.log("Visualizer Initialized.");
-
-                } catch (e) {
-                    console.error("Error during visualizer initialization:", e);
-                    alert("Could not initialize visualizer: " + e.message);
-                }
+                 } catch (e) {
+                     console.error("Error during visualizer initialization:", e);
+                     alert("Could not initialize visualizer: " + e.message);
+                 }
             }
-
-            function setupAudioContextAndSource(audioElement) {
-                // Added console logs for debugging audio context issues
-                // console.log("setupAudioContextAndSource called. Initialized:", isAudioContextInitialized, "Element:", audioElement);
-                if (isAudioContextInitialized && source && source.mediaElement === audioElement) {
-                    resumeAudioContext(); return;
-                }
-                 if (isAudioContextInitialized && source && source.mediaElement !== audioElement) {
+            function setupAudioContextAndSource(audioElement) { /* ... same ... */
+                 if (isAudioContextInitialized && source && source.mediaElement === audioElement) {
+                     resumeAudioContext(); return;
+                 }
+                  if (isAudioContextInitialized && source && source.mediaElement !== audioElement) {
                       console.log("Audio element changed, reconnecting source...");
                       if (source) { try { source.disconnect(); } catch (e) { console.warn("Error disconnecting previous source:", e); } }
                       source = null;
-                 }
-                try {
-                    if (!audioContext) {
+                  }
+                 try {
+                     if (!audioContext) {
                          console.log("Creating new AudioContext and Analyser...");
                          audioContext = new (window.AudioContext || window.webkitAudioContext)();
                          analyser = audioContext.createAnalyser();
@@ -444,127 +442,121 @@
                          bufferLength = analyser.frequencyBinCount;
                          dataArray = new Uint8Array(bufferLength);
                          analyser.connect(audioContext.destination);
-                    }
-                    // console.log("Creating media element source...");
-                    source = audioContext.createMediaElementSource(audioElement);
-                    // console.log("Connecting source to analyser...");
-                    source.connect(analyser);
-                    isAudioContextInitialized = true;
-                    console.log("AudioContext Initialized/Source Connected.");
-                    if (!audioElement.dataset.playListenerAdded) {
+                     }
+                     source = audioContext.createMediaElementSource(audioElement);
+                     source.connect(analyser);
+                     isAudioContextInitialized = true;
+                     console.log("AudioContext Initialized/Source Connected.");
+                     if (!audioElement.dataset.playListenerAdded) {
                          audioElement.addEventListener('play', resumeAudioContext);
                          audioElement.dataset.playListenerAdded = 'true';
-                    }
-                    document.body.addEventListener('click', resumeAudioContext, { once: true });
-                    document.body.addEventListener('touchend', resumeAudioContext, { once: true });
-                } catch (e) {
-                    console.error("Fatal Error setting up Web Audio API:", e);
-                    const loadingMsg = document.getElementById('loading-message');
-                    if(loadingMsg) loadingMsg.textContent = "Error initializing audio.";
-                    alert("Web Audio API setup failed: " + e.message);
-                    isAudioContextInitialized = false;
-                }
+                     }
+                     document.body.addEventListener('click', resumeAudioContext, { once: true });
+                     document.body.addEventListener('touchend', resumeAudioContext, { once: true });
+                 } catch (e) {
+                     console.error("Fatal Error setting up Web Audio API:", e);
+                     const loadingMsg = document.getElementById('loading-message');
+                     if(loadingMsg) loadingMsg.textContent = "Error initializing audio.";
+                     alert("Web Audio API setup failed: " + e.message);
+                     isAudioContextInitialized = false;
+                 }
             }
-
-            function resumeAudioContext() {
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume().then(() => console.log("AudioContext Resumed."))
-                    .catch(e => console.error("Error resuming AudioContext:", e));
-                }
+            function resumeAudioContext() { /* ... same ... */
+                 if (audioContext && audioContext.state === 'suspended') {
+                     audioContext.resume().then(() => console.log("AudioContext Resumed."))
+                     .catch(e => console.error("Error resuming AudioContext:", e));
+                 }
             }
+            function setupAudioEventListeners() { /* ... same ... */
+                 const fileInput = document.getElementById('audio-file-input');
+                 const audioElement = document.getElementById('audio-source');
+                 const loadingMessage = document.getElementById('loading-message');
+                 const radioSelect = document.getElementById('radio-select');
+                 const playRadioBtn = document.getElementById('play-radio-btn');
+                 const playBuiltinBtn = document.getElementById('play-builtin-btn');
+                 const speedSlider = document.getElementById('speed-slider');
+                 const speedValueSpan = document.getElementById('speed-value');
+                 const loopCheckbox = document.getElementById('loop-checkbox');
+                 const colorPicker = document.getElementById('bar-color-picker');
+                 const bgSelect = document.getElementById('bg-select');
+                 const bgCycleBtn = document.getElementById('bg-cycle-btn');
+                 const bgFileInput = document.getElementById('bg-file-input');
+                 const bgFileControls = document.getElementById('bg-file-controls');
+                 const volumeSlider = document.getElementById('volume-slider');
+                 const volumeValueSpan = document.getElementById('volume-value');
+                 const bloomCheckbox = document.getElementById('bloom-checkbox');
 
-            function setupAudioEventListeners() {
-                const fileInput = document.getElementById('audio-file-input');
-                const audioElement = document.getElementById('audio-source');
-                const loadingMessage = document.getElementById('loading-message');
-                const radioSelect = document.getElementById('radio-select');
-                const playRadioBtn = document.getElementById('play-radio-btn');
-                const playBuiltinBtn = document.getElementById('play-builtin-btn');
-                const speedSlider = document.getElementById('speed-slider');
-                const speedValueSpan = document.getElementById('speed-value');
-                const loopCheckbox = document.getElementById('loop-checkbox');
-                const colorPicker = document.getElementById('bar-color-picker');
-                const bgSelect = document.getElementById('bg-select');
-                const bgCycleBtn = document.getElementById('bg-cycle-btn');
-                const bgFileInput = document.getElementById('bg-file-input');
-                const bgFileControls = document.getElementById('bg-file-controls');
-                const volumeSlider = document.getElementById('volume-slider');
-                const volumeValueSpan = document.getElementById('volume-value');
-                const bloomCheckbox = document.getElementById('bloom-checkbox'); // Get bloom checkbox
+                 if (!audioElement) { console.error("Audio element not found!"); return; }
 
-                if (!audioElement) { console.error("Audio element not found!"); return; }
+                 function playAudio(element, sourceName) {
+                     if (!isAudioContextInitialized) setupAudioContextAndSource(element);
+                     if (!isAudioContextInitialized) { alert("Audio system could not be initialized."); if(loadingMessage) loadingMessage.textContent = "Audio init failed."; return; }
+                     resumeAudioContext();
+                     const playPromise = element.play();
+                     if (playPromise !== undefined) {
+                         playPromise.then(() => { if(loadingMessage) loadingMessage.textContent = `Playing: ${sourceName}`; })
+                         .catch(e => {
+                             if(loadingMessage) loadingMessage.textContent = `Error playing ${sourceName}.`;
+                             console.error(`Play Error (${sourceName}):`, e);
+                             if (e.name === 'NotAllowedError') alert(`Playback blocked. Click page/player & try again.`);
+                             else if (e.name === 'NotSupportedError') alert(`Audio format might be unsupported.`);
+                             else alert(`Could not play. Network/CORS issue or file unavailable?`);
+                         });
+                     } else { if(loadingMessage) loadingMessage.textContent = `Playing: ${sourceName}`; }
+                 }
 
-                function playAudio(element, sourceName) {
-                    if (!isAudioContextInitialized) setupAudioContextAndSource(element);
-                    if (!isAudioContextInitialized) { alert("Audio system could not be initialized."); if(loadingMessage) loadingMessage.textContent = "Audio init failed."; return; }
-                    resumeAudioContext();
-                    const playPromise = element.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => { if(loadingMessage) loadingMessage.textContent = `Playing: ${sourceName}`; })
-                        .catch(e => {
-                            if(loadingMessage) loadingMessage.textContent = `Error playing ${sourceName}.`;
-                            console.error(`Play Error (${sourceName}):`, e);
-                            if (e.name === 'NotAllowedError') alert(`Playback blocked. Click page/player & try again.`);
-                            else if (e.name === 'NotSupportedError') alert(`Audio format might be unsupported.`);
-                            else alert(`Could not play. Network/CORS issue or file unavailable?`);
-                        });
-                    } else { if(loadingMessage) loadingMessage.textContent = `Playing: ${sourceName}`; }
-                }
+                 if (fileInput) fileInput.addEventListener('change', function(event) {
+                     const file = event.target.files[0];
+                     if (file) {
+                         if (currentObjectURL) URL.revokeObjectURL(currentObjectURL);
+                         currentObjectURL = URL.createObjectURL(file);
+                         audioElement.src = currentObjectURL; audioElement.load();
+                         if(loadingMessage) loadingMessage.textContent = `Loaded: ${file.name}. Press play!`;
+                         if(radioSelect) radioSelect.value = "";
+                         setupAudioContextAndSource(audioElement);
+                     }
+                 });
+                 window.addEventListener('beforeunload', () => { if (currentObjectURL) URL.revokeObjectURL(currentObjectURL); if (currentBgObjectURL) URL.revokeObjectURL(currentBgObjectURL); });
 
-                if (fileInput) fileInput.addEventListener('change', function(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        if (currentObjectURL) URL.revokeObjectURL(currentObjectURL);
-                        currentObjectURL = URL.createObjectURL(file);
-                        audioElement.src = currentObjectURL; audioElement.load();
-                        if(loadingMessage) loadingMessage.textContent = `Loaded: ${file.name}. Press play!`;
-                        if(radioSelect) radioSelect.value = "";
-                        setupAudioContextAndSource(audioElement);
-                    }
-                });
-                window.addEventListener('beforeunload', () => { if (currentObjectURL) URL.revokeObjectURL(currentObjectURL); if (currentBgObjectURL) URL.revokeObjectURL(currentBgObjectURL); });
+                 if (playRadioBtn && radioSelect) playRadioBtn.addEventListener('click', () => {
+                     const streamUrl = radioSelect.value; const stationName = radioSelect.options[radioSelect.selectedIndex].text;
+                     if (streamUrl) {
+                         if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; }
+                         audioElement.src = streamUrl; audioElement.load();
+                         if(loadingMessage) loadingMessage.textContent = `Loading: ${stationName}...`;
+                         if(fileInput) fileInput.value = '';
+                         setupAudioContextAndSource(audioElement);
+                         playAudio(audioElement, stationName);
+                     } else { if(loadingMessage) loadingMessage.textContent = "Select a radio station."; }
+                 });
 
-                if (playRadioBtn && radioSelect) playRadioBtn.addEventListener('click', () => {
-                    const streamUrl = radioSelect.value; const stationName = radioSelect.options[radioSelect.selectedIndex].text;
-                    if (streamUrl) {
-                        if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; }
-                        audioElement.src = streamUrl; audioElement.load();
-                        if(loadingMessage) loadingMessage.textContent = `Loading: ${stationName}...`;
-                        if(fileInput) fileInput.value = '';
-                        setupAudioContextAndSource(audioElement);
-                        playAudio(audioElement, stationName);
-                    } else { if(loadingMessage) loadingMessage.textContent = "Select a radio station."; }
-                });
+                 if (playBuiltinBtn) playBuiltinBtn.addEventListener('click', () => {
+                     if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; }
+                     audioElement.src = BUILTIN_TRACK_URL; audioElement.load();
+                     if(loadingMessage) loadingMessage.textContent = `Loading: ${BUILTIN_TRACK_NAME}...`;
+                     if(fileInput) fileInput.value = ''; if(radioSelect) radioSelect.value = '';
+                     setupAudioContextAndSource(audioElement);
+                     playAudio(audioElement, BUILTIN_TRACK_NAME);
+                 });
 
-                if (playBuiltinBtn) playBuiltinBtn.addEventListener('click', () => {
-                    if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; }
-                    audioElement.src = BUILTIN_TRACK_URL; audioElement.load();
-                    if(loadingMessage) loadingMessage.textContent = `Loading: ${BUILTIN_TRACK_NAME}...`;
-                    if(fileInput) fileInput.value = ''; if(radioSelect) radioSelect.value = '';
-                    setupAudioContextAndSource(audioElement);
-                    playAudio(audioElement, BUILTIN_TRACK_NAME);
-                });
+                 if (speedSlider && speedValueSpan) speedSlider.addEventListener('input', function() {
+                     const speed = parseFloat(this.value);
+                     try { audioElement.playbackRate = speed; } catch(e) { console.warn("Could not set playbackRate:", e)}
+                     speedValueSpan.textContent = `${speed.toFixed(1)}x`;
+                 });
 
-                if (speedSlider && speedValueSpan) speedSlider.addEventListener('input', function() {
-                    const speed = parseFloat(this.value);
-                    try { audioElement.playbackRate = speed; } catch(e) { console.warn("Could not set playbackRate:", e)}
-                    speedValueSpan.textContent = `${speed.toFixed(1)}x`;
-                });
+                 if (loopCheckbox) loopCheckbox.addEventListener('change', function() { audioElement.loop = this.checked; });
 
-                if (loopCheckbox) loopCheckbox.addEventListener('change', function() { audioElement.loop = this.checked; });
-
-                if (volumeSlider && volumeValueSpan) volumeSlider.addEventListener('input', function() {
-                    const volume = parseFloat(this.value);
-                    audioElement.volume = volume;
-                    volumeValueSpan.textContent = `${Math.round(volume * 100)}%`;
-                });
+                 if (volumeSlider && volumeValueSpan) volumeSlider.addEventListener('input', function() {
+                     const volume = parseFloat(this.value);
+                     audioElement.volume = volume;
+                     volumeValueSpan.textContent = `${Math.round(volume * 100)}%`;
+                 });
 
 
-                if (colorPicker) colorPicker.addEventListener('input', function() { baseBarColor.set(this.value); });
+                 if (colorPicker) colorPicker.addEventListener('input', function() { baseBarColor.set(this.value); });
 
-                // --- Background Controls Logic ---
-                function updateBackgroundDisplay(type) {
-                     // console.log("Updating background display to:", type); // Debug log
+                 function updateBackgroundDisplay(type) {
                      if (!renderer || !scene) return;
                      if (currentBgObjectURL) { URL.revokeObjectURL(currentBgObjectURL); currentBgObjectURL = null; }
 
@@ -573,67 +565,62 @@
                          renderer.setClearColor(backgroundColors[currentBgIndex], 1);
                          if (bgCycleBtn) bgCycleBtn.disabled = false;
                          if (bgFileControls) bgFileControls.classList.add('hidden');
-                         // console.log("Set background to color cycle"); // Debug log
                      } else if (type === 'local') {
                          scene.background = null;
                          renderer.setClearColor(backgroundColors[currentBgIndex], 1);
                          if (bgCycleBtn) bgCycleBtn.disabled = true;
                          if (bgFileControls) bgFileControls.classList.remove('hidden');
-                         // console.log("Set background mode to local file upload"); // Debug log
                      } else if (predefinedBackgrounds[type]) {
                          if (bgCycleBtn) bgCycleBtn.disabled = true;
                          if (bgFileControls) bgFileControls.classList.add('hidden');
                          const imageUrl = predefinedBackgrounds[type];
-                         // console.log("Loading preset texture:", imageUrl); // Debug log
                          textureLoader.load(
                              imageUrl,
                              (texture) => {
                                  texture.colorSpace = THREE.SRGBColorSpace;
                                  scene.background = texture;
                                  renderer.setClearColor(0x000000, 0);
-                                 console.log("Preset texture loaded successfully:", imageUrl); // Debug log
+                                 console.log("Preset texture loaded successfully:", imageUrl);
                              },
                              undefined,
                              (error) => {
-                                 console.error(`Error loading texture (${imageUrl}):`, error); // Debug log
+                                 console.error(`Error loading texture (${imageUrl}):`, error);
                                  alert(`Failed to load predefined background image. Check console. Falling back to colors.`);
                                  scene.background = null;
                                  renderer.setClearColor(backgroundColors[currentBgIndex], 1);
                                  if(bgSelect) bgSelect.value = 'cycle';
                                  if (bgCycleBtn) bgCycleBtn.disabled = false;
+                                 if (bgFileControls) bgFileControls.classList.add('hidden');
                              }
                          );
                      }
                  }
 
-                if (bgSelect) bgSelect.addEventListener('change', (e) => updateBackgroundDisplay(e.target.value));
+                 if (bgSelect) bgSelect.addEventListener('change', (e) => updateBackgroundDisplay(e.target.value));
 
-                if (bgCycleBtn) bgCycleBtn.addEventListener('click', () => {
-                    // console.log("Cycle button clicked. Current mode:", bgSelect?.value); // Debug log
-                    if (bgSelect && bgSelect.value === 'cycle') {
-                        currentBgIndex = (currentBgIndex + 1) % backgroundColors.length;
-                        if (renderer) renderer.setClearColor(backgroundColors[currentBgIndex], 1);
-                        // console.log("Cycled color index to:", currentBgIndex); // Debug log
-                    }
-                });
+                 if (bgCycleBtn) bgCycleBtn.addEventListener('click', () => {
+                     if (bgSelect && bgSelect.value === 'cycle') {
+                         currentBgIndex = (currentBgIndex + 1) % backgroundColors.length;
+                         if (renderer) renderer.setClearColor(backgroundColors[currentBgIndex], 1);
+                     }
+                 });
 
-                if (bgFileInput) bgFileInput.addEventListener('change', function(event) {
+                 if (bgFileInput) bgFileInput.addEventListener('change', function(event) {
                      const file = event.target.files[0];
                      if (file && bgSelect && bgSelect.value === 'local') {
                           if (currentBgObjectURL) URL.revokeObjectURL(currentBgObjectURL);
                           currentBgObjectURL = URL.createObjectURL(file);
-                          // console.log("Loading local BG texture from Object URL:", currentBgObjectURL); // Debug log
                           textureLoader.load(
                               currentBgObjectURL,
                               (texture) => {
                                   texture.colorSpace = THREE.SRGBColorSpace;
                                   scene.background = texture;
                                   renderer.setClearColor(0x000000, 0);
-                                  console.log("Local BG texture loaded."); // Debug log
+                                  console.log("Local BG texture loaded.");
                               },
                               undefined,
                               (error) => {
-                                  console.error('Error loading local BG texture:', error); // Debug log
+                                  console.error('Error loading local BG texture:', error);
                                   alert('Failed to load local background image.');
                                   if (currentBgObjectURL) { URL.revokeObjectURL(currentBgObjectURL); currentBgObjectURL = null; }
                                   scene.background = null;
@@ -646,72 +633,65 @@
                      }
                  });
 
-                 // Bloom Checkbox Listener
                  if (bloomCheckbox) {
                      bloomCheckbox.addEventListener('change', function() {
                          bloomEnabled = this.checked;
-                         // console.log("Bloom enabled:", bloomEnabled); // Debug log
                      });
-                     // Set initial state based on checkbox default
                      bloomEnabled = bloomCheckbox.checked;
                  }
 
-
-                 // Initial background setup
                  if(bgSelect) {
-                    updateBackgroundDisplay(bgSelect.value);
+                     updateBackgroundDisplay(bgSelect.value);
                  } else {
-                    // Fallback if select element isn't found
-                    if(renderer) renderer.setClearColor(backgroundColors[currentBgIndex], 1);
+                     if(renderer) renderer.setClearColor(backgroundColors[currentBgIndex], 1);
                  }
 
             } // End setupAudioEventListeners
 
             /** Animation loop */
-            function animate() {
-                requestAnimationFrame(animate);
-                if(controls) controls.update();
+            function animate() { /* ... same ... */
+                 requestAnimationFrame(animate);
+                 if(controls) controls.update();
 
-                if (isAudioContextInitialized && analyser && dataArray) {
-                    try {
-                        analyser.getByteFrequencyData(dataArray);
-                        bars.forEach((bar, i) => {
-                            const frequencyValue = dataArray[i];
-                            const logValue = Math.log10(frequencyValue + 1) / Math.log10(256);
-                            const scaleTarget = Math.max(0.1, logValue * 80);
-                            bar.scale.y += (scaleTarget - bar.scale.y) * 0.2;
-                            bar.position.y = (bar.scale.y / 2) - 10;
+                 if (isAudioContextInitialized && analyser && dataArray) {
+                     try {
+                         analyser.getByteFrequencyData(dataArray);
+                         bars.forEach((bar, i) => {
+                             const frequencyValue = dataArray[i];
+                             const logValue = Math.log10(frequencyValue + 1) / Math.log10(256);
+                             const scaleTarget = Math.max(0.1, logValue * 80);
+                             bar.scale.y += (scaleTarget - bar.scale.y) * 0.2;
+                             bar.position.y = (bar.scale.y / 2) - 10;
 
-                            const intensity = frequencyValue / 255;
-                            const lightnessFactor = Math.min(1, 0.4 + intensity * 0.8);
-                            const emissiveFactor = Math.min(0.8, intensity * 0.8);
-                            let baseHSL = {}; baseBarColor.getHSL(baseHSL);
-                            if (bar.material?.color && bar.material?.emissive) {
-                                bar.material.color.setHSL(baseHSL.h, baseHSL.s, baseHSL.l * lightnessFactor);
-                                bar.material.emissive.copy(bar.material.color).multiplyScalar(emissiveFactor);
-                            }
-                        });
-                    } catch (e) { /* Ignore analyser errors */ }
-                } else if (bars.length > 0) {
-                     bars.forEach(bar => { bar.scale.y += (0.1 - bar.scale.y) * 0.1; bar.position.y = (bar.scale.y / 2) - 10; });
-                }
+                             const intensity = frequencyValue / 255;
+                             const lightnessFactor = Math.min(1, 0.4 + intensity * 0.8);
+                             const emissiveFactor = Math.min(0.8, intensity * 0.8);
+                             let baseHSL = {}; baseBarColor.getHSL(baseHSL);
+                             if (bar.material?.color && bar.material?.emissive) {
+                                 bar.material.color.setHSL(baseHSL.h, baseHSL.s, baseHSL.l * lightnessFactor);
+                                 bar.material.emissive.copy(bar.material.color).multiplyScalar(emissiveFactor);
+                             }
+                         });
+                     } catch (e) { /* Ignore analyser errors */ }
+                 } else if (bars.length > 0) {
+                      bars.forEach(bar => { bar.scale.y += (0.1 - bar.scale.y) * 0.1; bar.position.y = (bar.scale.y / 2) - 10; });
+                 }
 
-                // Conditionally render composer (bloom) or just renderer
-                if (bloomEnabled && composer) {
-                    composer.render();
-                } else if (renderer) {
-                    renderer.render(scene, camera);
-                }
+                 if (bloomEnabled && composer) {
+                     composer.render();
+                 } else if (renderer) {
+                     renderer.render(scene, camera);
+                 }
             }
 
             /** Handles window resize */
-            function onWindowResize() {
-                if (camera && renderer) {
-                    const width = window.innerWidth; const height = window.innerHeight;
-                    camera.aspect = width / height; camera.updateProjectionMatrix();
-                    renderer.setSize(width, height);
-                    if (composer) composer.setSize(width, height);
-                }
+            function onWindowResize() { /* ... same ... */
+                 if (camera && renderer) {
+                     const width = window.innerWidth; const height = window.innerHeight;
+                     camera.aspect = width / height; camera.updateProjectionMatrix();
+                     renderer.setSize(width, height);
+                     if (composer) composer.setSize(width, height);
+                 }
             }
 
             // --- Start Everything ---
@@ -720,4 +700,4 @@
         }); // End DOMContentLoaded
     </script>
 </body>
-</html>
+</ht
