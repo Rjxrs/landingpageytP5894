@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" class=""> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Blackjack Deluxe ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>
+        // Tailwind config with refined solid theme colors
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
+                    },
+                    colors: {
+                        // Core Palette
+                        'primary-light': '#3b82f6', 'primary-dark': '#60a5fa',
+                        'success-light': '#10b981', 'success-dark': '#34d399',
+                        'danger-light': '#ef4444', 'danger-dark': '#f87171',
+                        'warning-light': '#f59e0b', 'warning-dark': '#fcd34d',
+
+                        // Backgrounds (Softer)
+                        'bkg-light': '#f9fafb', // gray-50
+                        'bkg-dark': '#111827', // gray-900
+                        'panel-light': '#ffffff', // white
+                        'panel-dark': '#1f2937', // gray-800
+
+                        // Game area - Solid Green
+                        'game-area-light': '#15803d', // green-700
+                        'game-area-dark': '#166534', // green-800
+                        'game-border-light': 'rgba(133, 77, 14, 0.6)', // Darker SaddleBrown-like border
+                        'game-border-dark': 'rgba(161, 98, 7, 0.7)',
+
+                        // Text
+                        'text-main-light': '#111827', 'text-main-dark': '#f3f4f6',
+                        'text-secondary-light': '#4b5563', 'text-secondary-dark': '#9ca3af',
+                        'text-muted-light': '#6b7280', 'text-muted-dark': '#9ca3af',
+                        'text-heading-light': '#1f2937', 'text-heading-dark': '#e5e7eb',
+                        'text-on-green': '#ffffff', // White text for game area titles
+
+                        // Borders
+                        'border-light': '#e5e7eb', 'border-dark': '#374151',
+
+                        // Top Bar specific (remains same)
+                        'topbar-bg-light': 'rgba(255, 255, 255, 0.9)', 'topbar-bg-dark': 'rgba(17, 24, 39, 0.9)',
+                        'topbar-border-light': '#e5e7eb', 'topbar-border-dark': '#374151',
+                        'icon-btn-light': '#f3f4f6', 'icon-btn-dark': '#374151',
+                        'icon-btn-hover-light': '#e5e7eb', 'icon-btn-hover-dark': '#4b5563',
+                        'icon-color-light': '#4b5563', 'icon-color-dark': '#9ca3af',
+                        'icon-hover-light': '#1e293b', 'icon-hover-dark': '#e5e7eb',
+
+                        // Card specific (Solid background)
+                        'card-bg-light': '#ffffff',
+                        'card-bg-dark': '#e5e7eb', // Light gray for dark mode cards for contrast
+                        'card-border-light': '#d1d5db', // gray-300
+                        'card-border-dark': '#9ca3af', // gray-400
+                        'text-red-light': '#dc2626', 'text-red-dark': '#b91c1c', // Darker red on light gray card
+                        'text-black-light': '#1f2937', 'text-black-dark': '#111827', // Darker black on light gray card
+                        'card-back-bg-light': '#b91c1c', // Dark Red
+                        'card-back-bg-dark': '#991b1b', // Darker Red
+
+                        // Button specific (remains same)
+                        'button-deal': '#10b981', 'button-deal-hover': '#059669',
+                        'button-hit': '#3b82f6', 'button-hit-hover': '#2563eb',
+                        'button-stand': '#ef4444', 'button-stand-hover': '#dc2626',
+                        'button-new': '#6b7280', 'button-new-hover': '#4b5563',
+                    },
+                    boxShadow: { /* ... same shadows ... */
+                        'soft-light': '0 4px 10px -1px rgba(0, 0, 0, 0.07), 0 2px 6px -2px rgba(0, 0, 0, 0.06)',
+                        'soft-dark': '0 4px 10px -1px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.35)',
+                        'card': '0 2px 4px 0 rgba(0, 0, 0, 0.1)', // Slightly softer card shadow
+                        'card-dark': '0 2px 4px 0 rgba(0, 0, 0, 0.4)',
+                        'inner-light': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+                        'inner-dark': 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)', // Adjusted inner dark shadow
+                    },
+                    keyframes: {
+                        spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
+                        // Deal card animation
+                        'deal-card': {
+                            '0%': { transform: 'translateY(-30px) scale(0.9) rotateX(20deg)', opacity: '0' },
+                            '100%': { transform: 'translateY(0) scale(1) rotateX(0deg)', opacity: '1' },
+                        }
+                    },
+                    animation: {
+                       spin: 'spin 0.8s linear infinite',
+                       'deal-card': 'deal-card 0.4s ease-out forwards', // Animation applied via JS
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base styles */
+        body {
+            font-family: theme('fontFamily.sans');
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: theme('colors.bkg-light');
+            padding-top: 60px; /* Padding for fixed top bar */
+        }
+        .dark body { background-color: theme('colors.bkg-dark'); }
+        /* Apply transitions more selectively */
+        .main-panel, .top-bar, .top-bar-icon-btn, .playing-card, .game-button, #message-area {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+        }
+        .top-bar-icon-btn, .game-button {
+             transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+             transition-duration: 150ms;
+        }
+
+        /* Panel Styling */
+        .main-panel {
+            background-color: theme('colors.panel-light');
+            border: 1px solid theme('colors.border-light');
+        }
+        .dark .main-panel {
+            background-color: theme('colors.panel-dark');
+            border: 1px solid theme('colors.border-dark');
+        }
+
+        /* Theme Toggle Icons */
+        #theme-toggle-light-icon, #theme-toggle-dark-icon { display: none; }
+
+        /* Top Bar Styles */
+        .top-bar { /* ... same styles ... */
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding-left: 1rem; padding-right: 1rem; /* px-4 */
+             @media (min-width: 640px) { padding-left: 1.5rem; padding-right: 1.5rem; } /* sm:px-6 */
+            box-shadow: theme('boxShadow.md');
+            background-color: theme('colors.topbar-bg-light');
+            border-bottom: 1px solid theme('colors.topbar-border-light');
+            backdrop-filter: blur(4px);
+        }
+        .dark .top-bar {
+             background-color: theme('colors.topbar-bg-dark');
+             border-bottom-color: theme('colors.topbar-border-dark');
+        }
+        .time-date { /* ... same styles ... */
+             font-size: 0.75rem; /* text-xs */
+             @media (min-width: 640px) { font-size: 0.875rem; } /* sm:text-sm */
+             color: theme('colors.text-secondary-light');
+             white-space: nowrap;
+        }
+        .dark .time-date { color: theme('colors.text-secondary-dark'); }
+        .top-bar-controls { display: flex; align-items: center; gap: 0.75rem; /* space-x-3 */ }
+         @media (min-width: 640px) { .top-bar-controls { gap: 0.75rem; } } /* sm:space-x-3 */
+
+        .top-bar-icon-btn { /* ... same styles ... */
+             display: inline-flex; align-items: center; justify-content: center;
+             width: 2rem; height: 2rem; /* w-8 h-8 */
+             border-radius: 9999px; /* rounded-full */
+             background-color: theme('colors.icon-btn-light');
+             color: theme('colors.icon-color-light');
+        }
+         .dark .top-bar-icon-btn { background-color: theme('colors.icon-btn-dark'); color: theme('colors.icon-color-dark'); }
+         .top-bar-icon-btn:hover { background-color: theme('colors.icon-btn-hover-light'); color: theme('colors.icon-hover-light'); transform: scale(1.05); }
+         .dark .top-bar-icon-btn:hover { background-color: theme('colors.icon-btn-hover-dark'); color: theme('colors.icon-hover-dark'); }
+         .top-bar-icon-btn:focus { outline: 2px solid transparent; outline-offset: 2px; box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); --tw-ring-color: theme('colors.primary-light'); }
+         .dark .top-bar-icon-btn:focus { --tw-ring-color: theme('colors.primary-dark'); }
+         .top-bar-icon-btn i { font-size: 0.875rem; /* text-sm */ }
+
+        /* Blackjack Game Specific Styles */
+        .game-area {
+            min-height: 280px;
+            background-color: theme('colors.game-area-light'); /* Solid green fallback */
+            border: 4px solid theme('colors.game-border-light'); /* Table edge */
+            box-shadow: theme('boxShadow.inner-light'); /* Inner shadow */
+        }
+        .dark .game-area {
+            background-color: theme('colors.game-area-bg-dark');
+            border-color: theme('colors.game-border-dark');
+            box-shadow: theme('boxShadow.inner-dark');
+        }
+        .hand-container {
+            min-height: 110px;
+            padding: 0.75rem; /* p-3 */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem; /* gap-2 */
+            align-items: center;
+            justify-content: center;
+        }
+        /* White text for titles on green background */
+        .game-area h2 { color: theme('colors.text-on-green'); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .game-area h2 span { color: theme('colors.text-on-green'); font-weight: bold; }
+
+        .playing-card {
+            display: inline-flex; flex-direction: column; align-items: center; justify-content: space-between;
+            border: 1px solid theme('colors.card-border-light');
+            background-color: theme('colors.card-bg-light'); /* Solid background */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.6rem 0.3rem; /* Adjusted padding */
+            margin: 0.25rem;
+            min-width: 65px; /* Wider */
+            min-height: 95px; /* Taller */
+            box-shadow: theme('boxShadow.card');
+            font-family: theme('fontFamily.mono');
+            font-weight: 600; /* semibold */
+            user-select: none;
+            position: relative;
+            transform: scale(1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            opacity: 0; /* Start hidden for animation */
+            animation: deal-card 0.4s ease-out forwards; /* Apply animation by default */
+        }
+         .playing-card:hover {
+             transform: translateY(-3px) scale(1.03); /* Lift and scale on hover */
+             box-shadow: theme('boxShadow.lg');
+         }
+        .dark .playing-card {
+            border-color: theme('colors.card-border-dark');
+            background-color: theme('colors.card-bg-dark');
+            box-shadow: theme('boxShadow.card-dark');
+        }
+        .dark .playing-card:hover { box-shadow: theme('boxShadow.xl'); }
+
+        .playing-card .suit {
+            font-size: 1.5rem; /* text-2xl - Larger suit */
+            line-height: 1;
+        }
+        .playing-card .rank {
+             font-size: 1.875rem; /* text-3xl - Larger rank */
+             line-height: 1.1;
+        }
+        .playing-card.red { color: theme('colors.text-red-light'); }
+        .playing-card.black { color: theme('colors.text-black-light'); }
+        .dark .playing-card.red { color: theme('colors.text-red-dark'); }
+        .dark .playing-card.black { color: theme('colors.text-black-dark'); }
+
+        /* Style for hidden card */
+        .playing-card.hidden-card {
+             background: linear-gradient(135deg, theme('colors.card-back-bg-light') 25%, transparent 25%, transparent 50%, theme('colors.card-back-bg-light') 50%, theme('colors.card-back-bg-light') 75%, transparent 75%, transparent 100%),
+                         linear-gradient(45deg, theme('colors.card-back-bg-light') 25%, theme('colors.border-light') 25%, theme('colors.border-light') 50%, theme('colors.card-back-bg-light') 50%, theme('colors.card-back-bg-light') 75%, theme('colors.border-light') 75%, theme('colors.border-light') 100%);
+             background-size: 30px 30px;
+             color: transparent; border-color: theme('colors.card-back-bg-light');
+        }
+         .dark .playing-card.hidden-card {
+             background: linear-gradient(135deg, theme('colors.card-back-bg-dark') 25%, transparent 25%, transparent 50%, theme('colors.card-back-bg-dark') 50%, theme('colors.card-back-bg-dark') 75%, transparent 75%, transparent 100%),
+                         linear-gradient(45deg, theme('colors.card-back-bg-dark') 25%, theme('colors.border-dark') 25%, theme('colors.border-dark') 50%, theme('colors.card-back-bg-dark') 50%, theme('colors.card-back-bg-dark') 75%, theme('colors.border-dark') 75%, theme('colors.border-dark') 100%);
+             background-size: 30px 30px;
+             border-color: theme('colors.card-back-bg-dark');
+         }
+         .playing-card.hidden-card .rank, .playing-card.hidden-card .suit { visibility: hidden; }
+
+
+        /* Game Buttons - Enhanced */
+        .game-button {
+            @apply px-5 py-2 rounded-lg font-semibold text-sm shadow-md transition-all duration-200 ease-in-out;
+            @apply focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-panel-dark;
+            @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100;
+            @apply hover:scale-105 active:scale-95;
+        }
+        #deal-button { @apply bg-success-light hover:bg-opacity-80 text-white focus:ring-success-light; }
+        .dark #deal-button { @apply bg-success-dark hover:bg-opacity-80 focus:ring-success-dark; }
+        #hit-button { @apply bg-primary-light hover:bg-opacity-80 text-white focus:ring-primary-light; }
+        .dark #hit-button { @apply bg-primary-dark hover:bg-opacity-80 focus:ring-primary-dark; }
+        #stand-button { @apply bg-danger-light hover:bg-opacity-80 text-white focus:ring-danger-light; }
+        .dark #stand-button { @apply bg-danger-dark hover:bg-opacity-80 focus:ring-danger-dark; }
+        #new-game-button { @apply bg-text-secondary-light hover:bg-opacity-80 text-white focus:ring-gray-500; }
+        .dark #new-game-button { @apply bg-text-secondary-dark hover:bg-opacity-80 text-gray-900 focus:ring-gray-400; }
+
+        /* Message Area Styling */
+        #message-area {
+             @apply text-center text-xl font-bold h-8 my-5 transition-colors duration-300;
+             color: theme('colors.text-on-green'); /* White on green */
+             text-shadow: 1px 1px 2px rgba(0,0,0,0.6); /* Stronger shadow on green */
+        }
+        /* Add classes via JS for different message types */
+        #message-area.win { color: theme('colors.success-dark'); } /* Use dark success color for contrast */
+        #message-area.lose { color: theme('colors.danger-dark'); } /* Use dark danger color for contrast */
+        #message-area.info { color: theme('colors.primary-dark'); } /* Use dark info color for contrast */
+        #message-area.warn { color: theme('colors.warning-dark'); } /* Use dark warn color for contrast */
+        .dark #message-area.win, .dark #message-area.lose, .dark #message-area.info, .dark #message-area.warn {
+             /* Keep same colors in dark mode as they contrast well */
+        }
+
+    </style>
+</head>
+<body class="text-text-main-light dark:text-text-main-dark min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 pt-[76px]">
+
+    <div class="top-bar">
+        <div id="time-date-display" class="time-date">Loading...</div>
+        <div class="top-bar-controls">
+             <a href="index.html" title="Homepage" class="top-bar-icon-btn"> <i class="fas fa-home"></i> </a>
+             <a href="audiovisualizer.html" title="MP3 Player / Visualizer" class="top-bar-icon-btn"> <i class="fas fa-headphones"></i> </a>
+             <a href="XboxGREPfdowngrader.html" title="Xbox Downgrader" class="top-bar-icon-btn"> <i class="fab fa-xbox"></i> </a>
+             <a href="faceswapv1.html" title="Face Swap App" class="top-bar-icon-btn"> <i class="fas fa-face-smile"></i> </a>
+             <button id="theme-toggle" aria-label="Toggle dark mode" class="top-bar-icon-btn">
+                <svg id="theme-toggle-light-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="theme-toggle-dark-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-panel p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-4xl mt-4 mb-8">
+
+        <header class="text-center mb-6 sm:mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-500 to-green-600 dark:from-emerald-400 dark:to-green-500 bg-clip-text text-transparent">
+                Blackjack Deluxe
+            </h1>
+        </header>
+
+        <main>
+            <div class="game-area p-4 sm:p-6 rounded-lg border-4 border-game-border-light dark:border-game-border-dark mb-6 shadow-inner-light dark:shadow-inner-dark overflow-hidden"> <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-text-on-green mb-3 text-center tracking-wider uppercase">Dealer (<span id="dealer-score" class="font-mono">0</span>)</h2>
+                    <div id="dealer-hand" class="hand-container">
+                        <span class="text-sm text-white/70 italic">Waiting for deal...</span>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold text-text-on-green mb-3 text-center tracking-wider uppercase">Player (<span id="player-score" class="font-mono">0</span>)</h2>
+                    <div id="player-hand" class="hand-container">
+                        <span class="text-sm text-white/70 italic">Waiting for deal...</span>
+                    </div>
+                </div>
+
+                <div id="message-area" class="text-center text-xl font-bold h-8 my-5">
+                    Click Deal to Start!
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-4">
+                    <button id="deal-button" class="game-button">Deal</button>
+                    <button id="hit-button" class="game-button" disabled>Hit</button>
+                    <button id="stand-button" class="game-button" disabled>Stand</button>
+                    <button id="new-game-button" class="game-button">New Game</button>
+                </div>
+
+            </div>
+        </main>
+
+        <footer class="text-center mt-6 pt-4 border-t border-border-light dark:border-border-dark">
+            <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark opacity-70">
+                Enjoy the game! Please play responsibly.
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- Theme Toggle Logic ---
+        // (Same as previous pages)
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const htmlElement = document.documentElement;
+
+        function applyTheme(theme) { /* ... same ... */
+            const isDark = theme === 'dark';
+            htmlElement.classList.toggle('dark', isDark);
+            if (lightIcon && darkIcon) {
+                darkIcon.style.display = isDark ? 'block' : 'none';
+                lightIcon.style.display = isDark ? 'none' : 'block';
+            }
+            localStorage.setItem('theme', theme);
+         }
+        if (themeToggleButton) { themeToggleButton.addEventListener('click', () => { applyTheme(htmlElement.classList.contains('dark') ? 'light' : 'dark'); }); }
+        function initializeTheme() { /* ... same ... */
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+            applyTheme(initialTheme);
+         }
+
+        // --- Live Time and Date Logic ---
+        // (Same as previous pages)
+        const timeDateDisplay = document.getElementById('time-date-display');
+        const updateTimeDate = () => { /* ... same ... */
+            if (timeDateDisplay) {
+                const now = new Date();
+                const optionsDate = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+                const optionsTime = { hour: 'numeric', minute: '2-digit' };
+                const formattedDate = now.toLocaleDateString(undefined, optionsDate);
+                const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
+                timeDateDisplay.textContent = `${formattedDate}, ${formattedTime}`;
+            }
+         };
+
+        // --- Blackjack Game Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            updateTimeDate();
+            const timeInterval = setInterval(updateTimeDate, 1000 * 30);
+
+            const dealButton = document.getElementById('deal-button');
+            const hitButton = document.getElementById('hit-button');
+            const standButton = document.getElementById('stand-button');
+            const newGameButton = document.getElementById('new-game-button');
+            const messageArea = document.getElementById('message-area');
+            const dealerHandDiv = document.getElementById('dealer-hand');
+            const playerHandDiv = document.getElementById('player-hand');
+            const dealerScoreSpan = document.getElementById('dealer-score');
+            const playerScoreSpan = document.getElementById('player-score');
+
+            let deck = [];
+            let dealerHand = [];
+            let playerHand = [];
+            let dealerScore = 0;
+            let playerScore = 0;
+            let gameInProgress = false;
+
+            const suits = { '♠': 'black', '♥': 'red', '♦': 'red', '♣': 'black' };
+            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const values = {'A': 11, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10};
+
+            function createDeck() { /* ... same ... */
+                deck = [];
+                for (const suit in suits) {
+                    for (const rank of ranks) {
+                        deck.push({ suit, rank, value: values[rank], color: suits[suit] });
+                    }
+                }
+             }
+            function shuffleDeck() { /* ... same ... */
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+             }
+            function dealCard(targetHand) { /* ... same ... */
+                 if (deck.length < 1) { createDeck(); shuffleDeck(); }
+                 const card = deck.pop();
+                 targetHand.push(card);
+                 return card;
+             }
+            function calculateScore(hand) { /* ... same ... */
+                let score = 0; let aceCount = 0;
+                for (const card of hand) { score += card.value; if (card.rank === 'A') aceCount++; }
+                while (score > 21 && aceCount > 0) { score -= 10; aceCount--; }
+                return score;
+             }
+
+            // Updated function to create and render a card element with animation
+            function createCardElement(card, isHidden = false) {
+                const cardDiv = document.createElement('div');
+                cardDiv.classList.add('playing-card'); // Base class
+
+                if (isHidden) {
+                    cardDiv.classList.add('hidden-card');
+                    cardDiv.innerHTML = `<span></span><span class="suit"></span>`;
+                } else {
+                     cardDiv.classList.add(card.color);
+                     cardDiv.innerHTML = `<span class="rank">${card.rank}</span><span class="suit">${card.suit}</span>`;
+                }
+
+                // Apply animation - remove the opacity: 0 from base style if applying animation here
+                // cardDiv.style.opacity = '0'; // Start invisible for animation
+                // requestAnimationFrame(() => { // Ensure element is in DOM before animating
+                //     cardDiv.style.animation = `deal-card 0.4s ease-out forwards`;
+                // });
+                // Note: Applying animation directly via CSS might be simpler if all cards animate on render
+
+                return cardDiv;
+            }
+
+             function renderHands(hideDealerCard = true) {
+                dealerHandDiv.innerHTML = ''; // Clear previous cards
+                playerHandDiv.innerHTML = '';
+
+                // Render Dealer Hand
+                dealerHand.forEach((card, index) => {
+                    const isHidden = hideDealerCard && index === 0;
+                    dealerHandDiv.appendChild(createCardElement(card, isHidden));
+                });
+
+                // Render Player Hand
+                playerHand.forEach(card => {
+                    playerHandDiv.appendChild(createCardElement(card));
+                });
+
+                // Update Scores
+                playerScore = calculateScore(playerHand);
+                dealerScore = calculateScore(dealerHand);
+
+                if (hideDealerCard && dealerHand.length > 0) {
+                    const visibleCardValue = (dealerHand.length > 1 && dealerHand[1].value) ? dealerHand[1].value : 0;
+                    dealerScoreSpan.textContent = `${visibleCardValue} + ?`;
+                } else {
+                    dealerScoreSpan.textContent = dealerScore;
+                }
+                playerScoreSpan.textContent = playerScore;
+            }
+
+            function updateMessage(msg, type = 'info') { /* ... same ... */
+                messageArea.textContent = msg;
+                messageArea.className = 'text-center text-xl font-bold h-8 my-5 transition-colors duration-300';
+                messageArea.classList.add(type);
+             }
+            function disableGameButtons(disableDeal = true) { /* ... same ... */
+                 if(dealButton && disableDeal) dealButton.disabled = true;
+                 if(hitButton) hitButton.disabled = true;
+                 if(standButton) standButton.disabled = true;
+             }
+             function enablePlayerButtons() { /* ... same ... */
+                 if(hitButton) hitButton.disabled = false;
+                 if(standButton) standButton.disabled = false;
+             }
+            function startGame() { /* ... same logic ... */
+                createDeck(); shuffleDeck(); dealerHand = []; playerHand = []; gameInProgress = true;
+                playerHand.push(dealCard(playerHand)); dealCard(dealerHand);
+                playerHand.push(dealCard(playerHand)); dealCard(dealerHand);
+                renderHands(true);
+                updateMessage("Your turn: Hit or Stand?", "info");
+                enablePlayerButtons(); if(dealButton) dealButton.disabled = true;
+                if (playerScore === 21 && playerHand.length === 2) {
+                     renderHands(false);
+                     if (dealerScore === 21 && dealerHand.length === 2) { updateMessage("Push! Both have Blackjack.", "info"); }
+                     else { updateMessage("Blackjack! You win!", "win"); }
+                     gameInProgress = false; disableGameButtons(false);
+                } else if (dealerScore === 21 && dealerHand.length === 2) {
+                     renderHands(false); updateMessage("Dealer has Blackjack! Dealer wins.", "lose");
+                     gameInProgress = false; disableGameButtons(false);
+                 }
+             }
+            function playerHit() { /* ... same logic ... */
+                if (!gameInProgress) return; dealCard(playerHand); renderHands(true);
+                if (playerScore > 21) { updateMessage("Bust! Dealer wins.", "lose"); gameInProgress = false; disableGameButtons(false); renderHands(false); }
+                else if (playerScore === 21) { updateMessage("21! Press Stand.", "info"); if(hitButton) hitButton.disabled = true; }
+             }
+            function playerStand() { /* ... same logic ... */
+                if (!gameInProgress) return; gameInProgress = false; disableGameButtons(false); renderHands(false);
+                updateMessage("Dealer's turn...", "info");
+                function dealerPlay() {
+                    if (dealerScore < 17) {
+                        updateMessage("Dealer hits...", "info"); dealCard(dealerHand); renderHands(false);
+                        if (dealerScore > 21) { updateMessage("Dealer busts! You win!", "win"); }
+                        else { setTimeout(dealerPlay, 700); }
+                    } else { determineWinner(); }
+                }
+                setTimeout(dealerPlay, 800);
+             }
+            function determineWinner() { /* ... same logic ... */
+                 renderHands(false);
+                 if (playerScore > 21) { updateMessage("Bust! Dealer wins.", "lose"); }
+                 else if (dealerScore > 21) { updateMessage("Dealer busts! You win!", "win"); }
+                 else if (dealerScore > playerScore) { updateMessage("Dealer wins.", "lose"); }
+                 else if (playerScore > dealerScore) { updateMessage("You win!", "win"); }
+                 else { updateMessage("Push! (Tie)", "info"); }
+                 gameInProgress = false; disableGameButtons(false);
+             }
+             function resetUI() { /* ... same logic ... */
+                 dealerHandDiv.innerHTML = `<span class="text-sm text-muted-light dark:text-muted-dark italic">Waiting for deal...</span>`;
+                 playerHandDiv.innerHTML = `<span class="text-sm text-muted-light dark:text-muted-dark italic">Waiting for deal...</span>`;
+                 dealerScoreSpan.textContent = '0'; playerScoreSpan.textContent = '0';
+                 updateMessage('Click Deal to Start!', 'info');
+                 disableGameButtons(true); if(dealButton) dealButton.disabled = false; gameInProgress = false;
+             }
+
+            if (dealButton) dealButton.addEventListener('click', startGame);
+            if (hitButton) hitButton.addEventListener('click', playerHit);
+            if (standButton) standButton.addEventListener('click', playerStand);
+            if (newGameButton) newGameButton.addEventListener('click', resetUI);
+            resetUI();
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>
