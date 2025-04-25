@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income & Debt Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Use Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for modal */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Darker overlay */
+            padding-top: 60px; /* Space from top */
+            transition: opacity 0.3s ease; /* Smooth transition */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 2rem; /* More padding */
+            border: none; /* Remove border */
+            width: 90%; /* Responsive width */
+            max-width: 500px;
+            border-radius: 0.75rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Softer shadow */
+            transform: translateY(-20px); /* Animate in */
+            transition: transform 0.3s ease;
+        }
+        .modal.show .modal-content {
+             transform: translateY(0);
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute; /* Position relative to modal-content */
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333; /* Darker on hover */
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Ensure tables are responsive */
+        .table-container {
+            overflow-x: auto; /* Add horizontal scroll on small screens */
+        }
+        th, td {
+             white-space: nowrap; /* Prevent text wrapping */
+             padding: 0.75rem 1rem; /* Adjust padding */
+        }
+        /* Alternating row colors */
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb; /* Very light gray for even rows */
+        }
+        tbody tr:hover {
+            background-color: #f3f4f6; /* Slightly darker gray on hover */
+        }
+        /* Style for custom notification/alert box */
+        .notification-box {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1100; /* Above modal */
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease, top 0.3s ease;
+        }
+        .notification-box.show {
+            display: block;
+            opacity: 1;
+            top: 30px;
+        }
+        .notification-box.success {
+            background-color: #d1fae5; /* Tailwind green-100 */
+            color: #065f46; /* Tailwind green-800 */
+            border: 1px solid #6ee7b7; /* Tailwind green-300 */
+        }
+        .notification-box.error {
+            background-color: #fee2e2; /* Tailwind red-100 */
+            color: #991b1b; /* Tailwind red-800 */
+            border: 1px solid #fca5a5; /* Tailwind red-300 */
+        }
+        .notification-box.info {
+             background-color: #e0f2fe; /* Tailwind sky-100 */
+             color: #075985; /* Tailwind sky-800 */
+             border: 1px solid #7dd3fc; /* Tailwind sky-300 */
+        }
+
+         /* Style for custom confirmation box */
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            z-index: 1050; /* Above overlay, below notification */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+        }
+         .confirmation-dialog.show {
+             display: flex;
+         }
+        .confirmation-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+        }
+        .confirmation-content p {
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            color: #374151; /* gray-700 */
+        }
+        .confirmation-buttons button {
+            margin: 0 0.5rem;
+        }
+
+        /* Hide the actual file input */
+        #import-csv-input {
+            display: none;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8 text-gray-800">
+
+    <div id="notification-placeholder"></div>
+
+     <div id="confirmation-dialog" class="confirmation-dialog">
+        <div class="confirmation-content">
+            <p id="confirmation-message">Are you sure?</p>
+            <div class="confirmation-buttons">
+                <button id="confirm-yes-btn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Yes</button>
+                <button id="confirm-no-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300">No</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-lg">
+
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">Income & Debt Tracker</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
+            <div class="bg-green-100 p-5 rounded-lg shadow-md border border-green-200">
+                <h2 class="text-lg font-semibold text-green-800 mb-1">Total Income</h2>
+                <p id="total-income" class="text-3xl font-bold text-green-600">$0.00</p>
+            </div>
+            <div class="bg-red-100 p-5 rounded-lg shadow-md border border-red-200">
+                <h2 class="text-lg font-semibold text-red-800 mb-1">Total Debt</h2>
+                <p id="total-debt" class="text-3xl font-bold text-red-600">$0.00</p>
+            </div>
+            <div class="bg-blue-100 p-5 rounded-lg shadow-md border border-blue-200">
+                <h2 class="text-lg font-semibold text-blue-800 mb-1">Net Balance</h2>
+                <p id="net-balance" class="text-3xl font-bold text-blue-600">$0.00</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mb-8">
+            <button id="add-entry-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow hover:shadow-md transition duration-300 flex items-center justify-center">
+                <i class="fas fa-plus mr-2"></i>Add New Entry
+            </button>
+            <input type="file" id="import-csv-input" accept=".csv">
+            <button id="import-csv-btn" class="w-full sm:w-auto bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-5 rounded-lg shadow hover:shadow-md transition duration-300 flex items-center justify-center">
+                <i class="fas fa-file-import mr-2"></i>Import CSV
+            </button>
+            <button id="export-csv-btn" class="w-full sm:w-auto bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-5 rounded-lg shadow hover:shadow-md transition duration-300 flex items-center justify-center">
+                <i class="fas fa-file-export mr-2"></i>Export CSV
+            </button>
+        </div>
+
+        <div class="mb-10">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Income</h2>
+            <div class="table-container bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-green-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">Description</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">Amount</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-green-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="income-table-body" class="bg-white divide-y divide-gray-200">
+                        <tr id="no-income-row">
+                            <td colspan="4" class="px-4 py-4 text-sm text-gray-500 text-center italic">No income entries yet. Add one or import a CSV.</td>
+                        </tr>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Debt</h2>
+             <div class="table-container bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-red-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Description</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Amount</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-red-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debt-table-body" class="bg-white divide-y divide-gray-200">
+                         <tr id="no-debt-row">
+                            <td colspan="4" class="px-4 py-4 text-sm text-gray-500 text-center italic">No debt entries yet. Add one or import a CSV.</td>
+                        </tr>
+                         </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="entry-modal" class="modal">
+        <div class="modal-content relative"> <span class="close-button" id="close-modal-btn">&times;</span>
+            <h2 id="modal-title" class="text-2xl font-semibold mb-6 text-gray-700">Add New Entry</h2>
+            <form id="entry-form">
+                <input type="hidden" id="entry-id">
+                <div class="mb-4">
+                    <label for="entry-type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="entry-type" name="entry-type" required class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out">
+                        <option value="income">Income</option>
+                        <option value="debt">Debt</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="entry-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <input type="text" id="entry-description" name="entry-description" required class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out" placeholder="e.g., Salary, Groceries">
+                </div>
+                <div class="mb-4">
+                    <label for="entry-amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                    <input type="number" id="entry-amount" name="entry-amount" required min="0.01" step="0.01" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out" placeholder="0.00">
+                </div>
+                <div class="mb-6">
+                    <label for="entry-date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="entry-date" name="entry-date" required class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out">
+                </div>
+                <div class="flex justify-end gap-3 mt-2">
+                    <button type="button" id="cancel-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300">Cancel</button>
+                    <button type="submit" id="save-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        // Get references to various elements in the HTML for manipulation
+        const incomeTableBody = document.getElementById('income-table-body');
+        const debtTableBody = document.getElementById('debt-table-body');
+        const totalIncomeEl = document.getElementById('total-income');
+        const totalDebtEl = document.getElementById('total-debt');
+        const netBalanceEl = document.getElementById('net-balance');
+        const addEntryBtn = document.getElementById('add-entry-btn');
+        const entryModal = document.getElementById('entry-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const entryForm = document.getElementById('entry-form');
+        const modalTitle = document.getElementById('modal-title');
+        const entryIdInput = document.getElementById('entry-id'); // Hidden input for edit ID
+        const entryTypeSelect = document.getElementById('entry-type');
+        const entryDescriptionInput = document.getElementById('entry-description');
+        const entryAmountInput = document.getElementById('entry-amount');
+        const entryDateInput = document.getElementById('entry-date');
+        const saveBtn = document.getElementById('save-btn');
+        const noIncomeRow = document.getElementById('no-income-row'); // Placeholder row for income
+        const noDebtRow = document.getElementById('no-debt-row');     // Placeholder row for debt
+        const importCsvBtn = document.getElementById('import-csv-btn');
+        const importCsvInput = document.getElementById('import-csv-input'); // Hidden file input
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const notificationPlaceholder = document.getElementById('notification-placeholder'); // Div for notifications
+        const confirmationDialog = document.getElementById('confirmation-dialog'); // Div for confirmation modal
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const confirmYesBtn = document.getElementById('confirm-yes-btn');
+        const confirmNoBtn = document.getElementById('confirm-no-btn');
+
+
+        // --- Data Storage ---
+        // Load data from localStorage or initialize if empty. Use a versioned key.
+        // Structure: { income: [ {id, description, amount, date}, ... ], debt: [ ... ] }
+        let data = JSON.parse(localStorage.getItem('financialData_v2')) || { income: [], debt: [] };
+
+        // --- State Variables ---
+        let currentNotificationTimeout = null; // Track notification timer
+        let currentConfirmationCallback = null; // Store function to call after confirmation choice
+
+        // --- Core Functions ---
+
+        /**
+         * Generates a simple unique ID using timestamp and random string.
+         * @returns {string} A unique identifier string.
+         */
+        const generateId = () => `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        /**
+         * Formats a number as US Dollar currency.
+         * @param {number} amount - The amount to format.
+         * @returns {string} The formatted currency string (e.g., "$1,234.56").
+         */
+        const formatCurrency = (amount) => {
+            // Use Intl.NumberFormat for robust currency formatting
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        };
+
+        /**
+         * Displays a temporary notification message at the top of the screen.
+         * @param {string} message - The text to display.
+         * @param {'info'|'success'|'error'} type - The type of notification (controls styling).
+         * @param {number} [duration=3000] - How long the notification stays visible (in milliseconds).
+         */
+        const showNotification = (message, type = 'info', duration = 3000) => {
+            // Clear any existing notification timeout
+            if (currentNotificationTimeout) {
+                clearTimeout(currentNotificationTimeout);
+            }
+             // Remove any previous notification element immediately
+             notificationPlaceholder.innerHTML = '';
+
+            // Create the notification element
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `notification-box ${type}`; // Apply base and type-specific styles
+            notificationDiv.textContent = message;
+            notificationPlaceholder.appendChild(notificationDiv);
+
+            // Trigger fade-in animation (slight delay ensures CSS transition applies)
+            setTimeout(() => {
+                notificationDiv.classList.add('show');
+            }, 10);
+
+            // Set timeout to automatically remove the notification
+            currentNotificationTimeout = setTimeout(() => {
+                notificationDiv.classList.remove('show'); // Trigger fade-out
+                 // Remove the element from DOM after the fade-out transition completes
+                 setTimeout(() => {
+                    if (notificationPlaceholder.contains(notificationDiv)) {
+                        notificationPlaceholder.removeChild(notificationDiv);
+                    }
+                 }, 300); // Should match the CSS transition duration
+                currentNotificationTimeout = null; // Reset the timeout tracker
+            }, duration);
+        };
+
+        /**
+         * Displays a modal confirmation dialog.
+         * @param {string} message - The confirmation question to display.
+         * @param {function(boolean)} callback - The function to execute after the user clicks Yes (true) or No (false).
+         */
+        const showConfirmation = (message, callback) => {
+            confirmationMessage.textContent = message;
+            currentConfirmationCallback = callback; // Store the callback
+            confirmationDialog.classList.add('show'); // Display the dialog
+        };
+
+        /**
+         * Hides the modal confirmation dialog.
+         */
+        const hideConfirmation = () => {
+            confirmationDialog.classList.remove('show');
+            currentConfirmationCallback = null; // Clear the stored callback
+        };
+
+
+        /**
+         * Creates and renders a table row for an income or debt entry.
+         * @param {object} entry - The entry data {id, description, amount, date}.
+         * @param {'income'|'debt'} type - Specifies which table to add the row to.
+         */
+        const renderRow = (entry, type) => {
+            const tableBody = type === 'income' ? incomeTableBody : debtTableBody;
+            const row = document.createElement('tr');
+            row.setAttribute('data-id', entry.id); // Store ID on the row for easy access
+            row.classList.add('hover:bg-gray-50', 'transition', 'duration-150'); // Add hover styling
+
+            // Populate row cells with data and action buttons
+            row.innerHTML = `
+                <td class="px-4 py-3 text-sm text-gray-700">${entry.description}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">${formatCurrency(entry.amount)}</td>
+                <td class="px-4 py-3 text-sm text-gray-700">${entry.date}</td>
+                <td class="px-4 py-3 text-sm text-center">
+                    <button class="text-blue-600 hover:text-blue-800 mx-1 transition duration-150 ease-in-out edit-btn" title="Edit">
+                        <i class="fas fa-edit fa-fw"></i> </button>
+                    <button class="text-red-600 hover:text-red-800 mx-1 transition duration-150 ease-in-out delete-btn" title="Delete">
+                        <i class="fas fa-trash fa-fw"></i> </button>
+                </td>
+            `;
+
+            // Add event listeners directly to the buttons in this new row
+            row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                 e.stopPropagation(); // Prevent triggering other potential row events
+                 openEditModal(entry.id, type); // Open edit modal for this entry
+            });
+            row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteEntry(entry.id, type); // Initiate delete process for this entry
+            });
+
+            // Remove the "No entries" placeholder row if it exists and this is the first real entry
+            const noDataRow = type === 'income' ? noIncomeRow : noDebtRow;
+             if (noDataRow && tableBody.contains(noDataRow)) {
+                 try {
+                     tableBody.removeChild(noDataRow);
+                 } catch (error) {
+                     // Ignore if already removed (e.g., race condition), log other errors
+                     if (!(error instanceof DOMException && error.name === 'NotFoundError')) {
+                         console.error("Error removing placeholder row:", error);
+                     }
+                 }
+             }
+
+            // Append the newly created row to the appropriate table body
+            tableBody.appendChild(row);
+        };
+
+        /**
+         * Clears and re-renders all income and debt tables based on the current `data` object.
+         * Calculates and updates summary totals.
+         */
+        const renderData = () => {
+            // Clear existing rows from both tables
+            incomeTableBody.innerHTML = '';
+            debtTableBody.innerHTML = '';
+
+            let totalIncome = 0;
+            let totalDebt = 0;
+
+            // Sort data by date (most recent first) before rendering for consistent display
+            const sortByDateDesc = (a, b) => new Date(b.date) - new Date(a.date);
+            // Create sorted copies to avoid modifying the original data array directly
+            const sortedIncome = [...data.income].sort(sortByDateDesc);
+            const sortedDebt = [...data.debt].sort(sortByDateDesc);
+
+
+            // Render income rows
+            if (sortedIncome.length === 0) {
+                 // If no income data, re-add the placeholder row
+                 if (noIncomeRow) incomeTableBody.appendChild(noIncomeRow);
+            } else {
+                sortedIncome.forEach(entry => {
+                    renderRow(entry, 'income');
+                    totalIncome += entry.amount; // Accumulate total income
+                });
+            }
+
+            // Render debt rows
+             if (sortedDebt.length === 0) {
+                 // If no debt data, re-add the placeholder row
+                 if (noDebtRow) debtTableBody.appendChild(noDebtRow);
+            } else {
+                sortedDebt.forEach(entry => {
+                    renderRow(entry, 'debt');
+                    totalDebt += entry.amount; // Accumulate total debt
+                });
+            }
+
+            // Update summary display elements
+            totalIncomeEl.textContent = formatCurrency(totalIncome);
+            totalDebtEl.textContent = formatCurrency(totalDebt);
+            const balance = totalIncome - totalDebt;
+            netBalanceEl.textContent = formatCurrency(balance);
+
+            // Update net balance text color based on whether it's positive, negative, or zero
+            netBalanceEl.classList.remove('text-green-600', 'text-red-600', 'text-blue-600');
+            if (balance > 0) {
+                netBalanceEl.classList.add('text-green-600'); // Positive balance
+            } else if (balance < 0) {
+                netBalanceEl.classList.add('text-red-600'); // Negative balance
+            } else {
+                 netBalanceEl.classList.add('text-blue-600'); // Zero balance (neutral)
+            }
+        };
+
+        /**
+         * Saves the current `data` object to the browser's localStorage.
+         */
+        const saveData = () => {
+            localStorage.setItem('financialData_v2', JSON.stringify(data));
+        };
+
+        /**
+         * Opens the Add/Edit modal window.
+         * @param {'add'|'edit'} [mode='add'] - Determines if the modal is for adding or editing.
+         * @param {object|null} [entryData=null] - The data of the entry being edited (only used in 'edit' mode).
+         * @param {'income'|'debt'} [type='income'] - The type of entry being edited (only used in 'edit' mode).
+         */
+        const openModal = (mode = 'add', entryData = null, type = 'income') => {
+            entryForm.reset(); // Clear any previous form input
+            entryModal.classList.add('show'); // Add class for potential CSS animations
+
+            if (mode === 'add') {
+                // Configure modal for adding a new entry
+                modalTitle.textContent = 'Add New Entry';
+                saveBtn.textContent = 'Save Entry';
+                // Ensure button color is standard green for add
+                saveBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                entryIdInput.value = ''; // Clear hidden ID field
+                entryDateInput.valueAsDate = new Date(); // Default date to today
+                entryTypeSelect.value = type; // Default type (can be pre-set based on context)
+            } else if (mode === 'edit' && entryData) {
+                 // Configure modal for editing an existing entry
+                modalTitle.textContent = 'Edit Entry';
+                saveBtn.textContent = 'Update Entry';
+                 // Change button color to yellow for edit to visually distinguish
+                saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                saveBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                // Populate form fields with the existing entry's data
+                entryIdInput.value = entryData.id;
+                entryTypeSelect.value = type;
+                entryDescriptionInput.value = entryData.description;
+                entryAmountInput.value = entryData.amount;
+                entryDateInput.value = entryData.date; // Assumes date is stored as YYYY-MM-DD
+            }
+            entryModal.style.display = 'block'; // Make the modal visible
+             // Set focus to the description field for better UX
+             entryDescriptionInput.focus();
+        };
+
+        /**
+         * Closes the Add/Edit modal window.
+         */
+        const closeModal = () => {
+            entryModal.classList.remove('show'); // Remove class for animations
+            // Use setTimeout to hide the modal after the CSS transition completes
+            setTimeout(() => {
+                 entryModal.style.display = 'none';
+                 entryForm.reset(); // Clear the form fields
+            }, 300); // Match the CSS transition duration
+        };
+
+        /**
+         * Handles the submission of the Add/Edit form. Validates input, then either adds a new entry
+         * or updates an existing one in the `data` object.
+         * @param {Event} event - The form submission event.
+         */
+        const handleFormSubmit = (event) => {
+            event.preventDefault(); // Prevent the default browser form submission
+
+            // Get values from form fields
+            const id = entryIdInput.value; // Will be empty if adding, populated if editing
+            const type = entryTypeSelect.value;
+            const description = entryDescriptionInput.value.trim(); // Remove leading/trailing whitespace
+            const amount = parseFloat(entryAmountInput.value); // Convert amount string to number
+            const date = entryDateInput.value; // Get date string (YYYY-MM-DD)
+
+            // --- Input Validation ---
+            // Check for empty description, invalid or non-positive amount, or missing date
+            if (!description || isNaN(amount) || amount <= 0 || !date) {
+                showNotification('Please fill in all fields correctly.', 'error');
+                return; // Stop execution if validation fails
+            }
+             // Basic check for YYYY-MM-DD format (can be made more robust)
+             if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                 showNotification('Invalid date format. Please use YYYY-MM-DD.', 'error');
+                 return;
+             }
+
+            // Create the entry object (without ID initially)
+            const entry = { description, amount, date };
+
+            if (id) {
+                // --- Edit Mode ---
+                // Find the index of the entry to update in the correct array (income or debt)
+                const index = data[type].findIndex(item => item.id === id);
+                if (index !== -1) {
+                    // Update the entry at the found index, preserving the original ID
+                    data[type][index] = { ...entry, id: id };
+                     showNotification('Entry updated successfully!', 'success');
+                } else {
+                     // This should ideally not happen if the UI is working correctly
+                     console.error("Entry not found for editing:", id);
+                     showNotification('Error: Could not find entry to update.', 'error');
+                }
+            } else {
+                // --- Add Mode ---
+                entry.id = generateId(); // Assign a new unique ID
+                data[type].push(entry); // Add the new entry to the appropriate array
+                showNotification('Entry added successfully!', 'success');
+            }
+
+            // Save the updated data, re-render the tables, and close the modal
+            saveData();
+            renderData();
+            closeModal();
+        };
+
+
+        /**
+         * Finds an entry by ID and type, then opens the modal in edit mode populated with its data.
+         * @param {string} id - The ID of the entry to edit.
+         * @param {'income'|'debt'} type - The type of the entry to edit.
+         */
+        const openEditModal = (id, type) => {
+            // Find the specific entry within the correct array (income or debt)
+            const entry = data[type].find(item => item.id === id);
+            if (entry) {
+                // If found, open the modal in edit mode with this entry's data
+                openModal('edit', entry, type);
+            } else {
+                // Log error and notify user if entry couldn't be found (data inconsistency?)
+                console.error("Could not find entry to edit with ID:", id);
+                showNotification("Error: Could not find the entry to edit.", 'error');
+            }
+        };
+
+
+        /**
+         * Initiates the deletion process for an entry using a confirmation dialog.
+         * @param {string} id - The ID of the entry to delete.
+         * @param {'income'|'debt'} type - The type of the entry to delete.
+         */
+        const deleteEntry = (id, type) => {
+            // Show confirmation dialog before proceeding
+            showConfirmation(`Are you sure you want to delete this ${type} entry? This cannot be undone.`, (confirmed) => {
+                if (confirmed) {
+                    // User clicked "Yes"
+                    const initialLength = data[type].length;
+                    // Filter out the entry with the matching ID from the appropriate array
+                    data[type] = data[type].filter(entry => entry.id !== id);
+                    // Check if deletion was successful (array length decreased)
+                    if (data[type].length < initialLength) {
+                        saveData(); // Persist the changes
+                        renderData(); // Update the UI
+                        showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} entry deleted.`, 'success');
+                    } else {
+                         // This might happen if the ID wasn't found (e.g., deleted in another tab)
+                         showNotification(`Error: Could not delete ${type} entry.`, 'error');
+                    }
+                }
+                // Always hide the confirmation dialog after a choice is made
+                hideConfirmation();
+            });
+        };
+
+        // --- Import/Export Functions ---
+
+        /**
+         * Programmatically clicks the hidden file input element to open the file selection dialog.
+         */
+        const handleImportClick = () => {
+            importCsvInput.click(); // Trigger the hidden file input
+        };
+
+        /**
+         * Handles the file selection event from the hidden file input. Reads the selected CSV file.
+         * @param {Event} event - The file input change event.
+         */
+        const handleFileSelect = (event) => {
+            const file = event.target.files[0]; // Get the selected file
+            if (!file) {
+                return; // Exit if no file was selected
+            }
+            // Basic validation for file type (MIME type or extension)
+            if (file.type !== 'text/csv' && !file.name.toLowerCase().endsWith('.csv')) {
+                 showNotification('Please select a valid CSV file.', 'error');
+                 importCsvInput.value = ''; // Reset the file input
+                 return;
+            }
+
+            // Use FileReader API to read the file content
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // This function runs when the file is successfully read
+                try {
+                    const csvContent = e.target.result; // Get the file content as text
+                    parseAndImportCSV(csvContent); // Pass content to the parsing function
+                } catch (error) {
+                    console.error("Error processing file content:", error);
+                    showNotification(`Error processing file: ${error.message}`, 'error');
+                } finally {
+                     // Reset the file input value so selecting the same file again triggers the 'change' event
+                     importCsvInput.value = '';
+                }
+            };
+             reader.onerror = (e) => {
+                 // Handle errors during file reading
+                 console.error("FileReader error:", e);
+                 showNotification('Error reading the selected file.', 'error');
+                 importCsvInput.value = ''; // Reset input on error too
+             };
+            reader.readAsText(file); // Start reading the file as text
+        };
+
+        /**
+         * Parses CSV text content, validates rows, and adds valid entries to the `data` object.
+         * Assumes CSV columns: Type, Description, Amount, Date (case-insensitive headers).
+         * @param {string} csvString - The content of the CSV file as a string.
+         */
+        const parseAndImportCSV = (csvString) => {
+            // Split into lines, handling both Windows (\r\n) and Unix (\n) line endings
+            // Filter out empty lines
+            const lines = csvString.split(/\r?\n/).filter(line => line.trim() !== '');
+
+            // Check if there's any data beyond a potential header row
+            if (lines.length <= 1) {
+                showNotification('CSV file is empty or contains only headers.', 'info');
+                return;
+            }
+
+            // --- Header Validation ---
+            // Get headers from the first line, trim whitespace, convert to lowercase
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            // Define the essential headers we expect
+            const expectedHeaders = ['type', 'description', 'amount', 'date'];
+            // Check if all expected headers are present (order doesn't matter)
+            const hasAllHeaders = expectedHeaders.every(eh => headers.includes(eh));
+
+            if (!hasAllHeaders) {
+                 showNotification('Import failed. CSV file must contain columns: Type, Description, Amount, Date.', 'error');
+                 return;
+            }
+            // Find the column index for each expected header
+            const typeIndex = headers.indexOf('type');
+            const descIndex = headers.indexOf('description');
+            const amountIndex = headers.indexOf('amount');
+            const dateIndex = headers.indexOf('date');
+
+            // --- Row Processing ---
+            let importedCount = 0;
+            let errorCount = 0;
+
+            // Iterate through data rows (starting from the second line)
+            for (let i = 1; i < lines.length; i++) {
+                // Simple split by comma. NOTE: This won't handle commas within quoted fields correctly.
+                // For robust CSV parsing, a dedicated library would be better.
+                const values = lines[i].split(',');
+
+                 // Basic check: ensure enough columns exist based on header indices
+                 if (values.length < Math.max(typeIndex, descIndex, amountIndex, dateIndex) + 1) {
+                     console.warn(`Skipping row ${i + 1}: Incorrect number of columns.`);
+                     errorCount++;
+                     continue; // Skip this row
+                 }
+
+                // Extract data, trimming whitespace
+                const type = values[typeIndex]?.trim().toLowerCase();
+                const description = values[descIndex]?.trim();
+                const amountStr = values[amountIndex]?.trim();
+                const date = values[dateIndex]?.trim();
+
+                // --- Row Validation ---
+                // Check type, description presence, amount validity, and date format
+                if ((type !== 'income' && type !== 'debt') || !description || !amountStr || isNaN(parseFloat(amountStr)) || parseFloat(amountStr) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                    console.warn(`Skipping row ${i + 1}: Invalid data - Type: ${type}, Desc: ${description}, Amount: ${amountStr}, Date: ${date}`);
+                    errorCount++;
+                    continue; // Skip this invalid row
+                }
+
+                // If validation passes, create the new entry object
+                const amount = parseFloat(amountStr);
+                const newEntry = {
+                    id: generateId(), // Assign a new unique ID
+                    description: description,
+                    amount: amount,
+                    date: date
+                };
+
+                // Add the new entry to the correct array in the main `data` object
+                if (type === 'income') {
+                    data.income.push(newEntry);
+                    importedCount++;
+                } else if (type === 'debt') {
+                    data.debt.push(newEntry);
+                    importedCount++;
+                }
+                // Note: Rows with types other than 'income' or 'debt' are skipped by the validation above.
+            }
+
+            // --- Feedback after Import ---
+            if (importedCount > 0) {
+                saveData(); // Save the newly imported data
+                renderData(); // Refresh the UI
+                let message = `Successfully imported ${importedCount} entries.`;
+                if (errorCount > 0) {
+                    // Inform user if some rows were skipped
+                    message += ` Skipped ${errorCount} invalid rows. Check console for details.`;
+                }
+                 showNotification(message, 'success', 5000); // Longer duration for import summary
+            } else if (errorCount > 0) {
+                 // Only errors occurred
+                 showNotification(`Import failed. ${errorCount} rows had errors. Check console for details.`, 'error', 5000);
+            } else {
+                 // File was valid but contained no data rows matching the criteria
+                 showNotification('No valid entries found to import in the CSV file.', 'info');
+            }
+        };
+
+
+        /**
+         * Handles the click event for the Export CSV button. Generates and downloads the CSV.
+         */
+        const handleExportClick = () => {
+            // Check if there's any data to export
+            if (data.income.length === 0 && data.debt.length === 0) {
+                 showNotification('No data available to export.', 'info');
+                 return;
+            }
+
+            // Generate the CSV content string
+            const csvContent = convertToCSV(data);
+            // Trigger the download
+            downloadCSV(csvContent);
+             showNotification('Data exported successfully!', 'success');
+        };
+
+        /**
+         * Converts the `data` object (income and debt arrays) into a CSV formatted string.
+         * Includes headers: Type, Description, Amount, Date.
+         * Handles commas in descriptions by enclosing them in double quotes.
+         * @param {object} dataObj - The main data object { income: [], debt: [] }.
+         * @returns {string} The CSV formatted data as a single string.
+         */
+        const convertToCSV = (dataObj) => {
+            const rows = [];
+            // Add the header row
+            rows.push(['Type', 'Description', 'Amount', 'Date']); // Column headers
+
+            // Helper function to sanitize description for CSV (handles quotes)
+            const sanitize = (str) => `"${str.replace(/"/g, '""')}"`; // Replace " with "" and wrap in "
+
+            // Add income entries
+            dataObj.income.forEach(entry => {
+                rows.push(['Income', sanitize(entry.description), entry.amount, entry.date]);
+            });
+
+            // Add debt entries
+            dataObj.debt.forEach(entry => {
+                rows.push(['Debt', sanitize(entry.description), entry.amount, entry.date]);
+            });
+
+            // Join each row's elements with a comma, then join all rows with a newline character
+            return rows.map(row => row.join(',')).join('\n');
+        };
+
+        /**
+         * Creates a Blob from the CSV string and triggers a file download in the browser.
+         * @param {string} csvString - The CSV data to download.
+         */
+        const downloadCSV = (csvString) => {
+            // Create a Blob object representing the CSV data
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            // Create a temporary anchor element for downloading
+            const link = document.createElement('a');
+
+            // Check if the browser supports the download attribute
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob); // Create a temporary URL for the Blob
+                link.setAttribute('href', url);
+                // Generate a filename with the current date
+                const timestamp = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
+                link.setAttribute('download', `income_debt_tracker_export_${timestamp}.csv`);
+                link.style.visibility = 'hidden'; // Hide the link
+                document.body.appendChild(link); // Add link to the document
+                link.click(); // Programmatically click the link to trigger download
+                document.body.removeChild(link); // Remove the link from the document
+                URL.revokeObjectURL(url); // Release the temporary URL
+            } else {
+                // Fallback or error for browsers that don't support the download attribute
+                 showNotification('CSV download is not supported in this browser.', 'error');
+            }
+        };
+
+
+        // --- Event Listeners Setup ---
+        // Attach event listeners to buttons and forms
+
+        // Main action buttons
+        addEntryBtn.addEventListener('click', () => openModal('add')); // Open modal in 'add' mode
+        importCsvBtn.addEventListener('click', handleImportClick); // Trigger file input when Import button clicked
+        exportCsvBtn.addEventListener('click', handleExportClick); // Trigger export process
+
+        // Modal buttons
+        closeModalBtn.addEventListener('click', closeModal); // Close modal via 'X' button
+        cancelBtn.addEventListener('click', closeModal); // Close modal via 'Cancel' button
+        entryForm.addEventListener('submit', handleFormSubmit); // Handle saving/updating when form submitted
+
+        // File input change (when user selects a file)
+        importCsvInput.addEventListener('change', handleFileSelect);
+
+        // Confirmation dialog buttons
+        confirmYesBtn.addEventListener('click', () => {
+            // If a callback function is stored, execute it with 'true' (confirmed)
+            if (typeof currentConfirmationCallback === 'function') {
+                currentConfirmationCallback(true);
+            }
+            // Note: hideConfirmation is called within the deleteEntry logic after action
+        });
+        confirmNoBtn.addEventListener('click', () => {
+             // If a callback function is stored, execute it with 'false' (cancelled)
+             if (typeof currentConfirmationCallback === 'function') {
+                currentConfirmationCallback(false);
+            }
+            hideConfirmation(); // Always hide the dialog immediately on "No"
+        });
+
+
+        // Global listeners for convenience (e.g., closing modals)
+
+        // Close modal if user clicks on the background overlay
+        window.addEventListener('click', (event) => {
+            if (event.target === entryModal) {
+                closeModal();
+            }
+            // Close confirmation dialog if user clicks on its background overlay
+             if (event.target === confirmationDialog) {
+                 // Treat clicking outside as cancellation
+                 if (typeof currentConfirmationCallback === 'function') {
+                     currentConfirmationCallback(false);
+                 }
+                 hideConfirmation();
+             }
+        });
+
+         // Close modals on 'Escape' key press
+         window.addEventListener('keydown', (event) => {
+             // Close Add/Edit modal if it's open and Escape is pressed
+             if (event.key === 'Escape' && entryModal.style.display === 'block') {
+                 closeModal();
+             }
+              // Close Confirmation dialog if it's open and Escape is pressed
+              if (event.key === 'Escape' && confirmationDialog.classList.contains('show')) {
+                  // Treat Escape as cancellation
+                  if (typeof currentConfirmationCallback === 'function') {
+                     currentConfirmationCallback(false);
+                 }
+                 hideConfirmation();
+             }
+         });
+
+
+        // --- Initial Load ---
+        // Render the initial data from localStorage when the page loads
+        renderData();
+
+    </script>
+
+</body>
+</html>
