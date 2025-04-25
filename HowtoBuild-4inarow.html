@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Four - Step-by-Step Build</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        /* Custom styles for game pieces and board */
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation; /* Prevent double-tap zoom on mobile */
+        }
+        .board {
+            display: grid; /* Ensure grid is explicitly set */
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            grid-template-rows: repeat(6, minmax(0, 1fr));
+            aspect-ratio: 7 / 6;
+            min-width: 280px;
+            max-width: 560px;
+            width: 90vw;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 6px solid #1e3a8a;
+            background-color: #2563eb;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), inset 0 2px 4px rgba(0,0,0,0.2);
+            gap: 4px; /* Added gap between cells */
+            padding: 8px; /* Added padding around cells */
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            background-color: #2563eb; /* Match board background */
+            border-radius: 50%; /* Make the cell container round */
+        }
+
+        /* Style for the empty slot appearance */
+        .cell::before {
+            content: '';
+            display: block;
+            width: 75%;
+            height: 75%;
+            background-color: #0f172a; /* Dark background for empty slot */
+            border-radius: 50%;
+            border: 1px solid #334155;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            transition: background-color 0.2s ease;
+        }
+
+        /* Style for Player 1's piece (Red) */
+        .cell.player1::before {
+            background-color: #dc2626; /* Red */
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.4);
+            animation: drop 0.4s ease-out;
+        }
+
+        /* Style for Player 2's piece (Yellow) */
+        .cell.player2::before {
+            background-color: #facc15; /* Yellow */
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.25), 0 1px 1px rgba(255,255,255,0.4);
+            animation: drop 0.4s ease-out;
+        }
+
+        /* Highlight column on hover - more visible */
+        .col-hover-highlight::before {
+             background-color: #1e40af; /* Indicate hover on the hole */
+        }
+        /* Indicate whose turn it is by showing a faint piece color on hover */
+        .player1-turn-hover .col-hover-highlight::before {
+             background-color: rgba(220, 38, 38, 0.3); /* Faint red */
+        }
+         .player2-turn-hover .col-hover-highlight::before {
+             background-color: rgba(250, 204, 21, 0.3); /* Faint yellow */
+        }
+
+
+        /* Drop animation */
+        @keyframes drop {
+            0% { transform: translateY(-400%); opacity: 0.4; } /* Start higher */
+            80% { transform: translateY(10%); opacity: 1; } /* Slight bounce */
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Styling for instructions section */
+        details {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem; /* Rounded corners for the whole details block */
+            overflow: hidden; /* Ensure content stays within rounded corners */
+        }
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0.75rem 1.25rem; /* Increased padding */
+            background-color: #e2e8f0;
+            border-bottom: 1px solid #cbd5e1; /* Separator line */
+            transition: background-color 0.2s ease;
+            outline: none; /* Remove default focus outline */
+        }
+        details summary:hover {
+            background-color: #cbd5e1;
+        }
+        details[open] summary {
+             border-bottom: 1px solid #cbd5e1;
+        }
+        details summary::marker { /* Style the disclosure triangle */
+            color: #475569;
+        }
+        .instruction-content {
+            background-color: #f8fafc;
+            padding: 1.5rem; /* Increased padding */
+            border-top: none;
+        }
+        /* Code block styling */
+        .instruction-content pre {
+            background-color: #2d3748; /* Dark background for code */
+            color: #e2e8f0; /* Light text */
+            padding: 1rem;
+            border-radius: 0.375rem;
+            max-height: 450px; /* Slightly taller max height */
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace; /* Monospace font */
+            font-size: 0.9em; /* Slightly smaller font */
+        }
+        /* Improve readability within instructions */
+        .instruction-content h3 {
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem; /* Add space above headings */
+        }
+        .instruction-content h3:first-child {
+             margin-top: 0; /* No top margin for the very first heading */
+        }
+        .instruction-content p, .instruction-content ul {
+            line-height: 1.6; /* Improve text spacing */
+        }
+        .instruction-content code:not(pre code) { /* Inline code style */
+             background-color: #e2e8f0;
+             padding: 0.1em 0.4em;
+             border-radius: 0.25rem;
+             font-size: 0.9em;
+             color: #1e293b;
+        }
+
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-slate-300 flex flex-col items-center min-h-screen p-4 md:p-8">
+
+    <div class="w-full max-w-2xl mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 text-center">Connect Four</h1>
+        <div id="message" class="text-xl font-semibold text-slate-900 mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 bg-white">Loading Game...</div>
+        <div id="board" class="board shadow-xl mx-auto">
+            </div>
+    </div>
+
+    <button id="resetButton" class="mb-10 px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-all duration-200 ease-in-out">
+        Reset Game
+    </button>
+
+    <section class="w-full max-w-4xl bg-white p-1 rounded-lg shadow-md mb-8"> <details>
+            <summary class="text-lg text-slate-700">How to Build This Connect Four Game (Step-by-Step Guide)</summary>
+            <div class="instruction-content mt-0 space-y-6"> <p class="text-slate-700 text-lg">This guide walks you through creating this Connect Four game from scratch using HTML, CSS (with Tailwind), and JavaScript.</p>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 1: Setting Up the Basic HTML File</h3>
+                    <p class="text-slate-600 mb-3">First, create an HTML file (e.g., <code>connect_four.html</code>) and add the standard HTML boilerplate. Then, include the Tailwind CSS CDN link and optionally the Google Fonts link within the <code>&lt;head&gt;</code> section.</p>
+                    <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Connect Four&lt;/title&gt;
+    &lt;!-- Load Tailwind CSS --&gt;
+    &lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;
+    &lt;!-- Optional: Load Inter font --&gt;
+    &lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+    &lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+    &lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet"&gt;
+    &lt;!-- We'll add custom CSS styles here later --&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Game content goes here --&gt;
+    &lt;!-- JavaScript goes at the end of the body --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 2: Creating the HTML Layout</h3>
+                    <p class="text-slate-600 mb-3">Inside the <code>&lt;body&gt;</code>, set up the main visual elements: a title, a message area (with <code>id="message"</code>), the game board container (with <code>id="board"</code>), and a reset button (with <code>id="resetButton"</code>). Use Tailwind classes for layout, centering, background, and basic styling.</p>
+                    <pre><code class="language-html">&lt;body class="bg-gradient-to-br from-slate-100 to-slate-300 flex flex-col items-center justify-center min-h-screen p-4 md:p-8"&gt;
+
+    &lt;!-- Container for Title, Message, Board --&gt;
+    &lt;div class="w-full max-w-2xl mb-8"&gt;
+        &lt;h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 text-center"&gt;Connect Four&lt;/h1&gt;
+
+        &lt;!-- Message Area --&gt;
+        &lt;div id="message" class="text-xl font-semibold text-slate-900 mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 bg-white"&gt;
+            Loading Game... &lt;!-- Placeholder text --&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Game Board Container --&gt;
+        &lt;div id="board" class="grid grid-cols-7 grid-rows-6 gap-1 p-2 mx-auto" style="aspect-ratio: 7 / 6; min-width: 280px; max-width: 560px; width: 90vw; border-radius: 0.75rem; overflow: hidden; border: 6px solid #1e3a8a; background-color: #2563eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), inset 0 2px 4px rgba(0,0,0,0.2);"&gt;
+            &lt;!-- Cells added by JavaScript --&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Reset Button --&gt;
+    &lt;button id="resetButton" class="mb-10 px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-all duration-200 ease-in-out"&gt;
+        Reset Game
+    &lt;/button&gt;
+
+    &lt;!-- JavaScript will go here, before &lt;/body&gt; --&gt;
+&lt;/body&gt;</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 3: Basic CSS for Cells and Pieces</h3>
+                    <p class="text-slate-600 mb-3">Add custom CSS rules within a <code>&lt;style&gt;</code> tag in the <code>&lt;head&gt;</code>. These rules define the appearance of the individual cells (which will be created by JavaScript) and how they look when empty or filled with a player's piece. We use the <code>::before</code> pseudo-element to create the visible circle inside each cell container.</p>
+                    <pre><code class="language-css">&lt;style&gt;
+    body {
+        font-family: 'Inter', sans-serif;
+        touch-action: manipulation;
+    }
+    /* Board styling is mostly done with inline style + Tailwind in the HTML */
+    .board {
+        display: grid; /* Ensure grid behaviour */
+        gap: 4px;
+        padding: 8px;
+    }
+
+    /* Style for each cell container */
+    .cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        cursor: pointer;
+        background-color: #2563eb; /* Board color */
+        border-radius: 50%;
+    }
+
+    /* The visible "hole" or piece */
+    .cell::before {
+        content: '';
+        display: block;
+        width: 75%;
+        height: 75%;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+        /* Empty hole style */
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Player 1 piece style (added via JS) */
+    .cell.player1::before {
+        background-color: #dc2626; /* Red */
+        box-shadow: inset 0 3px 5px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.4);
+        /* animation added later */
+    }
+
+    /* Player 2 piece style (added via JS) */
+    .cell.player2::before {
+        background-color: #facc15; /* Yellow */
+        box-shadow: inset 0 3px 5px rgba(0,0,0,0.25), 0 1px 1px rgba(255,255,255,0.4);
+        /* animation added later */
+    }
+&lt;/style&gt;</code></pre>
+                </div>
+
+                 <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 4: JavaScript - Setup and Initialization</h3>
+                    <p class="text-slate-600 mb-3">Start the game logic by adding a <code>&lt;script&gt;</code> tag just before the closing <code>&lt;/body&gt;</code> tag. Define constants for board size and players. Declare variables for the game state (<code>board</code> data array, <code>currentPlayer</code>, <code>gameOver</code> flag, <code>cells</code> DOM references). Get references to the necessary HTML elements using their IDs. Create an <code>initializeGame</code> function to reset the state and call <code>createBoardDOM</code>.</p>
+                    <pre><code class="language-javascript">&lt;script&gt;
+    // --- Game Constants ---
+    const ROWS = 6;
+    const COLS = 7;
+    const PLAYER1 = 1;
+    const PLAYER2 = 2;
+    const PLAYER1_COLOR = 'Red';
+    const PLAYER2_COLOR = 'Yellow';
+
+    // --- Game State Variables ---
+    let board; // 2D array [row][col] -> 0: empty, 1: P1, 2: P2
+    let currentPlayer;
+    let gameOver;
+    let cells; // Array to hold references to HTML cell elements: cells[row][col]
+
+    // --- DOM Elements ---
+    const boardElement = document.getElementById('board');
+    const messageElement = document.getElementById('message');
+    const resetButton = document.getElementById('resetButton');
+
+    // --- Initialization Function ---
+    function initializeGame() {
+        console.log("Initializing game...");
+        // Create 6x7 array filled with 0s
+        board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+        currentPlayer = PLAYER1;
+        gameOver = false;
+        cells = []; // Reset DOM cell references
+        boardElement.innerHTML = ''; // Clear HTML board
+        messageElement.textContent = \`Player \${currentPlayer}'s Turn (\${PLAYER1_COLOR})\`;
+        messageElement.className = 'text-xl font-semibold text-slate-900 mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 bg-white'; // Reset style
+
+        // Set body class for hover effects (P1 starts)
+        document.body.classList.remove('player1-turn-hover', 'player2-turn-hover');
+        document.body.classList.add('player1-turn-hover');
+
+        createBoardDOM(); // Build the visual grid
+        console.log("Game initialized.");
+    }
+
+    // --- Create Board in DOM (Placeholder) ---
+    function createBoardDOM() { /* ... see next step ... */ }
+
+    // --- Event Listeners ---
+    resetButton.addEventListener('click', initializeGame);
+
+    // --- Start Game ---
+    // Run initializeGame once the page is fully loaded
+    document.addEventListener('DOMContentLoaded', initializeGame);
+&lt;/script&gt;</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 5: JavaScript - Creating the Visual Board</h3>
+                    <p class="text-slate-600 mb-3">Implement the <code>createBoardDOM</code> function. This function loops through the rows and columns, creates a <code>&lt;div&gt;</code> for each cell, adds the necessary CSS class (<code>cell</code>), stores row/column data on the element, appends it to the main board container, and stores a reference to the element in the <code>cells</code> array. Crucially, it adds event listeners for clicks and mouse hover to each cell.</p>
+                    <pre><code class="language-javascript">// --- Create Board in DOM ---
+function createBoardDOM() {
+    console.log("Creating DOM board...");
+    for (let r = 0; r < ROWS; r++) {
+        cells[r] = []; // Initialize inner array for the row
+        for (let c = 0; c < COLS; c++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell'); // Add base 'cell' class
+            // Store row/col index on the element itself
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+
+            boardElement.appendChild(cell); // Add to HTML
+            cells[r][c] = cell; // Store reference
+
+            // Add event listeners
+            cell.addEventListener('click', () => handleCellClick(c));
+            cell.addEventListener('mouseenter', () => highlightColumn(c, true));
+            cell.addEventListener('mouseleave', () => highlightColumn(c, false));
+        }
+    }
+    console.log("DOM board created.");
+}
+
+// --- Placeholder functions (to avoid errors) ---
+function handleCellClick(colIndex) { console.log(\`Click Col: \${colIndex}\`); }
+function highlightColumn(colIndex, isEntering) { /* Placeholder */ }</code></pre>
+                    <p class="text-slate-600 mt-3">At this point, saving and refreshing should show the visual grid of empty slots.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 6: JavaScript - Handling Clicks</h3>
+                    <p class="text-slate-600 mb-3">Implement the core click logic. Create <code>findLowestAvailableRow(colIndex)</code> to find the correct row for a piece drop. Then, implement <code>handleCellClick(colIndex)</code>: check if the game is over or the column is full; if not, update the <code>board</code> data array and add the correct player class (<code>player1</code> or <code>player2</code>) to the clicked cell's corresponding HTML element.</p>
+                    <pre><code class="language-javascript">// --- Find Lowest Available Row ---
+function findLowestAvailableRow(colIndex) {
+    for (let r = ROWS - 1; r >= 0; r--) { // Check bottom-up
+        if (board[r][colIndex] === 0) { // Is the cell empty?
+            return r; // Return row index
+        }
+    }
+    return -1; // Column is full
+}
+
+// --- Handle Cell Click ---
+function handleCellClick(colIndex) {
+    console.log(\`Handling click for column: \${colIndex}\`);
+    if (gameOver) return; // Ignore clicks if game is won/drawn
+
+    const rowIndex = findLowestAvailableRow(colIndex);
+    if (rowIndex === -1) {
+        console.log(\`Column \${colIndex} is full.\`);
+        return; // Ignore click if column is full
+    }
+
+    // Update the data board
+    board[rowIndex][colIndex] = currentPlayer;
+    console.log(\`Piece placed at [\${rowIndex}, \${colIndex}] by Player \${currentPlayer}\`);
+
+    // Update the visual board
+    const cellElement = cells[rowIndex][colIndex];
+    cellElement.classList.add(currentPlayer === PLAYER1 ? 'player1' : 'player2');
+    cellElement.classList.remove('col-hover-highlight'); // Remove hover effect
+
+    // --- Check Win/Draw & Switch Player (Coming next) ---
+    // if (checkWin(rowIndex, colIndex)) { ... }
+    // if (checkDraw()) { ... }
+    // switchPlayer();
+    // Update message...
+}
+
+// Placeholders for next steps
+function checkWin(r, c) { return false; }
+function checkDraw() { return false; }
+function switchPlayer() { console.log("Switching player (Not implemented yet)"); }</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 7: JavaScript - Switching Players & Updating Message</h3>
+                    <p class="text-slate-600 mb-3">Implement the <code>switchPlayer()</code> function to toggle between <code>PLAYER1</code> and <code>PLAYER2</code>. Call this function at the end of <code>handleCellClick</code> (after placing a piece). Also, update the <code>messageElement.textContent</code> to reflect the current player's turn.</p>
+                    <pre><code class="language-javascript">// --- Switch Player ---
+function switchPlayer() {
+    currentPlayer = (currentPlayer === PLAYER1) ? PLAYER2 : PLAYER1;
+    console.log(\`Switched turn to Player \${currentPlayer}\`);
+
+    // Update body class for hover effects
+    document.body.classList.toggle('player1-turn-hover', currentPlayer === PLAYER1);
+    document.body.classList.toggle('player2-turn-hover', currentPlayer === PLAYER2);
+}
+
+// --- Handle Cell Click (Updated) ---
+function handleCellClick(colIndex) {
+    // ... (check gameOver, find rowIndex, check if full) ...
+    if (rowIndex === -1) return;
+
+    // Update data board
+    board[rowIndex][colIndex] = currentPlayer;
+
+    // Update visual board
+    const cellElement = cells[rowIndex][colIndex];
+    cellElement.classList.add(currentPlayer === PLAYER1 ? 'player1' : 'player2');
+    cellElement.classList.remove('col-hover-highlight');
+
+    // --- Check Win/Draw (Placeholders) ---
+    if (checkWin(rowIndex, colIndex)) { return; } // Stop if win
+    if (checkDraw()) { return; } // Stop if draw
+
+    // --- Switch Player & Update Message ---
+    switchPlayer();
+    messageElement.textContent = \`Player \${currentPlayer}'s Turn (\${currentPlayer === PLAYER1 ? PLAYER1_COLOR : PLAYER2_COLOR})\`;
+}</code></pre>
+                    <p class="text-slate-600 mt-3">Now the game should alternate between placing red and yellow pieces.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 8: JavaScript - Checking for Win and Draw</h3>
+                    <p class="text-slate-600 mb-3">Implement the win/draw detection logic. <code>checkWin(r, c)</code> needs to check for four consecutive pieces horizontally, vertically, and diagonally from the last placed piece at <code>(r, c)</code>. <code>checkDraw()</code> checks if the top row is full. Update <code>handleCellClick</code> to call these functions, set <code>gameOver = true</code>, update the message accordingly, and prevent further moves if the game ends.</p>
+                    <pre><code class="language-javascript">// --- Check for Win ---
+function checkWin(r, c) {
+    const player = board[r][c];
+
+    // Helper function to check a line
+    const checkLine = (dr, dc) => {
+        let count = 0;
+        // Check in both directions from the placed piece (r, c)
+        for (let i = -3; i <= 3; i++) {
+            const row = r + i * dr;
+            const col = c + i * dc;
+            // Check bounds and if piece belongs to player
+            if (row >= 0 && row < ROWS && col >= 0 && col < COLS && board[row][col] === player) {
+                count++;
+                if (count === 4) return true; // Found 4!
+            } else {
+                count = 0; // Reset count if sequence breaks
+            }
+        }
+        return false;
+    };
+
+    // Check all four directions: Horizontal, Vertical, Diagonal /, Diagonal \
+    if (checkLine(0, 1) || checkLine(1, 0) || checkLine(1, 1) || checkLine(1, -1)) {
+        return true;
+    }
+
+    return false; // No win found
+}
+
+
+// --- Check for Draw ---
+function checkDraw() {
+    // Check if the top row (index 0) is full
+    // .every() checks if all elements in the array pass the test
+    return board[0].every(cell => cell !== 0); // If all cells are not 0, it's full
+}
+
+// --- Handle Cell Click (Updated with Win/Draw Logic) ---
+function handleCellClick(colIndex) {
+    if (gameOver) return;
+    const rowIndex = findLowestAvailableRow(colIndex);
+    if (rowIndex === -1) return;
+
+    board[rowIndex][colIndex] = currentPlayer;
+    const cellElement = cells[rowIndex][colIndex];
+    cellElement.classList.add(currentPlayer === PLAYER1 ? 'player1' : 'player2');
+    cellElement.classList.remove('col-hover-highlight');
+
+    // --- Check for Win ---
+    if (checkWin(rowIndex, colIndex)) {
+        gameOver = true;
+        messageElement.textContent = \`Player \${currentPlayer} (\${currentPlayer === PLAYER1 ? PLAYER1_COLOR : PLAYER2_COLOR}) Wins! 🎉\`;
+        // Style the win message
+        messageElement.className = \`text-xl font-bold mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 \${currentPlayer === PLAYER1 ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}\`;
+        console.log(\`Player \${currentPlayer} wins!\`);
+        document.body.classList.remove('player1-turn-hover', 'player2-turn-hover'); // Clear hover state
+        clearAllHighlights(); // Clear visual highlights
+        return; // Stop the turn
+    }
+
+    // --- Check for Draw ---
+    if (checkDraw()) {
+        gameOver = true;
+        messageElement.textContent = "It's a Draw! Stalemate";
+        messageElement.className = 'text-xl font-bold text-slate-700 mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 bg-slate-300'; // Draw style
+        console.log("Game is a draw.");
+        document.body.classList.remove('player1-turn-hover', 'player2-turn-hover'); // Clear hover state
+        clearAllHighlights(); // Clear visual highlights
+        return; // Stop the turn
+    }
+
+    // --- Switch Player & Update Message ---
+    switchPlayer();
+    messageElement.textContent = \`Player \${currentPlayer}'s Turn (\${currentPlayer === PLAYER1 ? PLAYER1_COLOR : PLAYER2_COLOR})\`;
+}
+
+// --- Clear Highlights (Helper needed for win/draw state) ---
+function clearAllHighlights() {
+    const highlightedCells = boardElement.querySelectorAll('.col-hover-highlight');
+    highlightedCells.forEach(cell => cell.classList.remove('col-hover-highlight'));
+}</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 9: CSS & JavaScript - Hover Effects</h3>
+                    <p class="text-slate-600 mb-3">Add visual feedback when hovering over a column. Implement the <code>highlightColumn(colIndex, isEntering)</code> function to add/remove a CSS class (e.g., <code>col-hover-highlight</code>) to all cells in that column. Add CSS rules for this class. Also, use the body classes (<code>player1-turn-hover</code>, <code>player2-turn-hover</code>) set during player switching to show a faint preview of the current player's color on hover.</p>
+                    <pre><code class="language-css">&lt;style&gt;
+    /* ... other styles ... */
+
+    /* Highlight column on hover - style the empty slot */
+    .col-hover-highlight::before {
+         background-color: #1e40af; /* Dark blue highlight for base hover */
+    }
+    /* Show faint player color based on body class */
+    .player1-turn-hover .col-hover-highlight::before {
+         background-color: rgba(220, 38, 38, 0.3); /* Faint red */
+    }
+     .player2-turn-hover .col-hover-highlight::before {
+         background-color: rgba(250, 204, 21, 0.3); /* Faint yellow */
+    }
+&lt;/style&gt;</code></pre>
+                     <pre><code class="language-javascript">// --- Highlight Column on Hover ---
+function highlightColumn(colIndex, isEntering) {
+    if (gameOver) return; // Don't highlight if game over
+
+    for (let r = 0; r < ROWS; r++) {
+         // Check if cells[r] and cells[r][colIndex] exist
+         if (cells[r] && cells[r][colIndex]) {
+             // Add or remove the class based on 'isEntering' boolean
+             cells[r][colIndex].classList.toggle('col-hover-highlight', isEntering);
+         }
+    }
+}</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-3">Step 10: CSS - Animation & Final Polish</h3>
+                    <p class="text-slate-600 mb-3">Add a simple drop animation using CSS <code>@keyframes</code>. Apply this animation to the player piece styles (<code>.cell.player1::before</code>, <code>.cell.player2::before</code>). Ensure the reset button works correctly by calling <code>initializeGame</code>. Add code highlighting for this guide using a library like highlight.js.</p>
+                    <pre><code class="language-css">&lt;style&gt;
+    /* ... other styles ... */
+
+    /* Apply animation to player pieces */
+    .cell.player1::before, .cell.player2::before {
+        /* ... existing background/shadow styles ... */
+        animation: drop 0.4s ease-out;
+    }
+
+    /* Drop animation keyframes */
+    @keyframes drop {
+        0% { transform: translateY(-400%); opacity: 0.4; }
+        80% { transform: translateY(10%); opacity: 1; } /* Bounce */
+        100% { transform: translateY(0); opacity: 1; }
+    }
+&lt;/style&gt;</code></pre>
+                     <pre><code class="language-html">&lt;!-- Add highlight.js library in &lt;head&gt; --&gt;
+&lt;head&gt;
+    &lt;!-- ... other head elements ... --&gt;
+    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"&gt;
+    &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"&gt;&lt;/script&gt;
+&lt;/head&gt;</code></pre>
+                    <pre><code class="language-javascript">&lt;script&gt;
+    // ... all game code ...
+
+    // --- Start Game & Initialize Highlighting ---
+    document.addEventListener('DOMContentLoaded', () => {
+         initializeGame(); // Start the game
+         hljs.highlightAll(); // Apply syntax highlighting to &lt;pre&gt;&lt;code&gt; blocks
+    });
+&lt;/script&gt;</code></pre>
+                </div>
+
+                <hr class="my-6 border-slate-300">
+                <p class="text-slate-700">That's it! You've built a functional Connect Four game. You can further enhance it with features like AI opponents, sound effects, or more sophisticated animations.</p>
+
+            </div> </details>
+    </section>
+
+    <script>
+        // --- Game Constants ---
+        const ROWS = 6;
+        const COLS = 7;
+        const PLAYER1 = 1;
+        const PLAYER2 = 2;
+        const PLAYER1_COLOR = 'Red';
+        const PLAYER2_COLOR = 'Yellow';
+
+        // --- Game State Variables ---
+        let board;
+        let currentPlayer;
+        let gameOver;
+        let cells;
+
+        // --- DOM Elements ---
+        const boardElement = document.getElementById('board');
+        const messageElement = document.getElementById('message');
+        const resetButton = document.getElementById('resetButton');
+
+        // --- Initialization ---
+        function initializeGame() {
+            console.log("Initializing game...");
+            board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            currentPlayer = PLAYER1;
+            gameOver = false;
+            cells = [];
+            boardElement.innerHTML = '';
+            messageElement.textContent = `Player ${currentPlayer}'s Turn (${PLAYER1_COLOR})`;
+            messageElement.className = 'text-xl font-semibold text-slate-900 mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 bg-white';
+            document.body.classList.remove('player1-turn-hover', 'player2-turn-hover');
+            document.body.classList.add('player1-turn-hover');
+            createBoardDOM();
+            console.log("Game initialized.");
+        }
+
+        // --- Create Board in DOM ---
+        function createBoardDOM() {
+            console.log("Creating DOM board...");
+            for (let r = 0; r < ROWS; r++) {
+                cells[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    boardElement.appendChild(cell);
+                    cells[r][c] = cell;
+                    cell.addEventListener('click', () => handleCellClick(c));
+                    cell.addEventListener('mouseenter', () => highlightColumn(c, true));
+                    cell.addEventListener('mouseleave', () => highlightColumn(c, false));
+                }
+            }
+            console.log("DOM board created.");
+        }
+
+        // --- Highlight Column on Hover ---
+        function highlightColumn(colIndex, isEntering) {
+            if (gameOver) return;
+            for (let r = 0; r < ROWS; r++) {
+                 if (cells[r] && cells[r][colIndex]) {
+                     cells[r][colIndex].classList.toggle('col-hover-highlight', isEntering);
+                 }
+            }
+        }
+
+        // --- Find Lowest Available Row ---
+        function findLowestAvailableRow(colIndex) {
+            for (let r = ROWS - 1; r >= 0; r--) {
+                if (board[r][colIndex] === 0) return r;
+            }
+            return -1;
+        }
+
+        // --- Handle Cell Click ---
+        function handleCellClick(colIndex) {
+            if (gameOver) return;
+            const rowIndex = findLowestAvailableRow(colIndex);
+            if (rowIndex === -1) return;
+
+            board[rowIndex][colIndex] = currentPlayer;
+            const cellElement = cells[rowIndex][colIndex];
+            cellElement.classList.remove('col-hover-highlight'); // Remove hover before adding piece class
+            cellElement.classList.add(currentPlayer === PLAYER1 ? 'player1' : 'player2');
+
+
+            if (checkWin(rowIndex, colIndex)) {
+                gameOver = true;
+                messageElement.textContent = `Player ${currentPlayer} (${currentPlayer === PLAYER1 ? PLAYER1_COLOR : PLAYER2_COLOR}) Wins! 🎉`;
+                messageElement.className = `text-xl font-bold mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 ${currentPlayer === PLAYER1 ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}`;
+                document.body.classList.remove('player1-turn-hover', 'player2-turn-hover');
+                clearAllHighlights();
+                return;
+            }
+
+            if (checkDraw()) {
+                gameOver = true;
+                messageElement.textContent = "It's a Draw! Stalemate";
+                messageElement.className = 'text-xl font-bold text-slate-700 mb-4 h-8 text-center rounded-md p-2 transition-colors duration-300 bg-slate-300';
+                document.body.classList.remove('player1-turn-hover', 'player2-turn-hover');
+                clearAllHighlights();
+                return;
+            }
+
+            switchPlayer();
+            messageElement.textContent = `Player ${currentPlayer}'s Turn (${currentPlayer === PLAYER1 ? PLAYER1_COLOR : PLAYER2_COLOR})`;
+        }
+
+        // --- Switch Player ---
+        function switchPlayer() {
+            currentPlayer = (currentPlayer === PLAYER1) ? PLAYER2 : PLAYER1;
+            document.body.classList.toggle('player1-turn-hover', currentPlayer === PLAYER1);
+            document.body.classList.toggle('player2-turn-hover', currentPlayer === PLAYER2);
+        }
+
+       // --- Check for Win ---
+        function checkWin(r, c) {
+            const player = board[r][c];
+            const checkLine = (dr, dc) => {
+                let count = 0;
+                for (let i = -3; i <= 3; i++) {
+                    const row = r + i * dr;
+                    const col = c + i * dc;
+                    if (row >= 0 && row < ROWS && col >= 0 && col < COLS && board[row][col] === player) {
+                        count++;
+                        if (count === 4) return true;
+                    } else {
+                        count = 0;
+                    }
+                }
+                return false;
+            };
+            return checkLine(0, 1) || checkLine(1, 0) || checkLine(1, 1) || checkLine(1, -1);
+        }
+
+
+        // --- Check for Draw ---
+        function checkDraw() {
+            return board[0].every(cell => cell !== 0);
+        }
+
+        // --- Clear Column Highlights ---
+         function clearAllHighlights() {
+            const highlightedCells = boardElement.querySelectorAll('.col-hover-highlight');
+            highlightedCells.forEach(cell => cell.classList.remove('col-hover-highlight'));
+        }
+
+        // --- Event Listeners ---
+        resetButton.addEventListener('click', initializeGame);
+
+        // --- Start Game & Initialize Highlighting ---
+        document.addEventListener('DOMContentLoaded', () => {
+             initializeGame();
+             // Apply syntax highlighting to code blocks in the instructions
+             hljs.highlightAll();
+        });
+
+    </script>
+
+</body>
+</html>
