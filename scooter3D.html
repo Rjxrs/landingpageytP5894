@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Scooter Customizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        select:hover, button:hover {
+            border-color: #999;
+        }
+        .color-swatch-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .color-swatch.active {
+            border-color: #007bff;
+            transform: scale(1.1);
+        }
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-size: 1.2rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <div id="ui">
+        <div class="control-group">
+            <h3>Scooter Model</h3>
+            <select id="scooter-select">
+                <option value="piaggio_liberty">Piaggio Liberty</option>
+                <option value="vespa_primavera">Vespa Primavera</option>
+                <option value="honda_pcx">Honda PCX</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <h3>Scooter Color</h3>
+            <div id="scooter-color-select" class="color-swatch-container">
+                 <!-- Swatches will be added here by JS -->
+            </div>
+        </div>
+        <div class="control-group">
+            <h3>Cover Type</h3>
+            <select id="cover-select">
+                <option value="none">None</option>
+                <option value="standard_cover">Standard Cover</option>
+                <option value="premium_cover">Premium Cover</option>
+            </select>
+        </div>
+         <div class="control-group">
+            <h3>Cover Color</h3>
+            <div id="cover-color-select" class="color-swatch-container">
+                 <!-- Swatches will be added here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="loader">Loading...</div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // --- Basic Scene Setup ---
+        let scene, camera, renderer, controls;
+        let scooterModel, coverModel;
+        const loader = new GLTFLoader();
+        const container = document.getElementById('container');
+        const loaderElement = document.getElementById('loader');
+
+        const scooterSelect = document.getElementById('scooter-select');
+        const coverSelect = document.getElementById('cover-select');
+        const scooterColorSelect = document.getElementById('scooter-color-select');
+        const coverColorSelect = document.getElementById('cover-color-select');
+        
+        const scooterColors = {
+            piaggio_liberty: [0xffffff, 0x333333, 0x00529b], // White, Black, Blue
+            vespa_primavera: [0xdc3545, 0xffffff, 0x28a745], // Red, White, Green
+            honda_pcx: [0x6c757d, 0xffffff, 0x000000] // Grey, White, Black
+        };
+
+        const coverColors = [0x333333, 0x888888, 0x004085, 0x540b0e]; // Dark Grey, Light Grey, Navy, Maroon
+
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f2f5);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(5, 2, 5);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            directionalLight.position.set(5, 10, 7.5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+
+            const plane = new THREE.Mesh(
+                new THREE.PlaneGeometry(10, 10),
+                new THREE.MeshStandardMaterial({ color: 0xdddddd })
+            );
+            plane.rotation.x = -Math.PI / 2;
+            plane.receiveShadow = true;
+            scene.add(plane);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.minDistance = 3;
+            controls.maxDistance = 10;
+            controls.target.set(0, 0.7, 0);
+            controls.update();
+
+            // Initial Load
+            updateScooterColorUI();
+            updateCoverColorUI();
+            loadScooter();
+            setupEventListeners();
+            animate();
+        }
+        
+        // --- Model Loading and Management ---
+        function loadScooter() {
+            const scooterName = scooterSelect.value;
+            loaderElement.style.display = 'block';
+
+            // Simulate loading a model. In a real app, you would load different .glb files.
+            // For this demo, we'll create placeholder geometry.
+            if (scooterModel) {
+                scene.remove(scooterModel);
+            }
+            
+            const geometry = createScooterGeometry(scooterName);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: scooterColors[scooterName][0],
+                metalness: 0.2,
+                roughness: 0.4 
+            });
+            scooterModel = new THREE.Mesh(geometry, material);
+            scooterModel.castShadow = true;
+            scooterModel.name = "scooter";
+            
+            // Traverse and apply shadow casting to all children
+            scooterModel.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                }
+            });
+
+            scene.add(scooterModel);
+            updateScooterColor(scooterColors[scooterName][0]);
+            loaderElement.style.display = 'none';
+        }
+
+        function loadCover() {
+            const coverName = coverSelect.value;
+            
+            if (coverModel) {
+                scene.remove(coverModel);
+                coverModel = null;
+            }
+
+            if (coverName === "none") {
+                 updateCoverColorUI(true); // Disable cover color swatches
+                 return;
+            }
+            
+            updateCoverColorUI(false); // Enable cover color swatches
+
+            // Simulate loading different cover models
+            const geometry = createCoverGeometry(coverName);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: coverColors[0],
+                metalness: 0.1,
+                roughness: 0.8,
+                transparent: true,
+                opacity: 0.95
+            });
+            coverModel = new THREE.Mesh(geometry, material);
+            coverModel.castShadow = true;
+            coverModel.name = "cover";
+            scene.add(coverModel);
+            updateCoverColor(coverColors[0]);
+        }
+
+        // --- Geometry Generation (Placeholders) ---
+        // In a real application, you would load GLB/GLTF models here.
+        function createScooterGeometry(modelName) {
+            const group = new THREE.Group();
+
+            // Body
+            const bodyGeo = new THREE.BoxGeometry(1.8, 0.6, 0.7);
+            const body = new THREE.Mesh(bodyGeo);
+            body.position.y = 0.6;
+            group.add(body);
+
+            // Seat
+            const seatGeo = new THREE.BoxGeometry(0.8, 0.3, 0.6);
+            const seat = new THREE.Mesh(seatGeo);
+            seat.position.set(-0.3, 1.05, 0);
+            group.add(seat);
+
+            // Handlebars
+            const handleGeo = new THREE.CylinderGeometry(0.05, 0.05, 1);
+            const handle = new THREE.Mesh(handleGeo);
+            handle.position.set(0.6, 1.2, 0);
+            handle.rotation.z = Math.PI / 4;
+            group.add(handle);
+
+            // Wheels
+            const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.2, 32);
+            const wheelMat = new THREE.MeshStandardMaterial({color: 0x111111});
+            const frontWheel = new THREE.Mesh(wheelGeo, wheelMat);
+            frontWheel.rotation.z = Math.PI / 2;
+            frontWheel.position.set(0.9, 0.4, 0);
+            group.add(frontWheel);
+
+            const backWheel = new THREE.Mesh(wheelGeo, wheelMat);
+            backWheel.rotation.z = Math.PI / 2;
+            backWheel.position.set(-0.9, 0.4, 0);
+            group.add(backWheel);
+
+            // Model specific adjustments
+            if (modelName === 'vespa_primavera') {
+                body.scale.x = 0.9;
+                seat.position.y = 1.0;
+            } else if (modelName === 'honda_pcx') {
+                body.scale.x = 1.1;
+                seat.scale.x = 1.2;
+            }
+
+            return group;
+        }
+
+        function createCoverGeometry(coverName) {
+            const scooterName = scooterSelect.value;
+            const baseGeometry = createScooterGeometry(scooterName);
+            const coverGeometry = baseGeometry.clone();
+
+            const scaleFactor = coverName === 'premium_cover' ? 1.08 : 1.05;
+            coverGeometry.scale.set(scaleFactor, scaleFactor, scaleFactor);
+            
+            return coverGeometry;
+        }
+
+
+        // --- UI and Event Handling ---
+        function setupEventListeners() {
+            scooterSelect.addEventListener('change', () => {
+                updateScooterColorUI();
+                loadScooter();
+                if(coverSelect.value !== 'none') loadCover();
+            });
+
+            coverSelect.addEventListener('change', loadCover);
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function updateScooterColor(color) {
+            if (scooterModel) {
+                 scooterModel.traverse(child => {
+                    // Affects the main body, not wheels etc.
+                    if (child.isMesh && child.material && child.material.color) {
+                       if(child.material !== (scooterModel.getObjectByName("frontWheel")?.material)){
+                           child.material.color.set(color);
+                       }
+                    }
+                });
+            }
+        }
+
+        function updateCoverColor(color) {
+            if (coverModel) {
+                coverModel.material.color.set(color);
+            }
+        }
+        
+        function createColorSwatches(colors, parentElement, clickHandler) {
+            parentElement.innerHTML = '';
+            colors.forEach((color, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                if (index === 0) swatch.classList.add('active');
+                swatch.style.backgroundColor = `#${new THREE.Color(color).getHexString()}`;
+                swatch.addEventListener('click', () => {
+                    parentElement.querySelector('.active')?.classList.remove('active');
+                    swatch.classList.add('active');
+                    clickHandler(color);
+                });
+                parentElement.appendChild(swatch);
+            });
+        }
+        
+        function updateScooterColorUI() {
+            const currentScooter = scooterSelect.value;
+            createColorSwatches(scooterColors[currentScooter], scooterColorSelect, updateScooterColor);
+        }
+
+        function updateCoverColorUI(disabled = false) {
+             if(disabled) {
+                coverColorSelect.style.opacity = '0.5';
+                coverColorSelect.style.pointerEvents = 'none';
+             } else {
+                coverColorSelect.style.opacity = '1';
+                coverColorSelect.style.pointerEvents = 'auto';
+                createColorSwatches(coverColors, coverColorSelect, updateCoverColor);
+             }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        init();
+
+    </script>
+</body>
+</html>
