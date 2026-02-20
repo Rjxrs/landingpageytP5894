@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pulse Path - Professional Edition</title>
+    
+    <!-- PWA / Mobile Home Screen Compatibility -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pulse Path">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f8fafc">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+                        amoled: '#0a0a0a'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --scrollbar-track: #f1f5f9;
+            --scrollbar-thumb: #cbd5e1;
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-main: #0a0a0a;
+            --card-bg: #121212;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #1e1e1e;
+            --scrollbar-track: #121212;
+            --scrollbar-thumb: #334155;
+        }
+
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overscroll-behavior-y: contain;
+        }
+
+        .bg-main-adaptive { background-color: var(--bg-main); }
+        .bg-card-adaptive { background-color: var(--card-bg); }
+        .border-adaptive { border-color: var(--border-color); }
+
+        /* Bootstrap Dark Override Fixes */
+        [data-bs-theme="dark"] .modal-content,
+        [data-bs-theme="dark"] .dropdown-menu,
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            background-color: var(--card-bg) !important;
+            color: var(--text-main) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        /* Mobile Optimized Spacing (Fixing the "Cramped" issue) */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1.25rem 1rem !important;
+                height: 80px !important;
+            }
+            .sidebar {
+                width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 2rem;
+            }
+            .sidebar .p-4 {
+                padding: 2.5rem 1.5rem 1.5rem 1.5rem !important;
+            }
+            .exercise-card {
+                padding: 1.75rem !important;
+                margin-bottom: 1.5rem !important;
+                border-radius: 1.25rem !important;
+            }
+            .day-column {
+                width: 100% !important;
+                min-width: 100% !important;
+                margin-bottom: 2.5rem !important;
+            }
+            .day-column .p-4 {
+                padding: 2rem 1.5rem !important;
+            }
+            .week-container {
+                padding: 2.5rem 1rem !important;
+                gap: 3rem !important;
+            }
+            .main-layout {
+                height: auto !important;
+                overflow-y: auto !important;
+                display: block !important;
+            }
+            .dropdown-item {
+                padding: 1rem 1.5rem !important;
+                font-size: 1rem !important;
+            }
+            .set-row input {
+                min-height: 48px !important; /* Larger touch target for inputs */
+                font-size: 14px !important;
+            }
+            #program-title {
+                padding: 1rem !important;
+                font-size: 1.1rem !important;
+            }
+        }
+
+        .exercise-card { 
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .sidebar {
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .navbar {
+            background-color: var(--card-bg) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        /* Visible Scrollbar Track */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { 
+            background: var(--scrollbar-track); 
+            border-radius: 10px;
+            margin: 2px;
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--scrollbar-thumb); 
+            border-radius: 10px;
+            border: 2px solid var(--scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+        .week-container {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        .main-layout { height: calc(100vh - 57px); }
+
+        .set-row input {
+            background-color: rgba(0,0,0,0.03);
+            color: var(--text-main);
+            border: 1px solid transparent;
+            min-height: 34px;
+        }
+        [data-bs-theme="dark"] .set-row input { background-color: rgba(255,255,255,0.05); }
+
+        .theme-switch {
+            width: 52px; height: 26px;
+            background: #cbd5e1;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        [data-bs-theme="dark"] .theme-switch { background: #3b82f6; }
+        .theme-switch::after {
+            content: "\f185";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute; left: 3px; top: 3px;
+            width: 20px; height: 20px;
+            background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #f59e0b;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-bs-theme="dark"] .theme-switch::after { content: "\f186"; left: 29px; color: #1e3a8a; }
+
+        .logo-img { height: 34px; width: auto; border-radius: 4px; }
+    </style>
+</head>
+<body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
+
+    <nav class="navbar navbar-expand-lg px-3 px-md-4 py-2 shrink-0">
+        <div class="container-fluid p-0 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2 m-0" href="#">
+                    <img id="app-logo" src="https://github.com/Rjxrs/landingpageytP5894/blob/main/112acbc9-8602-447a-9709-90091f51e237.png?raw=true" alt="Pulse Path" class="logo-img">
+                    <span class="hidden sm:inline">Pulse Path</span>
+                </a>
+                <div class="theme-switch shadow-inner" id="darkModeToggle" onclick="toggleDarkMode()"></div>
+            </div>
+            
+            <div class="d-flex gap-3 align-items-center">
+                <span class="hidden md:inline text-[10px] uppercase tracking-widest text-slate-400 font-bold" id="auto-save-status">Saved</span>
+                <button onclick="exportJSON()" class="btn btn-primary btn-sm rounded-lg px-3 bg-brand-600 border-0 shadow-sm text-xs font-bold">
+                    <i class="fa-solid fa-download"></i> <span class="hidden sm:inline ml-1">Export</span>
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm rounded-lg px-3 text-xs font-bold border-adaptive" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-gear text-base"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-xl border-adaptive">
+                        <li><a class="dropdown-item" href="#" onclick="document.getElementById('import-file').click()"><i class="fa-solid fa-file-import mr-3"></i> Import Plan</a></li>
+                        <li><hr class="dropdown-divider border-adaptive opacity-50"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmClear()"><i class="fa-solid fa-trash mr-3"></i> Clear Schedule</a></li>
+                    </ul>
+                </div>
+                <input type="file" id="import-file" class="hidden" accept=".json">
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex flex-grow-1 overflow-hidden main-layout">
+        <!-- Sidebar -->
+        <div class="sidebar w-80 d-flex flex-column h-100 flex-shrink-0">
+            <div class="p-4 border-bottom border-adaptive">
+                <div class="flex justify-between items-center mb-5">
+                    <h6 class="fw-bold text-muted uppercase tracking-wider text-[11px] mb-0">Exercise Library</h6>
+                    <button class="btn btn-primary bg-brand-600 border-0 rounded-xl py-2 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
+                        <i class="fa-solid fa-plus mr-1"></i> <span class="text-xs font-bold">ADD</span>
+                    </button>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-adaptive opacity-50"><i class="fa-solid fa-search"></i></span>
+                    <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-sm py-3" placeholder="Search exercises...">
+                </div>
+            </div>
+            <div class="flex-grow-1 overflow-auto p-4" id="library-list"></div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="flex-grow-1 overflow-y-auto p-4 md:p-6 bg-main-adaptive">
+            <div class="mb-6 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-5">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center bg-card-adaptive rounded-2xl shadow-sm border border-adaptive p-1">
+                        <button class="p-4 text-muted hover:text-brand-600" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="px-2 text-center min-w-[140px]">
+                            <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest">Current Week</span>
+                            <span class="block text-sm font-bold" id="date-display">...</span>
+                        </div>
+                        <button class="p-4 text-muted hover:text-brand-600" onclick="changeWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <button class="btn btn-sm text-brand-600 text-[11px] font-extrabold px-3 py-2" onclick="jumpToToday()">TODAY</button>
+                </div>
+                
+                <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-2xl p-3 px-4 shadow-sm w-full sm:w-auto">
+                    <i class="fa-solid fa-pen-to-square opacity-30 mr-3 text-xs"></i>
+                    <h2 class="text-sm fw-bold mb-0 flex-grow text-center sm:text-left" id="program-title" contenteditable="true" onblur="updateProgramMeta()">New Program</h2>
+                </div>
+            </div>
+            <div class="d-flex gap-4 overflow-x-auto pb-10 week-container" id="week-container"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="addExerciseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3xl border-0 shadow-2xl bg-card-adaptive">
+                <div class="modal-header border-bottom-0 p-5 pb-0">
+                    <h5 class="modal-title fw-bold text-sm uppercase tracking-widest">Create Exercise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-5">
+                    <form id="new-exercise-form">
+                        <div class="mb-5">
+                            <label class="form-label text-[10px] font-bold text-muted uppercase">Name</label>
+                            <input type="text" class="form-control border-adaptive bg-transparent p-4 text-sm rounded-xl" id="new-ex-name" placeholder="e.g. Lateral Raises" required>
+                        </div>
+                        <div class="row mb-5">
+                            <div class="col-6">
+                                <label class="form-label text-[10px] font-bold text-muted uppercase">Target</label>
+                                <select class="form-select border-adaptive bg-transparent p-4 text-sm rounded-xl" id="new-ex-muscle">
+                                    <option>Chest</option><option>Back</option><option>Legs</option>
+                                    <option>Shoulders</option><option>Arms</option><option>Core</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-[10px] font-bold text-muted uppercase">Style</label>
+                                <select class="form-select border-adaptive bg-transparent p-4 text-sm rounded-xl" id="new-ex-type">
+                                    <option>Compound</option><option>Isolation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 bg-brand-600 border-0 p-4 rounded-xl fw-bold text-sm shadow-md">Add to Library</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LOGOS = {
+            light: "https://github.com/Rjxrs/landingpageytP5894/blob/main/112acbc9-8602-447a-9709-90091f51e237.png?raw=true",
+            dark: "https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true"
+        };
+
+        const DEFAULT_EXERCISES = [
+            { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
+            { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-3', name: 'Deadlift', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-4', name: 'Pull Ups', muscle: 'Back', type: 'Compound' }
+        ];
+
+        let state = {
+            version: "2.0",
+            theme: 'light',
+            currentWeekStart: getMonday(new Date()).toISOString(),
+            customExercises: [],
+            program: { name: "Pulse Path Program", logs: {} }
+        };
+
+        function toggleDarkMode() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            applyTheme();
+            saveState();
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            const logo = document.getElementById('app-logo');
+            html.setAttribute('data-bs-theme', state.theme);
+            if (state.theme === 'dark') {
+                html.classList.add('dark');
+                logo.src = LOGOS.dark;
+            } else {
+                html.classList.remove('dark');
+                logo.src = LOGOS.light;
+            }
+        }
+
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function init() {
+            const saved = localStorage.getItem('pulse_path_v1');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } catch (e) { console.error(e); }
+            }
+            applyTheme();
+            document.getElementById('program-title').innerText = state.program.name;
+            updateDateDisplay();
+            renderLibrary();
+            renderWeek();
+            setupEvents();
+        }
+
+        function saveState() {
+            localStorage.setItem('pulse_path_v1', JSON.stringify(state));
+            const status = document.getElementById('auto-save-status');
+            status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            setTimeout(() => status.innerHTML = 'Saved', 600);
+        }
+
+        function renderLibrary(filter = "") {
+            const container = document.getElementById('library-list');
+            container.innerHTML = '';
+            const list = [...DEFAULT_EXERCISES, ...state.customExercises].filter(ex => ex.name.toLowerCase().includes(filter.toLowerCase()));
+            list.forEach(ex => {
+                const el = document.createElement('div');
+                el.className = 'exercise-card p-5 rounded-3xl mb-4 shadow-sm hover:shadow-md cursor-grab active:scale-95 transition-transform';
+                el.dataset.id = ex.id; el.dataset.name = ex.name;
+                el.innerHTML = `<div class="fw-bold text-sm mb-1">${ex.name}</div><div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>`;
+                container.appendChild(el);
+            });
+            new Sortable(container, { group: { name: 'shared', pull: 'clone', put: false }, sort: false, animation: 150 });
+        }
+
+        function renderWeek() {
+            const container = document.getElementById('week-container');
+            container.innerHTML = '';
+            const monday = new Date(state.currentWeekStart);
+            for (let i = 0; i < 7; i++) {
+                const currentDate = new Date(monday);
+                currentDate.setDate(monday.getDate() + i);
+                const dateKey = currentDate.toISOString().split('T')[0];
+                const dayExercises = state.program.logs[dateKey] || [];
+                const col = document.createElement('div');
+                col.className = 'day-column flex flex-col flex-shrink-0 bg-card-adaptive rounded-3xl border border-adaptive shadow-sm w-80 h-fit';
+                col.innerHTML = `
+                    <div class="p-5 border-bottom border-adaptive flex justify-between items-center">
+                        <div>
+                            <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest">${currentDate.toLocaleDateString(undefined, { weekday: 'long' })}</span>
+                            <span class="block text-sm font-bold">${currentDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                        </div>
+                    </div>
+                    <div class="p-4 flex-grow sortable-day-list min-h-[200px]" data-date="${dateKey}">
+                        ${dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('')}
+                    </div>
+                `;
+                container.appendChild(col);
+                new Sortable(col.querySelector('.sortable-day-list'), { group: 'shared', animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', onAdd: handleDrop, onUpdate: handleReorder });
+            }
+        }
+
+        function renderExerciseCard(ex, dateKey, idx) {
+            if (!ex.sets) ex.sets = [{ reps: '', weight: '' }];
+            let setHtml = ex.sets.map((set, sIdx) => `
+                <div class="flex gap-2 mb-3 items-center set-row">
+                    <span class="text-[9px] w-5 font-bold opacity-30">${sIdx + 1}</span>
+                    <input type="number" placeholder="REPS" class="form-control form-control-sm text-center text-[10px] rounded-xl py-3" value="${set.reps}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
+                    <input type="number" placeholder="KG" class="form-control form-control-sm text-center text-[10px] rounded-xl py-3" value="${set.weight}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
+                </div>
+            `).join('');
+            return `<div class="exercise-card rounded-2xl p-5 mb-4 shadow-sm border-adaptive"><div class="flex justify-between items-center mb-4"><span class="text-xs fw-bold truncate flex items-center gap-4"><i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab p-2"></i> ${ex.name}</span><button onclick="removeExercise('${dateKey}', ${idx})" class="p-3 text-muted hover:text-red-500"><i class="fa-solid fa-xmark text-sm"></i></button></div><div>${setHtml}</div></div>`;
+        }
+
+        function updateSetRow(dateKey, exIdx, setIdx, key, value) {
+            const exercise = state.program.logs[dateKey][exIdx];
+            exercise.sets[setIdx][key] = value;
+            const lastSet = exercise.sets[exercise.sets.length - 1];
+            if (lastSet.reps !== '' || lastSet.weight !== '') { exercise.sets.push({ reps: '', weight: '' }); renderWeek(); }
+            saveState();
+        }
+
+        function handleDrop(evt) {
+            const dateKey = evt.to.dataset.date;
+            if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
+            if (evt.from.id === 'library-list') {
+                const newEx = { id: evt.item.dataset.id, name: evt.item.dataset.name, sets: [{ reps: '', weight: '' }] };
+                state.program.logs[dateKey].splice(evt.newIndex, 0, newEx); evt.item.remove();
+            } else {
+                const fromDate = evt.from.dataset.date;
+                const ex = state.program.logs[fromDate].splice(evt.oldIndex, 1)[0];
+                state.program.logs[dateKey].splice(evt.newIndex, 0, ex);
+            }
+            saveState(); renderWeek();
+        }
+
+        function handleReorder(evt) {
+            const dateKey = evt.to.dataset.date;
+            const list = state.program.logs[dateKey];
+            const [item] = list.splice(evt.oldIndex, 1);
+            list.splice(evt.newIndex, 0, item);
+            saveState();
+        }
+
+        function removeExercise(date, idx) { state.program.logs[date].splice(idx, 1); saveState(); renderWeek(); }
+        function updateProgramMeta() { state.program.name = document.getElementById('program-title').innerText; saveState(); }
+        function changeWeek(dir) { const d = new Date(state.currentWeekStart); d.setDate(d.getDate() + (dir * 7)); state.currentWeekStart = d.toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
+        function jumpToToday() { state.currentWeekStart = getMonday(new Date()).toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
+        function updateDateDisplay() {
+            const start = new Date(state.currentWeekStart);
+            const end = new Date(start); end.setDate(start.getDate() + 6);
+            document.getElementById('date-display').innerText = `${start.toLocaleDateString(undefined, {month:'short', day:'numeric'})} - ${end.toLocaleDateString(undefined, {month:'short', day:'numeric'})}`;
+        }
+
+        function exportJSON() {
+            const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `PulsePath_Plan.json`; a.click();
+        }
+
+        function confirmClear() { if(confirm("Are you sure? This will delete all entries for the current plan.")) { state.program.logs = {}; saveState(); renderWeek(); } }
+
+        function handleImport(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => { try { state = JSON.parse(event.target.result); saveState(); location.reload(); } catch(err) { alert("Invalid File"); } };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        function setupEvents() {
+            document.getElementById('search-library').addEventListener('input', (e) => renderLibrary(e.target.value));
+            document.getElementById('import-file').addEventListener('change', handleImport);
+            document.getElementById('new-exercise-form').onsubmit = (e) => {
+                e.preventDefault();
+                state.customExercises.push({ id: 'custom-'+Date.now(), name: document.getElementById('new-ex-name').value, muscle: document.getElementById('new-ex-muscle').value, type: document.getElementById('new-ex-type').value });
+                saveState(); renderLibrary(); bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide(); e.target.reset();
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
