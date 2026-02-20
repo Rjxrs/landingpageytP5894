@@ -10,13 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pulse Path">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#f8fafc">
 
     <!-- Icons -->
     <link rel="apple-touch-icon" href="https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true">
     
     <!-- Web App Manifest -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Pulse Path Program Builder","short_name":"PulsePath","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#3b82f6","icons":[{"src":"https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Pulse Path Program Builder","short_name":"PulsePath","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#3b82f6","icons":[{"src":"https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true","sizes":"512x512","type":"image/png"}]}'>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,8 +49,8 @@
         }
 
         [data-bs-theme="dark"] {
-            --bg-main: #0a0a0a; /* AMOLED Black-ish */
-            --card-bg: #121212; /* Dark Grey AMOLED */
+            --bg-main: #0a0a0a;
+            --card-bg: #121212;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --border-color: #1e1e1e;
@@ -87,7 +87,7 @@
             padding-top: env(safe-area-inset-top, 0.5rem) !important;
         }
 
-        /* Enhanced Visible Scrollbar for better UX/UI Feedback */
+        /* Visible Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { 
             background: var(--scrollbar-track); 
@@ -99,18 +99,13 @@
             border-radius: 10px;
             border: 2px solid var(--scrollbar-track);
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3b82f6;
-        }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 
-        /* Ensure horizontal week container has visible scrolling cues */
         .week-container {
             scrollbar-width: thin;
             scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
         }
 
-        .sortable-ghost { opacity: 0.4; background-color: #3b82f622; border: 2px dashed #3b82f6 !important; }
-        
         .main-layout { height: calc(100vh - 57px); }
 
         @media (max-width: 768px) {
@@ -126,14 +121,7 @@
             color: var(--text-main);
             border: 1px solid transparent;
         }
-        [data-bs-theme="dark"] .set-row input {
-            background-color: rgba(255,255,255,0.05);
-        }
-        .set-row input:focus {
-            border-color: #3b82f6;
-            outline: none;
-            background-color: transparent;
-        }
+        [data-bs-theme="dark"] .set-row input { background-color: rgba(255,255,255,0.05); }
 
         .theme-switch {
             width: 48px;
@@ -149,50 +137,32 @@
             content: "\f185";
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            position: absolute;
-            left: 3px;
-            top: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #f59e0b;
+            position: absolute; left: 3px; top: 2px;
+            width: 20px; height: 20px;
+            background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #f59e0b;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        [data-bs-theme="dark"] .theme-switch::after {
-            content: "\f186";
-            left: 25px;
-            color: #1e3a8a;
-        }
+        [data-bs-theme="dark"] .theme-switch::after { content: "\f186"; left: 25px; color: #1e3a8a; }
 
-        .logo-img {
-            height: 32px;
-            width: auto;
-            border-radius: 6px;
-        }
+        .logo-img { height: 32px; width: auto; border-radius: 4px; }
     </style>
 </head>
 <body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
 
-    <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg px-4 py-2 shrink-0">
         <div class="container-fluid p-0 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2 m-0" href="#">
-                    <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true" alt="Pulse Path" class="logo-img">
-                    <span class="hidden sm:inline"></span>
+                    <img id="app-logo" src="https://github.com/Rjxrs/landingpageytP5894/blob/main/112acbc9-8602-447a-9709-90091f51e237.png?raw=true" alt="Pulse Path" class="logo-img">
+                    <span class="hidden sm:inline">Pulse Path</span>
                 </a>
                 <div class="theme-switch shadow-inner" id="darkModeToggle" onclick="toggleDarkMode()"></div>
             </div>
             
             <div class="d-flex gap-2 align-items-center">
-                <span class="hidden md:inline text-[10px] uppercase tracking-widest text-slate-400 font-bold" id="auto-save-status">
-                    Saved
-                </span>
+                <span class="hidden md:inline text-[10px] uppercase tracking-widest text-slate-400 font-bold" id="auto-save-status">Saved</span>
                 <button onclick="exportJSON()" class="btn btn-primary btn-sm rounded-lg px-3 bg-brand-600 border-0 shadow-sm text-xs font-bold">
                     <i class="fa-solid fa-download"></i> <span class="hidden sm:inline ml-1">Export</span>
                 </button>
@@ -205,8 +175,6 @@
     </nav>
 
     <div class="d-flex flex-grow-1 overflow-hidden main-layout">
-        
-        <!-- Sidebar -->
         <div class="sidebar w-80 d-flex flex-column h-100 flex-shrink-0">
             <div class="p-4 border-bottom border-adaptive">
                 <div class="flex justify-between items-center mb-3">
@@ -223,7 +191,6 @@
             <div class="flex-grow-1 overflow-auto p-3" id="library-list"></div>
         </div>
 
-        <!-- Main Content Area -->
         <div class="flex-grow-1 overflow-y-auto p-4 md:p-6 bg-main-adaptive">
             <div class="mb-4 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-3">
                 <div class="d-flex align-items-center gap-2">
@@ -240,13 +207,9 @@
                 
                 <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-xl p-1 gap-2 shadow-sm">
                     <h2 class="text-sm fw-bold mb-0 px-3 py-1 min-w-[120px]" id="program-title" contenteditable="true" onblur="updateProgramMeta()">New Program</h2>
-                    <button class="btn btn-sm text-red-400 hover:text-red-600 px-2" onclick="clearSchedule()" title="Clear Week">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>
+                    <button class="btn btn-sm text-red-400 hover:text-red-600 px-2" onclick="clearSchedule()" title="Clear Week"><i class="fa-solid fa-trash-can text-xs"></i></button>
                 </div>
             </div>
-
-            <!-- The scrollable week strip -->
             <div class="d-flex gap-4 overflow-x-auto pb-4 week-container" id="week-container"></div>
         </div>
     </div>
@@ -291,6 +254,11 @@
     </div>
 
     <script>
+        const LOGOS = {
+            light: "https://github.com/Rjxrs/landingpageytP5894/blob/main/112acbc9-8602-447a-9709-90091f51e237.png?raw=true",
+            dark: "https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true"
+        };
+
         const DEFAULT_EXERCISES = [
             { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
             { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
@@ -301,8 +269,8 @@
         ];
 
         let state = {
-            version: "1.6",
-            theme: 'dark', // Default to Dark/AMOLED
+            version: "1.7",
+            theme: 'light', // DEFAULT OPTION
             currentWeekStart: getMonday(new Date()).toISOString(),
             customExercises: [],
             program: { name: "My New Program", logs: {} }
@@ -316,13 +284,17 @@
 
         function applyTheme() {
             const html = document.documentElement;
+            const logo = document.getElementById('app-logo');
             html.setAttribute('data-bs-theme', state.theme);
+            
             if (state.theme === 'dark') {
                 html.classList.add('dark');
                 document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0a0a0a');
+                logo.src = LOGOS.dark;
             } else {
                 html.classList.remove('dark');
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#3b82f6');
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f8fafc');
+                logo.src = LOGOS.light;
             }
         }
 
@@ -359,19 +331,13 @@
             const container = document.getElementById('library-list');
             container.innerHTML = '';
             const list = [...DEFAULT_EXERCISES, ...state.customExercises].filter(ex => ex.name.toLowerCase().includes(filter.toLowerCase()));
-            
             list.forEach(ex => {
                 const el = document.createElement('div');
                 el.className = 'exercise-card p-3 rounded-xl mb-3 shadow-sm hover:shadow-md cursor-grab';
-                el.dataset.id = ex.id;
-                el.dataset.name = ex.name;
-                el.innerHTML = `
-                    <div class="fw-bold text-sm mb-1">${ex.name}</div>
-                    <div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>
-                `;
+                el.dataset.id = ex.id; el.dataset.name = ex.name;
+                el.innerHTML = `<div class="fw-bold text-sm mb-1">${ex.name}</div><div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>`;
                 container.appendChild(el);
             });
-
             new Sortable(container, { group: { name: 'shared', pull: 'clone', put: false }, sort: false, animation: 150 });
         }
 
@@ -379,13 +345,11 @@
             const container = document.getElementById('week-container');
             container.innerHTML = '';
             const monday = new Date(state.currentWeekStart);
-
             for (let i = 0; i < 7; i++) {
                 const currentDate = new Date(monday);
                 currentDate.setDate(monday.getDate() + i);
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const dayExercises = state.program.logs[dateKey] || [];
-
                 const col = document.createElement('div');
                 col.className = 'day-column flex flex-col flex-shrink-0 bg-card-adaptive rounded-2xl border border-adaptive shadow-sm w-72 md:w-80 h-fit';
                 col.innerHTML = `
@@ -400,66 +364,42 @@
                     </div>
                 `;
                 container.appendChild(col);
-
-                new Sortable(col.querySelector('.sortable-day-list'), {
-                    group: 'shared', animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle',
-                    onAdd: handleDrop, onUpdate: handleReorder
-                });
+                new Sortable(col.querySelector('.sortable-day-list'), { group: 'shared', animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', onAdd: handleDrop, onUpdate: handleReorder });
             }
         }
 
         function renderExerciseCard(ex, dateKey, idx) {
             if (!ex.sets) ex.sets = [{ reps: '', weight: '' }];
-            
             let setHtml = ex.sets.map((set, sIdx) => `
                 <div class="flex gap-1 mb-1 items-center set-row">
                     <span class="text-[9px] w-4 font-bold opacity-30">${sIdx + 1}</span>
-                    <input type="number" placeholder="R" class="form-control form-control-sm text-center text-[11px] rounded-md py-1" 
-                        value="${set.reps}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
-                    <input type="number" placeholder="KG" class="form-control form-control-sm text-center text-[11px] rounded-md py-1" 
-                        value="${set.weight}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
+                    <input type="number" placeholder="R" class="form-control form-control-sm text-center text-[11px] rounded-md py-1" value="${set.reps}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
+                    <input type="number" placeholder="KG" class="form-control form-control-sm text-center text-[11px] rounded-md py-1" value="${set.weight}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
                 </div>
             `).join('');
-
-            return `
-                <div class="exercise-card rounded-xl p-3 mb-3 shadow-sm border-adaptive">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs fw-bold truncate flex items-center gap-2">
-                            <i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab"></i> ${ex.name}
-                        </span>
-                        <button onclick="removeExercise('${dateKey}', ${idx})" class="text-muted hover:text-red-500"><i class="fa-solid fa-xmark text-xs"></i></button>
-                    </div>
-                    <div>${setHtml}</div>
-                </div>
-            `;
+            return `<div class="exercise-card rounded-xl p-3 mb-3 shadow-sm border-adaptive"><div class="flex justify-between items-center mb-2"><span class="text-xs fw-bold truncate flex items-center gap-2"><i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab"></i> ${ex.name}</span><button onclick="removeExercise('${dateKey}', ${idx})" class="text-muted hover:text-red-500"><i class="fa-solid fa-xmark text-xs"></i></button></div><div>${setHtml}</div></div>`;
         }
 
         function updateSetRow(dateKey, exIdx, setIdx, key, value) {
             const exercise = state.program.logs[dateKey][exIdx];
             exercise.sets[setIdx][key] = value;
             const lastSet = exercise.sets[exercise.sets.length - 1];
-            if (lastSet.reps !== '' || lastSet.weight !== '') {
-                exercise.sets.push({ reps: '', weight: '' });
-                renderWeek(); 
-            }
+            if (lastSet.reps !== '' || lastSet.weight !== '') { exercise.sets.push({ reps: '', weight: '' }); renderWeek(); }
             saveState();
         }
 
         function handleDrop(evt) {
             const dateKey = evt.to.dataset.date;
             if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
-            
             if (evt.from.id === 'library-list') {
                 const newEx = { id: evt.item.dataset.id, name: evt.item.dataset.name, sets: [{ reps: '', weight: '' }] };
-                state.program.logs[dateKey].splice(evt.newIndex, 0, newEx);
-                evt.item.remove();
+                state.program.logs[dateKey].splice(evt.newIndex, 0, newEx); evt.item.remove();
             } else {
                 const fromDate = evt.from.dataset.date;
                 const ex = state.program.logs[fromDate].splice(evt.oldIndex, 1)[0];
                 state.program.logs[dateKey].splice(evt.newIndex, 0, ex);
             }
-            saveState();
-            renderWeek();
+            saveState(); renderWeek();
         }
 
         function handleReorder(evt) {
@@ -470,29 +410,10 @@
             saveState();
         }
 
-        function removeExercise(date, idx) {
-            state.program.logs[date].splice(idx, 1);
-            saveState();
-            renderWeek();
-        }
-
-        function updateProgramMeta() {
-            state.program.name = document.getElementById('program-title').innerText;
-            saveState();
-        }
-
-        function changeWeek(dir) {
-            const d = new Date(state.currentWeekStart);
-            d.setDate(d.getDate() + (dir * 7));
-            state.currentWeekStart = d.toISOString();
-            updateDateDisplay(); renderWeek(); saveState();
-        }
-
-        function jumpToToday() {
-            state.currentWeekStart = getMonday(new Date()).toISOString();
-            updateDateDisplay(); renderWeek(); saveState();
-        }
-
+        function removeExercise(date, idx) { state.program.logs[date].splice(idx, 1); saveState(); renderWeek(); }
+        function updateProgramMeta() { state.program.name = document.getElementById('program-title').innerText; saveState(); }
+        function changeWeek(dir) { const d = new Date(state.currentWeekStart); d.setDate(d.getDate() + (dir * 7)); state.currentWeekStart = d.toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
+        function jumpToToday() { state.currentWeekStart = getMonday(new Date()).toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
         function updateDateDisplay() {
             const start = new Date(state.currentWeekStart);
             const end = new Date(start); end.setDate(start.getDate() + 6);
@@ -501,20 +422,13 @@
 
         function exportJSON() {
             const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `PulsePath_${state.program.name.replace(/\s+/g, '_')}.json`;
-            a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `PulsePath_${state.program.name.replace(/\s+/g, '_')}.json`; a.click();
         }
 
         function handleImport(e) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    state = JSON.parse(event.target.result);
-                    saveState(); location.reload();
-                } catch(err) { alert("Invalid File Format"); }
-            };
+            reader.onload = (event) => { try { state = JSON.parse(event.target.result); saveState(); location.reload(); } catch(err) { alert("Invalid File Format"); } };
             reader.readAsText(e.target.files[0]);
         }
 
@@ -522,11 +436,9 @@
             const currentWeek = new Date(state.currentWeekStart);
             for (let i = 0; i < 7; i++) {
                 const dateKey = new Date(currentWeek).toISOString().split('T')[0];
-                state.program.logs[dateKey] = [];
-                currentWeek.setDate(currentWeek.getDate() + 1);
+                state.program.logs[dateKey] = []; currentWeek.setDate(currentWeek.getDate() + 1);
             }
-            saveState();
-            renderWeek();
+            saveState(); renderWeek();
         }
 
         function setupEvents() {
@@ -534,15 +446,8 @@
             document.getElementById('import-file').addEventListener('change', handleImport);
             document.getElementById('new-exercise-form').onsubmit = (e) => {
                 e.preventDefault();
-                state.customExercises.push({
-                    id: 'custom-'+Date.now(),
-                    name: document.getElementById('new-ex-name').value,
-                    muscle: document.getElementById('new-ex-muscle').value,
-                    type: document.getElementById('new-ex-type').value
-                });
-                saveState(); renderLibrary();
-                bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide();
-                e.target.reset();
+                state.customExercises.push({ id: 'custom-'+Date.now(), name: document.getElementById('new-ex-name').value, muscle: document.getElementById('new-ex-muscle').value, type: document.getElementById('new-ex-type').value });
+                saveState(); renderLibrary(); bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide(); e.target.reset();
             };
         }
 
