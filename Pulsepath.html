@@ -12,12 +12,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#f8fafc">
 
-    <!-- Icons -->
-    <link rel="apple-touch-icon" href="https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true">
-    
-    <!-- Web App Manifest -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Pulse Path Program Builder","short_name":"PulsePath","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#3b82f6","icons":[{"src":"https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true","sizes":"512x512","type":"image/png"}]}'>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -70,6 +64,18 @@
         .bg-card-adaptive { background-color: var(--card-bg); }
         .border-adaptive { border-color: var(--border-color); }
 
+        /* Bootstrap Dark Override Fixes */
+        [data-bs-theme="dark"] .modal-content,
+        [data-bs-theme="dark"] .dropdown-menu,
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            background-color: var(--card-bg) !important;
+            color: var(--text-main) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
         .exercise-card { 
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -84,15 +90,14 @@
         .navbar {
             background-color: var(--card-bg) !important;
             border-bottom: 1px solid var(--border-color) !important;
-            padding-top: env(safe-area-inset-top, 0.5rem) !important;
         }
 
-        /* Visible Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        /* Visible Scrollbar Track UI/UX */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { 
             background: var(--scrollbar-track); 
             border-radius: 10px;
-            margin: 4px;
+            margin: 2px;
         }
         ::-webkit-scrollbar-thumb { 
             background: var(--scrollbar-thumb); 
@@ -124,8 +129,7 @@
         [data-bs-theme="dark"] .set-row input { background-color: rgba(255,255,255,0.05); }
 
         .theme-switch {
-            width: 48px;
-            height: 24px;
+            width: 48px; height: 24px;
             background: #cbd5e1;
             border-radius: 50px;
             position: relative;
@@ -166,15 +170,22 @@
                 <button onclick="exportJSON()" class="btn btn-primary btn-sm rounded-lg px-3 bg-brand-600 border-0 shadow-sm text-xs font-bold">
                     <i class="fa-solid fa-download"></i> <span class="hidden sm:inline ml-1">Export</span>
                 </button>
-                <button onclick="document.getElementById('import-file').click()" class="btn btn-outline-secondary btn-sm rounded-lg px-3 text-xs font-bold border-adaptive">
-                    <i class="fa-solid fa-file-import"></i>
-                </button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm rounded-lg px-3 text-xs font-bold border-adaptive" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-adaptive">
+                        <li><a class="dropdown-item text-xs py-2" href="#" onclick="document.getElementById('import-file').click()"><i class="fa-solid fa-file-import mr-2"></i> Import Plan</a></li>
+                        <li><a class="dropdown-item text-xs py-2 text-danger" href="#" onclick="clearSchedule()"><i class="fa-solid fa-trash mr-2"></i> Clear Schedule</a></li>
+                    </ul>
+                </div>
                 <input type="file" id="import-file" class="hidden" accept=".json">
             </div>
         </div>
     </nav>
 
     <div class="d-flex flex-grow-1 overflow-hidden main-layout">
+        <!-- Sidebar -->
         <div class="sidebar w-80 d-flex flex-column h-100 flex-shrink-0">
             <div class="p-4 border-bottom border-adaptive">
                 <div class="flex justify-between items-center mb-3">
@@ -185,12 +196,13 @@
                 </div>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-transparent border-adaptive opacity-50"><i class="fa-solid fa-search"></i></span>
-                    <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-sm text-main-adaptive" placeholder="Find exercise...">
+                    <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-sm" placeholder="Find exercise...">
                 </div>
             </div>
             <div class="flex-grow-1 overflow-auto p-3" id="library-list"></div>
         </div>
 
+        <!-- Main Workspace -->
         <div class="flex-grow-1 overflow-y-auto p-4 md:p-6 bg-main-adaptive">
             <div class="mb-4 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-3">
                 <div class="d-flex align-items-center gap-2">
@@ -207,7 +219,6 @@
                 
                 <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-xl p-1 gap-2 shadow-sm">
                     <h2 class="text-sm fw-bold mb-0 px-3 py-1 min-w-[120px]" id="program-title" contenteditable="true" onblur="updateProgramMeta()">New Program</h2>
-                    <button class="btn btn-sm text-red-400 hover:text-red-600 px-2" onclick="clearSchedule()" title="Clear Week"><i class="fa-solid fa-trash-can text-xs"></i></button>
                 </div>
             </div>
             <div class="d-flex gap-4 overflow-x-auto pb-4 week-container" id="week-container"></div>
@@ -233,16 +244,13 @@
                                 <label class="form-label text-[10px] font-bold text-muted uppercase">Muscle Group</label>
                                 <select class="form-select border-adaptive bg-transparent p-2 text-sm" id="new-ex-muscle">
                                     <option>Chest</option><option>Back</option><option>Legs</option>
-                                    <option>Shoulders</option><option>Arms (Biceps)</option>
-                                    <option>Arms (Triceps)</option><option>Forearms</option>
-                                    <option>Core / Abs</option><option>Calves</option>
-                                    <option>Glutes</option><option>Cardio</option>
+                                    <option>Shoulders</option><option>Arms</option><option>Core</option>
                                 </select>
                             </div>
                             <div class="col-6">
                                 <label class="form-label text-[10px] font-bold text-muted uppercase">Type</label>
                                 <select class="form-select border-adaptive bg-transparent p-2 text-sm" id="new-ex-type">
-                                    <option>Compound</option><option>Isolation</option><option>Isometric</option>
+                                    <option>Compound</option><option>Isolation</option>
                                 </select>
                             </div>
                         </div>
@@ -263,17 +271,15 @@
             { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
             { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
             { id: 'ex-3', name: 'Deadlift', muscle: 'Back', type: 'Compound' },
-            { id: 'ex-4', name: 'Standing Calf Raise', muscle: 'Calves', type: 'Isolation' },
-            { id: 'ex-5', name: 'Plank', muscle: 'Core / Abs', type: 'Isometric' },
-            { id: 'ex-6', name: 'Pull Ups', muscle: 'Back', type: 'Compound' }
+            { id: 'ex-4', name: 'Pull Ups', muscle: 'Back', type: 'Compound' }
         ];
 
         let state = {
-            version: "1.7",
-            theme: 'light', // DEFAULT OPTION
+            version: "1.8",
+            theme: 'light',
             currentWeekStart: getMonday(new Date()).toISOString(),
             customExercises: [],
-            program: { name: "My New Program", logs: {} }
+            program: { name: "Pulse Path Program", logs: {} }
         };
 
         function toggleDarkMode() {
@@ -289,11 +295,9 @@
             
             if (state.theme === 'dark') {
                 html.classList.add('dark');
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0a0a0a');
                 logo.src = LOGOS.dark;
             } else {
                 html.classList.remove('dark');
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f8fafc');
                 logo.src = LOGOS.light;
             }
         }
@@ -414,6 +418,7 @@
         function updateProgramMeta() { state.program.name = document.getElementById('program-title').innerText; saveState(); }
         function changeWeek(dir) { const d = new Date(state.currentWeekStart); d.setDate(d.getDate() + (dir * 7)); state.currentWeekStart = d.toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
         function jumpToToday() { state.currentWeekStart = getMonday(new Date()).toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
+        
         function updateDateDisplay() {
             const start = new Date(state.currentWeekStart);
             const end = new Date(start); end.setDate(start.getDate() + 6);
@@ -423,21 +428,17 @@
         function exportJSON() {
             const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = `PulsePath_${state.program.name.replace(/\s+/g, '_')}.json`; a.click();
+            a.download = `PulsePath_Plan.json`; a.click();
         }
 
         function handleImport(e) {
             const reader = new FileReader();
-            reader.onload = (event) => { try { state = JSON.parse(event.target.result); saveState(); location.reload(); } catch(err) { alert("Invalid File Format"); } };
+            reader.onload = (event) => { try { state = JSON.parse(event.target.result); saveState(); location.reload(); } catch(err) { alert("Invalid File"); } };
             reader.readAsText(e.target.files[0]);
         }
 
         function clearSchedule() {
-            const currentWeek = new Date(state.currentWeekStart);
-            for (let i = 0; i < 7; i++) {
-                const dateKey = new Date(currentWeek).toISOString().split('T')[0];
-                state.program.logs[dateKey] = []; currentWeek.setDate(currentWeek.getDate() + 1);
-            }
+            state.program.logs = {};
             saveState(); renderWeek();
         }
 
