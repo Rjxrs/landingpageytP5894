@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitCraft - Enterprise Program Builder</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SortableJS for Enterprise Drag & Drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        body { background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        
+        .sortable-ghost { opacity: 0.4; background-color: #eff6ff; border: 2px dashed #3b82f6 !important; }
+        .sortable-drag { cursor: grabbing !important; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important; }
+        
+        .exercise-card { transition: all 0.2s; cursor: grab; }
+        .exercise-card:active { cursor: grabbing; }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .date-nav-btn { transition: all 0.2s; border-radius: 8px; }
+        .date-nav-btn:hover { background-color: #e2e8f0; }
+
+        [contenteditable="true"]:focus { outline: none; border-bottom: 2px solid #3b82f6; }
+    </style>
+</head>
+<body class="d-flex flex-column vh-100 overflow-hidden">
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-4 py-3 shrink-0">
+        <div class="container-fluid p-0 flex justify-between items-center">
+            <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2" href="#">
+                <i class="fa-solid fa-dumbbell"></i> FitCraft
+            </a>
+            
+            <div class="d-flex gap-3 align-items-center">
+                <span class="text-xs text-slate-400 font-medium" id="auto-save-status">
+                    <i class="fa-solid fa-check-circle"></i> Changes Saved
+                </span>
+                <div class="h-4 w-[1px] bg-slate-200 mx-2"></div>
+                <input type="file" id="import-file" class="hidden" accept=".json">
+                <button onclick="document.getElementById('import-file').click()" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+                    <i class="fa-solid fa-file-import mr-1"></i> Import JSON
+                </button>
+                <button onclick="exportJSON()" class="btn btn-primary btn-sm rounded-pill px-4 bg-brand-600 hover:bg-brand-900 border-0 shadow-sm">
+                    <i class="fa-solid fa-download mr-1"></i> Export Data
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <div class="d-flex flex-grow-1 overflow-hidden">
+        
+        <!-- Sidebar: Exercise Library -->
+        <div class="w-80 bg-white border-end d-flex flex-column h-100 flex-shrink-0">
+            <div class="p-4 border-bottom">
+                <div class="flex justify-between items-center mb-3">
+                    <h6 class="fw-bold text-slate-800 uppercase tracking-wider text-xs mb-0">Exercise Library</h6>
+                    <button class="btn btn-xs btn-primary bg-brand-600 border-0 rounded-md py-1 px-2" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-slate-50 border-slate-200"><i class="fa-solid fa-search text-slate-400"></i></span>
+                    <input type="text" id="search-library" class="form-control border-slate-200 bg-slate-50" placeholder="Search...">
+                </div>
+            </div>
+            
+            <div class="flex-grow-1 overflow-auto p-3" id="library-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Main Content: Schedule Builder -->
+        <div class="flex-grow-1 overflow-auto bg-slate-50 p-6">
+            <!-- Date & Navigation Header -->
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="d-flex align-items-center bg-white border rounded-xl shadow-sm p-1">
+                        <button class="date-nav-btn px-3 py-2 text-slate-600" onclick="changeWeek(-1)">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <div class="px-4 text-center min-w-[200px]">
+                            <span class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Current Period</span>
+                            <span class="block text-sm font-bold text-slate-800" id="date-display">...</span>
+                        </div>
+                        <button class="date-nav-btn px-3 py-2 text-slate-600" onclick="changeWeek(1)">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-sm text-brand-600 font-bold hover:underline" onclick="jumpToToday()">Jump to Today</button>
+                </div>
+                
+                <div class="d-flex align-items-center bg-white border rounded-xl p-2 gap-3 shadow-sm">
+                    <h2 class="h6 fw-bold text-slate-800 mb-0 px-2 min-w-[150px]" id="program-title" contenteditable="true" onblur="updateProgramMeta()">New Program</h2>
+                    <div class="h-6 w-[1px] bg-slate-200"></div>
+                    <button class="btn btn-sm btn-light border-0 text-red-400 hover:text-red-600 p-2" onclick="clearSchedule()" title="Clear View">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Horizontal Scrollable Week Container -->
+            <div class="d-flex gap-4 overflow-x-auto pb-4" style="min-height: 600px;" id="week-container">
+                <!-- Days populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Exercise -->
+    <div class="modal fade" id="addExerciseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-2xl border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-slate-800">New Library Exercise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <form id="new-exercise-form">
+                        <div class="mb-3">
+                            <label class="form-label text-xs font-bold text-slate-500 uppercase">Exercise Name</label>
+                            <input type="text" class="form-control border-slate-200 bg-slate-50 p-3 rounded-xl" id="new-ex-name" placeholder="e.g. Incline DB Press" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-xs font-bold text-slate-500 uppercase">Muscle Group</label>
+                                <select class="form-select border-slate-200 bg-slate-50 p-3 rounded-xl" id="new-ex-muscle">
+                                    <option>Chest</option><option>Back</option><option>Legs</option><option>Shoulders</option><option>Arms</option><option>Core</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-xs font-bold text-slate-500 uppercase">Type</label>
+                                <select class="form-select border-slate-200 bg-slate-50 p-3 rounded-xl" id="new-ex-type">
+                                    <option>Compound</option><option>Isolation</option><option>Isometric</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 bg-brand-600 border-0 p-3 rounded-xl fw-bold shadow-sm">Save to Library</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="liveToast" class="toast align-items-center text-white bg-slate-800 border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body flex items-center gap-2" id="toast-message"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. STATE & CONSTANTS ---
+        const DEFAULT_EXERCISES = [
+            { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
+            { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-3', name: 'Deadlift', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-4', name: 'Overhead Press', muscle: 'Shoulders', type: 'Compound' },
+            { id: 'ex-5', name: 'Pull-up', muscle: 'Back', type: 'Compound' }
+        ];
+
+        let state = {
+            version: "1.2",
+            currentWeekStart: getMonday(new Date()).toISOString(),
+            customExercises: [],
+            program: {
+                name: "My Strength Program",
+                logs: {} // Key: "YYYY-MM-DD", Value: Exercise array
+            }
+        };
+
+        // --- 2. DATE HELPERS ---
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function formatDateDisplay(dateStr) {
+            const start = new Date(dateStr);
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            const options = { month: 'short', day: 'numeric' };
+            return `${start.toLocaleDateString(undefined, options)} - ${end.toLocaleDateString(undefined, options)}, ${start.getFullYear()}`;
+        }
+
+        function changeWeek(direction) {
+            const current = new Date(state.currentWeekStart);
+            current.setDate(current.getDate() + (direction * 7));
+            if (current.getFullYear() > 2099) return;
+            state.currentWeekStart = current.toISOString();
+            renderWeek();
+            updateDateDisplay();
+            saveState();
+        }
+
+        function jumpToToday() {
+            state.currentWeekStart = getMonday(new Date()).toISOString();
+            renderWeek();
+            updateDateDisplay();
+            saveState();
+        }
+
+        function updateDateDisplay() {
+            document.getElementById('date-display').innerText = formatDateDisplay(state.currentWeekStart);
+        }
+
+        // --- 3. INITIALIZATION ---
+        function init() {
+            const saved = localStorage.getItem('fitcraft_v2');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Ensure all properties exist
+                    state = { ...state, ...parsed };
+                } catch (e) { console.error(e); }
+            }
+            
+            document.getElementById('program-title').innerText = state.program.name;
+            updateDateDisplay();
+            renderLibrary();
+            renderWeek();
+            setupEvents();
+        }
+
+        function saveState() {
+            localStorage.setItem('fitcraft_v2', JSON.stringify(state));
+            const status = document.getElementById('auto-save-status');
+            status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            setTimeout(() => {
+                status.innerHTML = '<i class="fa-solid fa-check-circle text-green-500"></i> Changes Saved';
+            }, 500);
+        }
+
+        function setupEvents() {
+            document.getElementById('search-library').addEventListener('input', (e) => renderLibrary(e.target.value));
+            document.getElementById('import-file').addEventListener('change', handleImport);
+            
+            document.getElementById('new-exercise-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('new-ex-name').value;
+                const muscle = document.getElementById('new-ex-muscle').value;
+                const type = document.getElementById('new-ex-type').value;
+                
+                const newEx = { id: 'custom-' + Date.now(), name, muscle, type };
+                state.customExercises.push(newEx);
+                
+                saveState();
+                renderLibrary();
+                bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide();
+                e.target.reset();
+                showToast(`Added ${name} to library`);
+            });
+        }
+
+        // --- 4. RENDERERS ---
+        function renderLibrary(filter = "") {
+            const container = document.getElementById('library-list');
+            container.innerHTML = '';
+            
+            const list = [...DEFAULT_EXERCISES, ...state.customExercises]
+                .filter(ex => ex.name.toLowerCase().includes(filter.toLowerCase()));
+            
+            list.forEach(ex => {
+                const el = document.createElement('div');
+                el.className = 'exercise-card bg-white p-3 rounded-xl border border-slate-200 mb-3 shadow-sm hover:shadow-md';
+                el.dataset.id = ex.id;
+                el.dataset.name = ex.name;
+                el.innerHTML = `
+                    <div class="fw-bold text-slate-700 text-sm mb-1">${ex.name}</div>
+                    <div class="flex gap-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${ex.muscle}</span>
+                        <span class="text-[10px] font-bold text-brand-500 uppercase tracking-tighter">${ex.type}</span>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+
+            new Sortable(container, {
+                group: { name: 'shared', pull: 'clone', put: false },
+                sort: false,
+                animation: 150
+            });
+        }
+
+        function renderWeek() {
+            const container = document.getElementById('week-container');
+            container.innerHTML = '';
+            const monday = new Date(state.currentWeekStart);
+
+            for (let i = 0; i < 7; i++) {
+                const currentDate = new Date(monday);
+                currentDate.setDate(monday.getDate() + i);
+                const dateKey = currentDate.toISOString().split('T')[0];
+                const dayExercises = state.program.logs[dateKey] || [];
+
+                const col = document.createElement('div');
+                col.className = 'flex flex-col flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm w-80';
+                col.innerHTML = `
+                    <div class="p-3 border-bottom bg-slate-50/50 rounded-t-2xl flex justify-between items-center">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-400 uppercase tracking-widest">${currentDate.toLocaleDateString(undefined, { weekday: 'long' })}</span>
+                            <span class="block font-bold text-slate-700">${currentDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                        </div>
+                        <span class="text-[10px] font-bold bg-white border px-2 py-1 rounded text-slate-400">${dayExercises.length} EX</span>
+                    </div>
+                    <div class="p-3 flex-grow sortable-day-list min-h-[300px]" data-date="${dateKey}">
+                        ${dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('')}
+                    </div>
+                `;
+                container.appendChild(col);
+
+                new Sortable(col.querySelector('.sortable-day-list'), {
+                    group: 'shared',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    handle: '.drag-handle',
+                    onAdd: (e) => handleDrop(e),
+                    onUpdate: (e) => handleReorder(e)
+                });
+            }
+        }
+
+        function renderExerciseCard(ex, dateKey, idx) {
+            return `
+                <div class="bg-white border border-slate-200 rounded-xl p-3 mb-3 shadow-sm" data-id="${ex.id}">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm fw-bold text-slate-700 truncate flex items-center gap-2">
+                            <i class="fa-solid fa-grip-vertical text-slate-300 drag-handle cursor-grab"></i>
+                            ${ex.name}
+                        </span>
+                        <button onclick="removeExercise('${dateKey}', ${idx})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="number" class="form-control form-control-sm text-center rounded-lg bg-slate-50 border-0" value="${ex.sets || 3}" onchange="updateDetail('${dateKey}', ${idx}, 'sets', this.value)">
+                        <input type="text" class="form-control form-control-sm text-center rounded-lg bg-slate-50 border-0" value="${ex.reps || '10'}" onchange="updateDetail('${dateKey}', ${idx}, 'reps', this.value)">
+                        <input type="number" class="form-control form-control-sm text-center rounded-lg bg-slate-50 border-0" placeholder="kg" value="${ex.weight || ''}" onchange="updateDetail('${dateKey}', ${idx}, 'weight', this.value)">
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 5. LOGIC HANDLERS ---
+        function handleDrop(evt) {
+            const dateKey = evt.to.dataset.date;
+            if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
+            
+            if (evt.from.id === 'library-list') {
+                const newEx = {
+                    id: evt.item.dataset.id,
+                    name: evt.item.dataset.name,
+                    sets: 3, reps: '10', weight: null
+                };
+                state.program.logs[dateKey].splice(evt.newIndex, 0, newEx);
+                evt.item.remove();
+            } else {
+                const fromDate = evt.from.dataset.date;
+                const ex = state.program.logs[fromDate].splice(evt.oldIndex, 1)[0];
+                state.program.logs[dateKey].splice(evt.newIndex, 0, ex);
+            }
+            saveState();
+            renderWeek();
+        }
+
+        function handleReorder(evt) {
+            const dateKey = evt.to.dataset.date;
+            const list = state.program.logs[dateKey];
+            const [item] = list.splice(evt.oldIndex, 1);
+            list.splice(evt.newIndex, 0, item);
+            saveState();
+        }
+
+        function removeExercise(date, idx) {
+            state.program.logs[date].splice(idx, 1);
+            saveState();
+            renderWeek();
+        }
+
+        function updateDetail(date, idx, key, val) {
+            state.program.logs[date][idx][key] = val;
+            saveState();
+        }
+
+        function updateProgramMeta() {
+            state.program.name = document.getElementById('program-title').innerText;
+            saveState();
+        }
+
+        function clearSchedule() {
+            if (confirm("Clear all workouts in this view?")) {
+                const monday = new Date(state.currentWeekStart);
+                for(let i=0; i<7; i++) {
+                    const d = new Date(monday);
+                    d.setDate(monday.getDate() + i);
+                    delete state.program.logs[d.toISOString().split('T')[0]];
+                }
+                saveState();
+                renderWeek();
+            }
+        }
+
+        function exportJSON() {
+            const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `FitCraft_Data_${state.program.name.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showToast("Exported all data to JSON");
+        }
+
+        function handleImport(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    state = { ...state, ...imported };
+                    saveState();
+                    location.reload();
+                } catch(e) { alert("Invalid File Format"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function showToast(msg) {
+            document.getElementById('toast-message').innerText = msg;
+            new bootstrap.Toast(document.getElementById('liveToast')).show();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
