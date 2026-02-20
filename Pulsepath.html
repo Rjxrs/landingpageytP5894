@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PulsePath - Professional Edition</title>
+    
+    <!-- PWA / Mobile Home Screen Compatibility -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FitCraft">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#3b82f6">
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="https://chatgpt.com/backend-api/estuary/content?id=file_00000000855472468c801cf86e1c5ffa&ts=492118&p=fs&cid=1&sig=387d41e3191a206321ae5908dc7f60b8aaddfc720cc322afb3293ceb3d8eeadf&v=0">
+    
+    <!-- Web App Manifest (Data URI for single-file portability) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"FitCraft Program Builder","short_name":"FitCraft","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#3b82f6","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2906/2906496.png","sizes":"512x512","type":"image/png"}]}'>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-main: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            /* Prevent pull-to-refresh and extra bouncing on iOS */
+            overscroll-behavior-y: contain;
+        }
+
+        /* Fixed Dark Mode Backgrounds */
+        .bg-main-adaptive { background-color: var(--bg-main); }
+        .bg-card-adaptive { background-color: var(--card-bg); }
+        .border-adaptive { border-color: var(--border-color); }
+
+        .exercise-card { 
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .sidebar {
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .navbar {
+            background-color: var(--card-bg) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            /* Extra padding for iOS Notch */
+            padding-top: env(safe-area-inset-top, 0.5rem) !important;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #475569; }
+
+        .sortable-ghost { opacity: 0.4; background-color: #3b82f622; border: 2px dashed #3b82f6 !important; }
+        
+        /* Layout Constraints */
+        .main-layout { height: calc(100vh - 57px); }
+
+        @media (max-width: 768px) {
+            .main-layout { 
+                flex-direction: column !important; 
+                height: auto !important; 
+                overflow-y: auto !important;
+            }
+            .sidebar { 
+                width: 100% !important; 
+                height: auto !important; 
+                max-height: 350px; 
+                border-right: none; 
+                border-bottom: 1px solid var(--border-color); 
+            }
+            .week-container { 
+                flex-direction: column !important; 
+                padding: 1rem 0 !important; 
+                gap: 1.5rem !important; 
+                overflow-x: visible !important;
+            }
+            .day-column { 
+                width: 100% !important; 
+                min-width: 100% !important; 
+            }
+            body { overflow-y: auto !important; }
+        }
+
+        .set-row input {
+            background-color: rgba(0,0,0,0.03);
+            color: var(--text-main);
+            border: 1px solid transparent;
+        }
+        [data-bs-theme="dark"] .set-row input {
+            background-color: rgba(255,255,255,0.05);
+        }
+        .set-row input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            background-color: transparent;
+        }
+
+        /* Custom Theme Toggle Switch */
+        .theme-switch {
+            width: 48px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        [data-bs-theme="dark"] .theme-switch { background: #3b82f6; }
+        .theme-switch::after {
+            content: "\f185";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 3px;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #f59e0b;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-bs-theme="dark"] .theme-switch::after {
+            content: "\f186";
+            left: 25px;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg px-4 py-2 shrink-0">
+        <div class="container-fluid p-0 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2 m-0" href="#">
+                    <i class="fa-solid fa-dumbbell text-xl"></i> 
+                    <span class="hidden sm:inline">FitCraft</span>
+                </a>
+                <div class="theme-switch shadow-inner" id="darkModeToggle" onclick="toggleDarkMode()"></div>
+            </div>
+            
+            <div class="d-flex gap-2 align-items-center">
+                <span class="hidden md:inline text-[10px] uppercase tracking-widest text-slate-400 font-bold" id="auto-save-status">
+                    Saved
+                </span>
+                <button onclick="exportJSON()" class="btn btn-primary btn-sm rounded-lg px-3 bg-brand-600 border-0 shadow-sm text-xs font-bold">
+                    <i class="fa-solid fa-download"></i> <span class="hidden sm:inline ml-1">Export</span>
+                </button>
+                <button onclick="document.getElementById('import-file').click()" class="btn btn-outline-secondary btn-sm rounded-lg px-3 text-xs font-bold border-adaptive">
+                    <i class="fa-solid fa-file-import"></i>
+                </button>
+                <input type="file" id="import-file" class="hidden" accept=".json">
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex flex-grow-1 overflow-hidden main-layout">
+        
+        <!-- Sidebar -->
+        <div class="sidebar w-80 d-flex flex-column h-100 flex-shrink-0">
+            <div class="p-4 border-bottom border-adaptive">
+                <div class="flex justify-between items-center mb-3">
+                    <h6 class="fw-bold text-muted uppercase tracking-wider text-[11px] mb-0">Library</h6>
+                    <button class="btn btn-xs btn-primary bg-brand-600 border-0 rounded-md py-1 px-2" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-adaptive opacity-50"><i class="fa-solid fa-search"></i></span>
+                    <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-sm text-main-adaptive" placeholder="Find exercise...">
+                </div>
+            </div>
+            <div class="flex-grow-1 overflow-auto p-3" id="library-list"></div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-grow-1 overflow-y-auto p-4 md:p-6 bg-main-adaptive">
+            <div class="mb-4 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center bg-card-adaptive rounded-xl shadow-sm border border-adaptive p-1">
+                        <button class="px-2 py-1 text-muted hover:text-brand-600" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="px-3 text-center min-w-[160px]">
+                            <span class="block text-[10px] font-bold text-muted uppercase tracking-tighter">Plan Period</span>
+                            <span class="block text-xs font-bold" id="date-display">...</span>
+                        </div>
+                        <button class="px-2 py-1 text-muted hover:text-brand-600" onclick="changeWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <button class="btn btn-sm text-brand-600 text-[11px] font-bold p-0 ml-2" onclick="jumpToToday()">TODAY</button>
+                </div>
+                
+                <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-xl p-1 gap-2 shadow-sm">
+                    <h2 class="text-sm fw-bold mb-0 px-3 py-1 min-w-[120px]" id="program-title" contenteditable="true" onblur="updateProgramMeta()">New Program</h2>
+                    <button class="btn btn-sm text-red-400 hover:text-red-600 px-2" onclick="clearSchedule()" title="Clear Week">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- The scrollable week strip -->
+            <div class="d-flex gap-4 overflow-x-auto pb-4 week-container" id="week-container"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="addExerciseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-2xl border-0 shadow-lg bg-card-adaptive">
+                <div class="modal-header border-bottom-0 p-4 pb-0">
+                    <h5 class="modal-title fw-bold text-sm uppercase tracking-widest">Add to Library</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="new-exercise-form">
+                        <div class="mb-3">
+                            <label class="form-label text-[10px] font-bold text-muted uppercase">Name</label>
+                            <input type="text" class="form-control border-adaptive bg-transparent p-2 text-sm" id="new-ex-name" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-[10px] font-bold text-muted uppercase">Muscle Group</label>
+                                <select class="form-select border-adaptive bg-transparent p-2 text-sm" id="new-ex-muscle">
+                                    <option>Chest</option><option>Back</option><option>Legs</option>
+                                    <option>Shoulders</option><option>Arms (Biceps)</option>
+                                    <option>Arms (Triceps)</option><option>Forearms</option>
+                                    <option>Core / Abs</option><option>Calves</option>
+                                    <option>Glutes</option><option>Cardio</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-[10px] font-bold text-muted uppercase">Type</label>
+                                <select class="form-select border-adaptive bg-transparent p-2 text-sm" id="new-ex-type">
+                                    <option>Compound</option><option>Isolation</option><option>Isometric</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 bg-brand-600 border-0 p-2 rounded-lg fw-bold text-sm">Save Exercise</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. STATE & THEME ---
+        const DEFAULT_EXERCISES = [
+            { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
+            { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-3', name: 'Deadlift', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-4', name: 'Standing Calf Raise', muscle: 'Calves', type: 'Isolation' },
+            { id: 'ex-5', name: 'Plank', muscle: 'Core / Abs', type: 'Isometric' },
+            { id: 'ex-6', name: 'Pull Ups', muscle: 'Back', type: 'Compound' }
+        ];
+
+        let state = {
+            version: "1.5",
+            theme: 'light',
+            currentWeekStart: getMonday(new Date()).toISOString(),
+            customExercises: [],
+            program: { name: "My New Program", logs: {} }
+        };
+
+        function toggleDarkMode() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            applyTheme();
+            saveState();
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            html.setAttribute('data-bs-theme', state.theme);
+            if (state.theme === 'dark') {
+                html.classList.add('dark');
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0f172a');
+            } else {
+                html.classList.remove('dark');
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#3b82f6');
+            }
+        }
+
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        // --- 2. CORE LOGIC ---
+        function init() {
+            const saved = localStorage.getItem('fitcraft_v4');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } catch (e) { console.error(e); }
+            }
+            applyTheme();
+            document.getElementById('program-title').innerText = state.program.name;
+            updateDateDisplay();
+            renderLibrary();
+            renderWeek();
+            setupEvents();
+        }
+
+        function saveState() {
+            localStorage.setItem('fitcraft_v4', JSON.stringify(state));
+            const status = document.getElementById('auto-save-status');
+            status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            setTimeout(() => status.innerHTML = 'Saved', 600);
+        }
+
+        function renderLibrary(filter = "") {
+            const container = document.getElementById('library-list');
+            container.innerHTML = '';
+            const list = [...DEFAULT_EXERCISES, ...state.customExercises].filter(ex => ex.name.toLowerCase().includes(filter.toLowerCase()));
+            
+            list.forEach(ex => {
+                const el = document.createElement('div');
+                el.className = 'exercise-card p-3 rounded-xl mb-3 shadow-sm hover:shadow-md cursor-grab';
+                el.dataset.id = ex.id;
+                el.dataset.name = ex.name;
+                el.innerHTML = `
+                    <div class="fw-bold text-sm mb-1">${ex.name}</div>
+                    <div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>
+                `;
+                container.appendChild(el);
+            });
+
+            new Sortable(container, { group: { name: 'shared', pull: 'clone', put: false }, sort: false, animation: 150 });
+        }
+
+        function renderWeek() {
+            const container = document.getElementById('week-container');
+            container.innerHTML = '';
+            const monday = new Date(state.currentWeekStart);
+
+            for (let i = 0; i < 7; i++) {
+                const currentDate = new Date(monday);
+                currentDate.setDate(monday.getDate() + i);
+                const dateKey = currentDate.toISOString().split('T')[0];
+                const dayExercises = state.program.logs[dateKey] || [];
+
+                const col = document.createElement('div');
+                col.className = 'day-column flex flex-col flex-shrink-0 bg-card-adaptive rounded-2xl border border-adaptive shadow-sm w-72 md:w-80 h-fit';
+                col.innerHTML = `
+                    <div class="p-3 border-bottom border-adaptive flex justify-between items-center">
+                        <div>
+                            <span class="block text-[9px] font-bold text-muted uppercase tracking-widest">${currentDate.toLocaleDateString(undefined, { weekday: 'long' })}</span>
+                            <span class="block text-xs font-bold">${currentDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                        </div>
+                    </div>
+                    <div class="p-3 flex-grow sortable-day-list min-h-[150px]" data-date="${dateKey}">
+                        ${dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('')}
+                    </div>
+                `;
+                container.appendChild(col);
+
+                new Sortable(col.querySelector('.sortable-day-list'), {
+                    group: 'shared', animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle',
+                    onAdd: handleDrop, onUpdate: handleReorder
+                });
+            }
+        }
+
+        function renderExerciseCard(ex, dateKey, idx) {
+            if (!ex.sets) ex.sets = [{ reps: '', weight: '' }];
+            
+            let setHtml = ex.sets.map((set, sIdx) => `
+                <div class="flex gap-1 mb-1 items-center set-row">
+                    <span class="text-[9px] w-4 font-bold opacity-30">${sIdx + 1}</span>
+                    <input type="number" placeholder="R" class="form-control form-control-sm text-center text-[11px] rounded-md py-1" 
+                        value="${set.reps}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
+                    <input type="number" placeholder="KG" class="form-control form-control-sm text-center text-[11px] rounded-md py-1" 
+                        value="${set.weight}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
+                </div>
+            `).join('');
+
+            return `
+                <div class="exercise-card rounded-xl p-3 mb-3 shadow-sm border-adaptive">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs fw-bold truncate flex items-center gap-2">
+                            <i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab"></i> ${ex.name}
+                        </span>
+                        <button onclick="removeExercise('${dateKey}', ${idx})" class="text-muted hover:text-red-500"><i class="fa-solid fa-xmark text-xs"></i></button>
+                    </div>
+                    <div>${setHtml}</div>
+                </div>
+            `;
+        }
+
+        function updateSetRow(dateKey, exIdx, setIdx, key, value) {
+            const exercise = state.program.logs[dateKey][exIdx];
+            exercise.sets[setIdx][key] = value;
+            const lastSet = exercise.sets[exercise.sets.length - 1];
+            if (lastSet.reps !== '' || lastSet.weight !== '') {
+                exercise.sets.push({ reps: '', weight: '' });
+                renderWeek(); 
+            }
+            saveState();
+        }
+
+        function handleDrop(evt) {
+            const dateKey = evt.to.dataset.date;
+            if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
+            
+            if (evt.from.id === 'library-list') {
+                const newEx = { id: evt.item.dataset.id, name: evt.item.dataset.name, sets: [{ reps: '', weight: '' }] };
+                state.program.logs[dateKey].splice(evt.newIndex, 0, newEx);
+                evt.item.remove();
+            } else {
+                const fromDate = evt.from.dataset.date;
+                const ex = state.program.logs[fromDate].splice(evt.oldIndex, 1)[0];
+                state.program.logs[dateKey].splice(evt.newIndex, 0, ex);
+            }
+            saveState();
+            renderWeek();
+        }
+
+        function handleReorder(evt) {
+            const dateKey = evt.to.dataset.date;
+            const list = state.program.logs[dateKey];
+            const [item] = list.splice(evt.oldIndex, 1);
+            list.splice(evt.newIndex, 0, item);
+            saveState();
+        }
+
+        function removeExercise(date, idx) {
+            state.program.logs[date].splice(idx, 1);
+            saveState();
+            renderWeek();
+        }
+
+        function updateProgramMeta() {
+            state.program.name = document.getElementById('program-title').innerText;
+            saveState();
+        }
+
+        function changeWeek(dir) {
+            const d = new Date(state.currentWeekStart);
+            d.setDate(d.getDate() + (dir * 7));
+            state.currentWeekStart = d.toISOString();
+            updateDateDisplay(); renderWeek(); saveState();
+        }
+
+        function jumpToToday() {
+            state.currentWeekStart = getMonday(new Date()).toISOString();
+            updateDateDisplay(); renderWeek(); saveState();
+        }
+
+        function updateDateDisplay() {
+            const start = new Date(state.currentWeekStart);
+            const end = new Date(start); end.setDate(start.getDate() + 6);
+            document.getElementById('date-display').innerText = `${start.toLocaleDateString(undefined, {month:'short', day:'numeric'})} - ${end.toLocaleDateString(undefined, {month:'short', day:'numeric'})}, ${start.getFullYear()}`;
+        }
+
+        function exportJSON() {
+            const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `FitCraft_${state.program.name.replace(/\s+/g, '_')}.json`;
+            a.click();
+        }
+
+        function handleImport(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    state = JSON.parse(event.target.result);
+                    saveState(); location.reload();
+                } catch(err) { alert("Invalid File Format"); }
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        function clearSchedule() {
+            const currentWeek = new Date(state.currentWeekStart);
+            for (let i = 0; i < 7; i++) {
+                const dateKey = new Date(currentWeek).toISOString().split('T')[0];
+                state.program.logs[dateKey] = [];
+                currentWeek.setDate(currentWeek.getDate() + 1);
+            }
+            saveState();
+            renderWeek();
+        }
+
+        function setupEvents() {
+            document.getElementById('search-library').addEventListener('input', (e) => renderLibrary(e.target.value));
+            document.getElementById('import-file').addEventListener('change', handleImport);
+            document.getElementById('new-exercise-form').onsubmit = (e) => {
+                e.preventDefault();
+                state.customExercises.push({
+                    id: 'custom-'+Date.now(),
+                    name: document.getElementById('new-ex-name').value,
+                    muscle: document.getElementById('new-ex-muscle').value,
+                    type: document.getElementById('new-ex-type').value
+                });
+                saveState(); renderLibrary();
+                bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide();
+                e.target.reset();
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
