@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PulsePath - Professional Edition</title>
+    <title>Pulse Path - Professional Edition</title>
     
     <!-- PWA / Mobile Home Screen Compatibility -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FitCraft">
+    <meta name="apple-mobile-web-app-title" content="Pulse Path">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#3b82f6">
+    <meta name="theme-color" content="#121212">
 
     <!-- Icons -->
-    <link rel="apple-touch-icon" href="https://chatgpt.com/backend-api/estuary/content?id=file_00000000855472468c801cf86e1c5ffa&ts=492118&p=fs&cid=1&sig=387d41e3191a206321ae5908dc7f60b8aaddfc720cc322afb3293ceb3d8eeadf&v=0">
+    <link rel="apple-touch-icon" href="https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true">
     
-    <!-- Web App Manifest (Data URI for single-file portability) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"FitCraft Program Builder","short_name":"FitCraft","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#3b82f6","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2906/2906496.png","sizes":"512x512","type":"image/png"}]}'>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Pulse Path Program Builder","short_name":"PulsePath","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#3b82f6","icons":[{"src":"https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true","sizes":"512x512","type":"image/png"}]}'>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,7 +29,8 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+                        amoled: '#0a0a0a'
                     }
                 }
             }
@@ -43,14 +44,18 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
+            --scrollbar-track: #f1f5f9;
+            --scrollbar-thumb: #cbd5e1;
         }
 
         [data-bs-theme="dark"] {
-            --bg-main: #0f172a;
-            --card-bg: #1e293b;
+            --bg-main: #0a0a0a; /* AMOLED Black-ish */
+            --card-bg: #121212; /* Dark Grey AMOLED */
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
-            --border-color: #334155;
+            --border-color: #1e1e1e;
+            --scrollbar-track: #121212;
+            --scrollbar-thumb: #334155;
         }
 
         body { 
@@ -58,11 +63,9 @@
             color: var(--text-main);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             transition: background-color 0.3s ease, color 0.3s ease;
-            /* Prevent pull-to-refresh and extra bouncing on iOS */
             overscroll-behavior-y: contain;
         }
 
-        /* Fixed Dark Mode Backgrounds */
         .bg-main-adaptive { background-color: var(--bg-main); }
         .bg-card-adaptive { background-color: var(--card-bg); }
         .border-adaptive { border-color: var(--border-color); }
@@ -81,43 +84,40 @@
         .navbar {
             background-color: var(--card-bg) !important;
             border-bottom: 1px solid var(--border-color) !important;
-            /* Extra padding for iOS Notch */
             padding-top: env(safe-area-inset-top, 0.5rem) !important;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #475569; }
+        /* Enhanced Visible Scrollbar for better UX/UI Feedback */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { 
+            background: var(--scrollbar-track); 
+            border-radius: 10px;
+            margin: 4px;
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--scrollbar-thumb); 
+            border-radius: 10px;
+            border: 2px solid var(--scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        /* Ensure horizontal week container has visible scrolling cues */
+        .week-container {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
 
         .sortable-ghost { opacity: 0.4; background-color: #3b82f622; border: 2px dashed #3b82f6 !important; }
         
-        /* Layout Constraints */
         .main-layout { height: calc(100vh - 57px); }
 
         @media (max-width: 768px) {
-            .main-layout { 
-                flex-direction: column !important; 
-                height: auto !important; 
-                overflow-y: auto !important;
-            }
-            .sidebar { 
-                width: 100% !important; 
-                height: auto !important; 
-                max-height: 350px; 
-                border-right: none; 
-                border-bottom: 1px solid var(--border-color); 
-            }
-            .week-container { 
-                flex-direction: column !important; 
-                padding: 1rem 0 !important; 
-                gap: 1.5rem !important; 
-                overflow-x: visible !important;
-            }
-            .day-column { 
-                width: 100% !important; 
-                min-width: 100% !important; 
-            }
+            .main-layout { flex-direction: column !important; height: auto !important; overflow-y: auto !important; }
+            .sidebar { width: 100% !important; height: auto !important; max-height: 350px; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .week-container { flex-direction: column !important; padding: 1rem 0 !important; gap: 1.5rem !important; overflow-x: visible !important; }
+            .day-column { width: 100% !important; min-width: 100% !important; }
             body { overflow-y: auto !important; }
         }
 
@@ -135,7 +135,6 @@
             background-color: transparent;
         }
 
-        /* Custom Theme Toggle Switch */
         .theme-switch {
             width: 48px;
             height: 24px;
@@ -169,6 +168,12 @@
             left: 25px;
             color: #1e3a8a;
         }
+
+        .logo-img {
+            height: 32px;
+            width: auto;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
@@ -178,8 +183,8 @@
         <div class="container-fluid p-0 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2 m-0" href="#">
-                    <i class="fa-solid fa-dumbbell text-xl"></i> 
-                    <span class="hidden sm:inline">FitCraft</span>
+                    <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true" alt="Pulse Path" class="logo-img">
+                    <span class="hidden sm:inline">Pulse Path</span>
                 </a>
                 <div class="theme-switch shadow-inner" id="darkModeToggle" onclick="toggleDarkMode()"></div>
             </div>
@@ -286,7 +291,6 @@
     </div>
 
     <script>
-        // --- 1. STATE & THEME ---
         const DEFAULT_EXERCISES = [
             { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
             { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
@@ -297,8 +301,8 @@
         ];
 
         let state = {
-            version: "1.5",
-            theme: 'light',
+            version: "1.6",
+            theme: 'dark', // Default to Dark/AMOLED
             currentWeekStart: getMonday(new Date()).toISOString(),
             customExercises: [],
             program: { name: "My New Program", logs: {} }
@@ -315,7 +319,7 @@
             html.setAttribute('data-bs-theme', state.theme);
             if (state.theme === 'dark') {
                 html.classList.add('dark');
-                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0f172a');
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0a0a0a');
             } else {
                 html.classList.remove('dark');
                 document.querySelector('meta[name="theme-color"]').setAttribute('content', '#3b82f6');
@@ -328,9 +332,8 @@
             return new Date(d.setDate(diff));
         }
 
-        // --- 2. CORE LOGIC ---
         function init() {
-            const saved = localStorage.getItem('fitcraft_v4');
+            const saved = localStorage.getItem('pulse_path_v1');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -346,7 +349,7 @@
         }
 
         function saveState() {
-            localStorage.setItem('fitcraft_v4', JSON.stringify(state));
+            localStorage.setItem('pulse_path_v1', JSON.stringify(state));
             const status = document.getElementById('auto-save-status');
             status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
             setTimeout(() => status.innerHTML = 'Saved', 600);
@@ -500,7 +503,7 @@
             const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `FitCraft_${state.program.name.replace(/\s+/g, '_')}.json`;
+            a.download = `PulsePath_${state.program.name.replace(/\s+/g, '_')}.json`;
             a.click();
         }
 
