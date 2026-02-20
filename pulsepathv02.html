@@ -76,7 +76,7 @@
 
         [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
 
-        /* Mobile Optimized Spacing (Fixing the "Cramped" issue) */
+        /* Mobile Optimized Spacing */
         @media (max-width: 768px) {
             .navbar {
                 padding: 1.25rem 1rem !important;
@@ -120,7 +120,7 @@
                 font-size: 1rem !important;
             }
             .set-row input {
-                min-height: 48px !important; /* Larger touch target for inputs */
+                min-height: 48px !important; 
                 font-size: 14px !important;
             }
             #program-title {
@@ -197,6 +197,11 @@
         [data-bs-theme="dark"] .theme-switch::after { content: "\f186"; left: 29px; color: #1e3a8a; }
 
         .logo-img { height: 34px; width: auto; border-radius: 4px; }
+
+        /* Highlight Press Animation */
+        .exercise-card:active {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
     </style>
 </head>
 <body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
@@ -273,6 +278,21 @@
         </div>
     </div>
 
+    <!-- Selection Modal -->
+    <div class="modal fade" id="selectDayModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-3xl border-0 shadow-2xl bg-card-adaptive">
+                <div class="modal-header border-bottom-0 p-5 pb-0">
+                    <h5 class="modal-title fw-bold text-sm uppercase tracking-widest" id="select-day-title">Add to Day</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="day-selection-list">
+                    <!-- Day options will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modals -->
     <div class="modal fade" id="addExerciseModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -330,6 +350,8 @@
             program: { name: "Pulse Path Program", logs: {} }
         };
 
+        let selectedExerciseForDay = null;
+
         function toggleDarkMode() {
             state.theme = state.theme === 'light' ? 'dark' : 'light';
             applyTheme();
@@ -384,12 +406,59 @@
             const list = [...DEFAULT_EXERCISES, ...state.customExercises].filter(ex => ex.name.toLowerCase().includes(filter.toLowerCase()));
             list.forEach(ex => {
                 const el = document.createElement('div');
-                el.className = 'exercise-card p-5 rounded-3xl mb-4 shadow-sm hover:shadow-md cursor-grab active:scale-95 transition-transform';
-                el.dataset.id = ex.id; el.dataset.name = ex.name;
-                el.innerHTML = `<div class="fw-bold text-sm mb-1">${ex.name}</div><div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>`;
+                el.className = 'exercise-card p-5 rounded-3xl mb-4 shadow-sm hover:shadow-md cursor-pointer transition-all active:scale-95 flex justify-between items-center';
+                el.onclick = () => openDaySelector(ex);
+                el.innerHTML = `
+                    <div>
+                        <div class="fw-bold text-sm mb-1">${ex.name}</div>
+                        <div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>
+                    </div>
+                    <div class="bg-brand-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </div>
+                `;
                 container.appendChild(el);
             });
-            new Sortable(container, { group: { name: 'shared', pull: 'clone', put: false }, sort: false, animation: 150 });
+        }
+
+        function openDaySelector(exercise) {
+            selectedExerciseForDay = exercise;
+            const modalTitle = document.getElementById('select-day-title');
+            modalTitle.innerText = `Add ${exercise.name}`;
+            
+            const list = document.getElementById('day-selection-list');
+            list.innerHTML = '';
+            
+            const monday = new Date(state.currentWeekStart);
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                const dayName = date.toLocaleDateString(undefined, { weekday: 'long' });
+                const dateKey = date.toISOString().split('T')[0];
+                
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 mb-2 rounded-2xl hover:bg-brand-50 border-adaptive border transition-colors flex justify-between items-center';
+                btn.innerHTML = `<span class="text-sm font-bold">${dayName}</span><i class="fa-solid fa-chevron-right text-[10px] opacity-30"></i>`;
+                btn.onclick = () => {
+                    addExerciseToDay(dateKey, exercise);
+                    bootstrap.Modal.getInstance(document.getElementById('selectDayModal')).hide();
+                };
+                list.appendChild(btn);
+            }
+            
+            new bootstrap.Modal(document.getElementById('selectDayModal')).show();
+        }
+
+        function addExerciseToDay(dateKey, exercise) {
+            if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
+            const newEx = { 
+                id: exercise.id + '-' + Date.now(), 
+                name: exercise.name, 
+                sets: [{ reps: '', weight: '' }] 
+            };
+            state.program.logs[dateKey].push(newEx);
+            saveState();
+            renderWeek();
         }
 
         function renderWeek() {
@@ -410,12 +479,12 @@
                             <span class="block text-sm font-bold">${currentDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
                         </div>
                     </div>
-                    <div class="p-4 flex-grow sortable-day-list min-h-[200px]" data-date="${dateKey}">
-                        ${dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('')}
+                    <div class="p-4 flex-grow sortable-day-list min-h-[100px]" data-date="${dateKey}">
+                        ${dayExercises.length > 0 ? dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('') : '<div class="text-[10px] text-muted text-center py-10 opacity-50 italic">Tap an exercise to add</div>'}
                     </div>
                 `;
                 container.appendChild(col);
-                new Sortable(col.querySelector('.sortable-day-list'), { group: 'shared', animation: 150, ghostClass: 'sortable-ghost', handle: '.drag-handle', onAdd: handleDrop, onUpdate: handleReorder });
+                new Sortable(col.querySelector('.sortable-day-list'), { animation: 150, handle: '.drag-handle', onUpdate: handleReorder });
             }
         }
 
@@ -437,20 +506,6 @@
             const lastSet = exercise.sets[exercise.sets.length - 1];
             if (lastSet.reps !== '' || lastSet.weight !== '') { exercise.sets.push({ reps: '', weight: '' }); renderWeek(); }
             saveState();
-        }
-
-        function handleDrop(evt) {
-            const dateKey = evt.to.dataset.date;
-            if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
-            if (evt.from.id === 'library-list') {
-                const newEx = { id: evt.item.dataset.id, name: evt.item.dataset.name, sets: [{ reps: '', weight: '' }] };
-                state.program.logs[dateKey].splice(evt.newIndex, 0, newEx); evt.item.remove();
-            } else {
-                const fromDate = evt.from.dataset.date;
-                const ex = state.program.logs[fromDate].splice(evt.oldIndex, 1)[0];
-                state.program.logs[dateKey].splice(evt.newIndex, 0, ex);
-            }
-            saveState(); renderWeek();
         }
 
         function handleReorder(evt) {
