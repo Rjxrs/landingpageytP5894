@@ -74,58 +74,32 @@
             border-color: var(--border-color) !important;
         }
 
-        [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-
-        /* Mobile Optimized Spacing */
+        /* Mobile Adjustments */
         @media (max-width: 768px) {
-            .navbar {
-                padding: 1.25rem 1rem !important;
-                height: 80px !important;
+            .main-layout {
+                height: auto !important;
+                display: block !important;
+                overflow-y: auto !important;
             }
             .sidebar {
                 width: 100% !important;
                 height: auto !important;
-                max-height: none !important;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
-                padding-bottom: 2rem;
             }
-            .sidebar .p-4 {
-                padding: 2.5rem 1.5rem 1.5rem 1.5rem !important;
-            }
-            .exercise-card {
-                padding: 1.75rem !important;
-                margin-bottom: 1.5rem !important;
-                border-radius: 1.25rem !important;
+            /* Vertical Scrolling for Week View on Mobile */
+            .week-container {
+                flex-direction: column !important;
+                overflow-x: hidden !important;
+                padding: 1rem !important;
+                gap: 1.5rem !important;
             }
             .day-column {
                 width: 100% !important;
                 min-width: 100% !important;
-                margin-bottom: 2.5rem !important;
             }
-            .day-column .p-4 {
-                padding: 2rem 1.5rem !important;
-            }
-            .week-container {
-                padding: 2.5rem 1rem !important;
-                gap: 3rem !important;
-            }
-            .main-layout {
-                height: auto !important;
-                overflow-y: auto !important;
-                display: block !important;
-            }
-            .dropdown-item {
-                padding: 1rem 1.5rem !important;
-                font-size: 1rem !important;
-            }
-            .set-row input {
-                min-height: 48px !important; 
-                font-size: 14px !important;
-            }
-            #program-title {
-                padding: 1rem !important;
-                font-size: 1.1rem !important;
+            .exercise-card {
+                padding: 1.25rem !important;
             }
         }
 
@@ -145,23 +119,10 @@
             border-bottom: 1px solid var(--border-color) !important;
         }
 
-        /* Visible Scrollbar Track */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { 
-            background: var(--scrollbar-track); 
-            border-radius: 10px;
-            margin: 2px;
-        }
-        ::-webkit-scrollbar-thumb { 
-            background: var(--scrollbar-thumb); 
-            border-radius: 10px;
-            border: 2px solid var(--scrollbar-track);
-        }
-        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
-
         .week-container {
             scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+            display: flex;
+            flex-direction: row;
         }
 
         .main-layout { height: calc(100vh - 57px); }
@@ -170,7 +131,7 @@
             background-color: rgba(0,0,0,0.03);
             color: var(--text-main);
             border: 1px solid transparent;
-            min-height: 34px;
+            min-height: 38px;
         }
         [data-bs-theme="dark"] .set-row input { background-color: rgba(255,255,255,0.05); }
 
@@ -180,33 +141,23 @@
             border-radius: 50px;
             position: relative;
             cursor: pointer;
-            transition: background 0.3s;
         }
         [data-bs-theme="dark"] .theme-switch { background: #3b82f6; }
         .theme-switch::after {
-            content: "\f185";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
+            content: "\f185"; font-family: "Font Awesome 6 Free"; font-weight: 900;
             position: absolute; left: 3px; top: 3px;
-            width: 20px; height: 20px;
-            background: white; border-radius: 50%;
+            width: 20px; height: 20px; background: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 10px; color: #f59e0b;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 10px; color: #f59e0b; transition: 0.3s;
         }
         [data-bs-theme="dark"] .theme-switch::after { content: "\f186"; left: 29px; color: #1e3a8a; }
 
         .logo-img { height: 34px; width: auto; border-radius: 4px; }
-
-        /* Highlight Press Animation */
-        .exercise-card:active {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
     </style>
 </head>
 <body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
 
-    <nav class="navbar navbar-expand-lg px-3 px-md-4 py-2 shrink-0">
+    <nav class="navbar navbar-expand-lg px-3 py-2 shrink-0">
         <div class="container-fluid p-0 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2 m-0" href="#">
@@ -221,17 +172,6 @@
                 <button onclick="exportJSON()" class="btn btn-primary btn-sm rounded-lg px-3 bg-brand-600 border-0 shadow-sm text-xs font-bold">
                     <i class="fa-solid fa-download"></i> <span class="hidden sm:inline ml-1">Export</span>
                 </button>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary btn-sm rounded-lg px-3 text-xs font-bold border-adaptive" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa-solid fa-gear text-base"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-xl border-adaptive">
-                        <li><a class="dropdown-item" href="#" onclick="document.getElementById('import-file').click()"><i class="fa-solid fa-file-import mr-3"></i> Import Plan</a></li>
-                        <li><hr class="dropdown-divider border-adaptive opacity-50"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmClear()"><i class="fa-solid fa-trash mr-3"></i> Clear Schedule</a></li>
-                    </ul>
-                </div>
-                <input type="file" id="import-file" class="hidden" accept=".json">
             </div>
         </div>
     </nav>
@@ -240,15 +180,15 @@
         <!-- Sidebar -->
         <div class="sidebar w-80 d-flex flex-column h-100 flex-shrink-0">
             <div class="p-4 border-bottom border-adaptive">
-                <div class="flex justify-between items-center mb-5">
+                <div class="flex justify-between items-center mb-4">
                     <h6 class="fw-bold text-muted uppercase tracking-wider text-[11px] mb-0">Exercise Library</h6>
-                    <button class="btn btn-primary bg-brand-600 border-0 rounded-xl py-2 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
-                        <i class="fa-solid fa-plus mr-1"></i> <span class="text-xs font-bold">ADD</span>
+                    <button class="btn btn-primary bg-brand-600 btn-sm border-0 rounded-lg px-3 py-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
+                        <i class="fa-solid fa-plus mr-1"></i> <span class="text-[10px] font-bold">ADD</span>
                     </button>
                 </div>
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-adaptive opacity-50"><i class="fa-solid fa-search"></i></span>
-                    <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-sm py-3" placeholder="Search exercises...">
+                    <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-sm py-2" placeholder="Search...">
                 </div>
             </div>
             <div class="flex-grow-1 overflow-auto p-4" id="library-list"></div>
@@ -256,73 +196,54 @@
 
         <!-- Main Workspace -->
         <div class="flex-grow-1 overflow-y-auto p-4 md:p-6 bg-main-adaptive">
-            <div class="mb-6 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-5">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center bg-card-adaptive rounded-2xl shadow-sm border border-adaptive p-1">
-                        <button class="p-4 text-muted hover:text-brand-600" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                        <div class="px-2 text-center min-w-[140px]">
-                            <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest">Current Week</span>
-                            <span class="block text-sm font-bold" id="date-display">...</span>
+            <div class="mb-4 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-4">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center bg-card-adaptive rounded-xl shadow-sm border border-adaptive p-1">
+                        <button class="p-2 text-muted hover:text-brand-600" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="px-2 text-center min-w-[120px]">
+                            <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest">Week</span>
+                            <span class="block text-xs font-bold" id="date-display">...</span>
                         </div>
-                        <button class="p-4 text-muted hover:text-brand-600" onclick="changeWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button class="p-2 text-muted hover:text-brand-600" onclick="changeWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
-                    <button class="btn btn-sm text-brand-600 text-[11px] font-extrabold px-3 py-2" onclick="jumpToToday()">TODAY</button>
                 </div>
                 
-                <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-2xl p-3 px-4 shadow-sm w-full sm:w-auto">
-                    <i class="fa-solid fa-pen-to-square opacity-30 mr-3 text-xs"></i>
-                    <h2 class="text-sm fw-bold mb-0 flex-grow text-center sm:text-left" id="program-title" contenteditable="true" onblur="updateProgramMeta()">New Program</h2>
+                <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-xl p-2 px-4 shadow-sm w-full sm:w-auto">
+                    <h2 class="text-sm fw-bold mb-0 flex-grow text-center" id="program-title" contenteditable="true" onblur="updateProgramMeta()">My Workout Plan</h2>
                 </div>
             </div>
-            <div class="d-flex gap-4 overflow-x-auto pb-10 week-container" id="week-container"></div>
+            <div class="week-container gap-4 pb-10" id="week-container"></div>
         </div>
     </div>
 
     <!-- Selection Modal -->
-    <div class="modal fade" id="selectDayModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="selectDayModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content rounded-3xl border-0 shadow-2xl bg-card-adaptive">
-                <div class="modal-header border-bottom-0 p-5 pb-0">
-                    <h5 class="modal-title fw-bold text-sm uppercase tracking-widest" id="select-day-title">Add to Day</h5>
+                <div class="modal-header border-bottom-0 p-4 pb-0">
+                    <h5 class="modal-title fw-bold text-xs uppercase tracking-widest" id="select-day-title">Add to Day</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4" id="day-selection-list">
-                    <!-- Day options will be rendered here -->
-                </div>
+                <div class="modal-body p-3" id="day-selection-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div class="modal fade" id="addExerciseModal" tabindex="-1" aria-hidden="true">
+    <!-- Add Custom Exercise Modal -->
+    <div class="modal fade" id="addExerciseModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-3xl border-0 shadow-2xl bg-card-adaptive">
+            <div class="modal-content rounded-3xl border-0 bg-card-adaptive">
                 <div class="modal-header border-bottom-0 p-5 pb-0">
                     <h5 class="modal-title fw-bold text-sm uppercase tracking-widest">Create Exercise</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-5">
                     <form id="new-exercise-form">
-                        <div class="mb-5">
+                        <div class="mb-4">
                             <label class="form-label text-[10px] font-bold text-muted uppercase">Name</label>
-                            <input type="text" class="form-control border-adaptive bg-transparent p-4 text-sm rounded-xl" id="new-ex-name" placeholder="e.g. Lateral Raises" required>
+                            <input type="text" class="form-control border-adaptive bg-transparent p-3 text-sm rounded-xl" id="new-ex-name" required>
                         </div>
-                        <div class="row mb-5">
-                            <div class="col-6">
-                                <label class="form-label text-[10px] font-bold text-muted uppercase">Target</label>
-                                <select class="form-select border-adaptive bg-transparent p-4 text-sm rounded-xl" id="new-ex-muscle">
-                                    <option>Chest</option><option>Back</option><option>Legs</option>
-                                    <option>Shoulders</option><option>Arms</option><option>Core</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label text-[10px] font-bold text-muted uppercase">Style</label>
-                                <select class="form-select border-adaptive bg-transparent p-4 text-sm rounded-xl" id="new-ex-type">
-                                    <option>Compound</option><option>Isolation</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 bg-brand-600 border-0 p-4 rounded-xl fw-bold text-sm shadow-md">Add to Library</button>
+                        <button type="submit" class="btn btn-primary w-100 bg-brand-600 border-0 p-3 rounded-xl fw-bold text-sm">Add to Library</button>
                     </form>
                 </div>
             </div>
@@ -339,23 +260,33 @@
             { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
             { id: 'ex-2', name: 'Bench Press', muscle: 'Chest', type: 'Compound' },
             { id: 'ex-3', name: 'Deadlift', muscle: 'Back', type: 'Compound' },
-            { id: 'ex-4', name: 'Pull Ups', muscle: 'Back', type: 'Compound' }
+            { id: 'ex-4', name: 'Pull Ups', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-5', name: 'Overhead Press', muscle: 'Shoulders', type: 'Compound' }
         ];
 
         let state = {
-            version: "2.0",
+            version: "2.1",
             theme: 'light',
             currentWeekStart: getMonday(new Date()).toISOString(),
             customExercises: [],
             program: { name: "Pulse Path Program", logs: {} }
         };
 
-        let selectedExerciseForDay = null;
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
 
-        function toggleDarkMode() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
+        function init() {
+            const saved = localStorage.getItem('pulse_path_v1');
+            if (saved) { state = { ...state, ...JSON.parse(saved) }; }
             applyTheme();
-            saveState();
+            document.getElementById('program-title').innerText = state.program.name;
+            updateDateDisplay();
+            renderLibrary();
+            renderWeek();
+            setupEvents();
         }
 
         function applyTheme() {
@@ -371,26 +302,10 @@
             }
         }
 
-        function getMonday(d) {
-            d = new Date(d);
-            const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(d.setDate(diff));
-        }
-
-        function init() {
-            const saved = localStorage.getItem('pulse_path_v1');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed };
-                } catch (e) { console.error(e); }
-            }
+        function toggleDarkMode() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
             applyTheme();
-            document.getElementById('program-title').innerText = state.program.name;
-            updateDateDisplay();
-            renderLibrary();
-            renderWeek();
-            setupEvents();
+            saveState();
         }
 
         function saveState() {
@@ -406,15 +321,15 @@
             const list = [...DEFAULT_EXERCISES, ...state.customExercises].filter(ex => ex.name.toLowerCase().includes(filter.toLowerCase()));
             list.forEach(ex => {
                 const el = document.createElement('div');
-                el.className = 'exercise-card p-5 rounded-3xl mb-4 shadow-sm hover:shadow-md cursor-pointer transition-all active:scale-95 flex justify-between items-center';
+                el.className = 'exercise-card p-4 rounded-2xl mb-3 shadow-sm cursor-pointer transition-all active:scale-95 flex justify-between items-center';
                 el.onclick = () => openDaySelector(ex);
                 el.innerHTML = `
                     <div>
-                        <div class="fw-bold text-sm mb-1">${ex.name}</div>
-                        <div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle} • ${ex.type}</div>
+                        <div class="fw-bold text-xs mb-0.5">${ex.name}</div>
+                        <div class="text-[9px] text-muted font-bold uppercase tracking-wider">${ex.muscle || 'Custom'}</div>
                     </div>
-                    <div class="bg-brand-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm">
-                        <i class="fa-solid fa-plus text-xs"></i>
+                    <div class="bg-brand-500 text-white rounded-lg w-7 h-7 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
                     </div>
                 `;
                 container.appendChild(el);
@@ -422,41 +337,35 @@
         }
 
         function openDaySelector(exercise) {
-            selectedExerciseForDay = exercise;
             const modalTitle = document.getElementById('select-day-title');
             modalTitle.innerText = `Add ${exercise.name}`;
-            
             const list = document.getElementById('day-selection-list');
             list.innerHTML = '';
-            
             const monday = new Date(state.currentWeekStart);
             for (let i = 0; i < 7; i++) {
                 const date = new Date(monday);
                 date.setDate(monday.getDate() + i);
                 const dayName = date.toLocaleDateString(undefined, { weekday: 'long' });
                 const dateKey = date.toISOString().split('T')[0];
-                
                 const btn = document.createElement('button');
-                btn.className = 'w-full text-left p-4 mb-2 rounded-2xl hover:bg-brand-50 border-adaptive border transition-colors flex justify-between items-center';
-                btn.innerHTML = `<span class="text-sm font-bold">${dayName}</span><i class="fa-solid fa-chevron-right text-[10px] opacity-30"></i>`;
+                btn.className = 'w-full text-left p-3 mb-2 rounded-xl hover:bg-brand-50 border-adaptive border flex justify-between items-center';
+                btn.innerHTML = `<span class="text-xs font-bold">${dayName}</span><i class="fa-solid fa-plus text-[10px] opacity-30"></i>`;
                 btn.onclick = () => {
                     addExerciseToDay(dateKey, exercise);
                     bootstrap.Modal.getInstance(document.getElementById('selectDayModal')).hide();
                 };
                 list.appendChild(btn);
             }
-            
             new bootstrap.Modal(document.getElementById('selectDayModal')).show();
         }
 
         function addExerciseToDay(dateKey, exercise) {
             if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
-            const newEx = { 
-                id: exercise.id + '-' + Date.now(), 
+            state.program.logs[dateKey].push({ 
+                id: Date.now(), 
                 name: exercise.name, 
                 sets: [{ reps: '', weight: '' }] 
-            };
-            state.program.logs[dateKey].push(newEx);
+            });
             saveState();
             renderWeek();
         }
@@ -471,16 +380,15 @@
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const dayExercises = state.program.logs[dateKey] || [];
                 const col = document.createElement('div');
-                col.className = 'day-column flex flex-col flex-shrink-0 bg-card-adaptive rounded-3xl border border-adaptive shadow-sm w-80 h-fit';
+                col.className = 'day-column flex flex-col flex-shrink-0 bg-card-adaptive rounded-2xl border border-adaptive shadow-sm w-80 h-fit';
                 col.innerHTML = `
-                    <div class="p-5 border-bottom border-adaptive flex justify-between items-center">
+                    <div class="p-4 border-bottom border-adaptive flex justify-between items-center">
                         <div>
                             <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest">${currentDate.toLocaleDateString(undefined, { weekday: 'long' })}</span>
-                            <span class="block text-sm font-bold">${currentDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
                         </div>
                     </div>
-                    <div class="p-4 flex-grow sortable-day-list min-h-[100px]" data-date="${dateKey}">
-                        ${dayExercises.length > 0 ? dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('') : '<div class="text-[10px] text-muted text-center py-10 opacity-50 italic">Tap an exercise to add</div>'}
+                    <div class="p-3 sortable-day-list min-h-[50px]" data-date="${dateKey}">
+                        ${dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('')}
                     </div>
                 `;
                 container.appendChild(col);
@@ -489,23 +397,48 @@
         }
 
         function renderExerciseCard(ex, dateKey, idx) {
-            if (!ex.sets) ex.sets = [{ reps: '', weight: '' }];
             let setHtml = ex.sets.map((set, sIdx) => `
-                <div class="flex gap-2 mb-3 items-center set-row">
-                    <span class="text-[9px] w-5 font-bold opacity-30">${sIdx + 1}</span>
-                    <input type="number" placeholder="REPS" class="form-control form-control-sm text-center text-[10px] rounded-xl py-3" value="${set.reps}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
-                    <input type="number" placeholder="KG" class="form-control form-control-sm text-center text-[10px] rounded-xl py-3" value="${set.weight}" oninput="updateSetRow('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
+                <div class="flex gap-2 mb-2 items-center set-row">
+                    <span class="text-[9px] w-4 font-bold opacity-30">${sIdx + 1}</span>
+                    <input type="number" placeholder="Reps" class="form-control form-control-sm text-center text-[10px] rounded-lg" value="${set.reps}" oninput="updateSetData('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
+                    <input type="number" placeholder="KG" class="form-control form-control-sm text-center text-[10px] rounded-lg" value="${set.weight}" oninput="updateSetData('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
+                    <button onclick="removeSet('${dateKey}', ${idx}, ${sIdx})" class="p-1 opacity-20 hover:opacity-100"><i class="fa-solid fa-times text-[10px]"></i></button>
                 </div>
             `).join('');
-            return `<div class="exercise-card rounded-2xl p-5 mb-4 shadow-sm border-adaptive"><div class="flex justify-between items-center mb-4"><span class="text-xs fw-bold truncate flex items-center gap-4"><i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab p-2"></i> ${ex.name}</span><button onclick="removeExercise('${dateKey}', ${idx})" class="p-3 text-muted hover:text-red-500"><i class="fa-solid fa-xmark text-sm"></i></button></div><div>${setHtml}</div></div>`;
+            
+            return `
+                <div class="exercise-card rounded-xl p-3 mb-3 border-adaptive">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[11px] fw-bold truncate flex items-center gap-2">
+                            <i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab"></i> 
+                            ${ex.name}
+                        </span>
+                        <button onclick="removeExercise('${dateKey}', ${idx})" class="p-1 text-muted hover:text-red-500"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                    </div>
+                    <div id="sets-${dateKey}-${idx}">${setHtml}</div>
+                    <button onclick="addSet('${dateKey}', ${idx})" class="w-full mt-2 py-1 border border-dashed border-adaptive rounded-lg text-[9px] font-bold text-muted uppercase hover:bg-brand-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Set
+                    </button>
+                </div>`;
         }
 
-        function updateSetRow(dateKey, exIdx, setIdx, key, value) {
-            const exercise = state.program.logs[dateKey][exIdx];
-            exercise.sets[setIdx][key] = value;
-            const lastSet = exercise.sets[exercise.sets.length - 1];
-            if (lastSet.reps !== '' || lastSet.weight !== '') { exercise.sets.push({ reps: '', weight: '' }); renderWeek(); }
+        function updateSetData(dateKey, exIdx, setIdx, key, value) {
+            state.program.logs[dateKey][exIdx].sets[setIdx][key] = value;
             saveState();
+        }
+
+        function addSet(dateKey, exIdx) {
+            state.program.logs[dateKey][exIdx].sets.push({ reps: '', weight: '' });
+            saveState();
+            renderWeek();
+        }
+
+        function removeSet(dateKey, exIdx, setIdx) {
+            if (state.program.logs[dateKey][exIdx].sets.length > 1) {
+                state.program.logs[dateKey][exIdx].sets.splice(setIdx, 1);
+                saveState();
+                renderWeek();
+            }
         }
 
         function handleReorder(evt) {
@@ -519,7 +452,6 @@
         function removeExercise(date, idx) { state.program.logs[date].splice(idx, 1); saveState(); renderWeek(); }
         function updateProgramMeta() { state.program.name = document.getElementById('program-title').innerText; saveState(); }
         function changeWeek(dir) { const d = new Date(state.currentWeekStart); d.setDate(d.getDate() + (dir * 7)); state.currentWeekStart = d.toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
-        function jumpToToday() { state.currentWeekStart = getMonday(new Date()).toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
         function updateDateDisplay() {
             const start = new Date(state.currentWeekStart);
             const end = new Date(start); end.setDate(start.getDate() + 6);
@@ -529,23 +461,14 @@
         function exportJSON() {
             const blob = new Blob([JSON.stringify(state)], {type: 'application/json'});
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = `PulsePath_Plan.json`; a.click();
-        }
-
-        function confirmClear() { if(confirm("Are you sure? This will delete all entries for the current plan.")) { state.program.logs = {}; saveState(); renderWeek(); } }
-
-        function handleImport(e) {
-            const reader = new FileReader();
-            reader.onload = (event) => { try { state = JSON.parse(event.target.result); saveState(); location.reload(); } catch(err) { alert("Invalid File"); } };
-            reader.readAsText(e.target.files[0]);
+            a.download = `PulsePath_Workout.json`; a.click();
         }
 
         function setupEvents() {
             document.getElementById('search-library').addEventListener('input', (e) => renderLibrary(e.target.value));
-            document.getElementById('import-file').addEventListener('change', handleImport);
             document.getElementById('new-exercise-form').onsubmit = (e) => {
                 e.preventDefault();
-                state.customExercises.push({ id: 'custom-'+Date.now(), name: document.getElementById('new-ex-name').value, muscle: document.getElementById('new-ex-muscle').value, type: document.getElementById('new-ex-type').value });
+                state.customExercises.push({ id: Date.now(), name: document.getElementById('new-ex-name').value });
                 saveState(); renderLibrary(); bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide(); e.target.reset();
             };
         }
