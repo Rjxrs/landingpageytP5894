@@ -1,444 +1,422 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Official Player Hub | Heat_In_The_Desert_Guy</title>
-    
-    <!-- External CSS & Frameworks -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Desert Hub | Heat_In_The_Desert_Guy</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
         :root {
-            --desert-red: #ef4444;
-            --desert-dark: #050507;
-            --desert-card: rgba(15, 23, 42, 0.4);
+            --brand-primary: #ff3e3e; 
+            --brand-secondary: #7000ff; 
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-dark: #050507;
+            --card-radius: 24px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            transition: background-color 0.5s ease, color 0.5s ease;
-        }
-        
-        .font-brand { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
-        
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Animations */
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow { animation: spin-slow 10s linear infinite; }
-        
-        .bg-desert-gradient {
-            background: radial-gradient(circle at center, rgba(255, 62, 62, 0.15) 0%, transparent 40%), 
-                        radial-gradient(circle at 20% 30%, rgba(112, 0, 255, 0.12) 0%, transparent 30%);
+        [data-bs-theme="dark"] {
+            --bg-dark: #050507;
+            --bg-card: #0c0c0e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
-        /* Custom Input Styling */
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 12px;
-            width: 12px;
-            border-radius: 50%;
-            background: var(--desert-red);
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding-top: 100px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .nav-link, .font-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Branding: Header Dock 1:1 */
+        .header-dock {
+            background: rgba(5, 5, 7, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 0;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 2000;
+        }
+
+        .tool-link {
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .tool-link:hover, .tool-link.active {
+            transform: translateY(-3px);
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+            box-shadow: 0 10px 20px rgba(255, 62, 62, 0.3);
+        }
+
+        /* Content Cards */
+        .media-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--brand-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tag-container {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .tag-toggle {
+            color: var(--brand-primary);
             cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            border: none;
+            background: none;
+            padding: 0 5px;
         }
 
-        .dark-mode { background-color: var(--desert-dark); color: #f1f5f9; }
-        .light-mode { background-color: #f1f5f9; color: #0f172a; }
-
-        /* Header Dock Styles */
-        #mainHeader {
-            transition: all 0.3s ease;
-        }
-
-        .nav-link-custom {
-            width: 40px;
-            height: 40px;
+        /* Player Bar */
+        .master-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 90px;
+            background: rgba(12, 12, 14, 0.9);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            z-index: 2100;
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: inherit;
-            transition: all 0.2s;
+            padding: 0 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        .nav-link-custom:hover {
-            background: var(--desert-red);
-            color: white !important;
-            transform: translateY(-2px);
+        .play-btn {
+            width: 54px; height: 54px;
+            background: var(--brand-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
         }
+        .play-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 62, 62, 0.4); }
 
-        .active-tab {
-            background: var(--desert-red) !important;
-            color: white !important;
+        .video-stage {
+            background: #000;
+            border-radius: 32px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            border: 1px solid var(--glass-border);
+            position: relative;
         }
+        
+        video { width: 100%; height: 100%; object-fit: contain; }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--brand-primary); border-radius: 10px; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="dark-mode overflow-x-hidden">
+<body>
 
-    <!-- HEADER DOCK (Synced with Primary Site) -->
-    <header id="mainHeader" class="fixed-top border-b border-white/10 backdrop-blur-xl py-3 px-4 px-md-6 d-flex justify-content-between align-items-center bg-[#050507]/80 z-[2000]">
-        <div class="d-flex align-items-center gap-3">
-            <span id="clock" class="bg-black/40 border border-white/10 text-[11px] font-mono px-3 py-1.5 rounded-lg text-red-500">
-                00:00:00
-            </span>
-        </div>
-        
-        <nav class="d-flex align-items-center gap-2">
-            <!-- Navigation Sequence: PulsePath, Music, Xbox, FaceSwap -->
-            <a href="/" class="nav-link-custom" title="Home">
-                <i class="fa-solid fa-house-chimney fs-6"></i>
-            </a>
-            <a href="/pulsepathv02" class="nav-link-custom" title="PulsePath">
-                <i class="fa-solid fa-heart-pulse fs-6"></i>
-            </a>
-            <a href="#" class="nav-link-custom active-tab" title="Music">
-                <i class="fa-solid fa-compact-disc fs-6"></i>
-            </a>
-            <a href="/XboxGREPfdowngrader.html" class="nav-link-custom" title="Xbox">
-                <i class="fa-brands fa-xbox fs-6"></i>
-            </a>
-            <a href="/faceswapv1.html" class="nav-link-custom" title="AI Swap">
-                <i class="fa-solid fa-wand-magic-sparkles fs-6"></i>
-            </a>
-            
-            <div class="vr mx-2 opacity-10 d-none d-md-block" style="height: 24px; color: white;"></div>
-            
-            <button id="themeToggle" class="nav-link-custom text-warning">
-                <i class="fa-solid fa-sun fs-6"></i>
-            </button>
-        </nav>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section class="relative pt-32 pb-20 px-6 overflow-hidden text-center">
-        <div id="bgPulse" class="absolute inset-0 z-0 pointer-events-none opacity-40 bg-desert-gradient animate-[spin_20s_linear_infinite]"></div>
-
-        <div class="relative z-10 max-w-4xl mx-auto">
-            <div class="inline-flex items-center gap-8 px-8 py-3 bg-white/5 border border-white/10 backdrop-blur-2xl rounded-full mb-8 shadow-2xl relative font-brand">
-                <div class="flex items-baseline gap-1.5">
-                    <span class="text-xl font-bold text-red-500">106</span>
-                    <span class="text-[10px] uppercase font-bold opacity-50 tracking-widest">Subs</span>
-                </div>
-                <div class="flex items-baseline gap-1.5">
-                    <span class="text-xl font-bold text-red-500">24</span>
-                    <span class="text-[10px] uppercase font-bold opacity-50 tracking-widest">Videos</span>
-                </div>
-                <div class="flex items-baseline gap-1.5">
-                    <span class="text-xl font-bold text-red-500">91.8K</span>
-                    <span class="text-[10px] uppercase font-bold opacity-50 tracking-widest">Views</span>
-                </div>
-                <button id="refreshStats" class="absolute -right-12 text-slate-500 hover:text-red-500 transition-all">
-                    <i data-lucide="refresh-cw" class="w-[18px]"></i>
-                </button>
+    <!-- Header Dock (Branding Code) -->
+    <header class="header-dock">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <span id="live-clock" class="badge bg-dark border border-secondary fw-normal py-2 px-3">00:00:00</span>
+                <h5 class="m-0 font-brand fw-bold d-none d-md-block" style="font-size: 1rem;">DESERT_HUB <span class="text-danger">V6</span></h5>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-brand text-white">
-                Desert Audio Hub
-            </h1>
-            <p class="text-lg opacity-60 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Tune into global frequencies or upload your own desert sessions. Integrated with AI metadata analysis.
-            </p>
+            <div class="d-flex align-items-center gap-2">
+                <button onclick="switchTab('radio')" class="tool-link nav-btn active" id="btn-radio" title="Radio"><i class="fas fa-radio"></i></button>
+                <button onclick="switchTab('iptv')" class="tool-link nav-btn" id="btn-iptv" title="IPTV"><i class="fas fa-tv"></i></button>
+                <button onclick="switchTab('video')" class="tool-link nav-btn" id="btn-video" title="Player"><i class="fas fa-play"></i></button>
+                <div class="vr mx-2 opacity-25"></div>
+                <input type="text" id="searchInput" placeholder="Search signals..." class="bg-dark border border-secondary rounded-pill px-3 py-1 text-white small" style="width: 150px;">
+            </div>
         </div>
-    </section>
+    </header>
 
-    <!-- APP CONTENT AREA -->
-    <section class="max-w-7xl mx-auto px-6 pb-40">
-        <div class="bg-slate-900/40 border border-white/5 rounded-[40px] overflow-hidden backdrop-blur-md">
-            <div class="flex flex-col md:flex-row h-[700px]">
-                <!-- Nav Rail -->
-                <div class="w-full md:w-20 border-b md:border-b-0 md:border-r border-white/5 p-4 flex flex-row md:flex-col items-center gap-4">
-                    <button id="tabRadio" class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all bg-red-600 text-white" title="Global Radio">
-                        <i class="fa-solid fa-earth-americas fs-4"></i>
-                    </button>
-                    <button id="tabPlayer" class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:bg-white/5 text-slate-400" title="My Library">
-                        <i class="fa-solid fa-music fs-4"></i>
-                    </button>
-                </div>
+    <main class="container mb-5 pb-5">
+        <!-- View Title -->
+        <div class="mb-4">
+            <h1 id="viewTitle" class="display-6 fw-bold">Radio Scanner</h1>
+            <p id="viewSubtitle" class="text-muted small text-uppercase tracking-wider">Global Signal Intercept</p>
+        </div>
 
-                <!-- List and Explorer -->
-                <div class="flex-1 flex flex-col min-w-0">
-                    <header class="p-6 border-b border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                        <div class="relative w-full max-w-sm">
-                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-[18px]"></i>
-                            <input id="searchInput" type="text" placeholder="Search frequencies..."
-                                class="w-full bg-black/40 border border-white/10 rounded-full py-2.5 pl-12 pr-6 text-sm focus:border-red-500 outline-none">
+        <!-- Media Grid -->
+        <div id="mediaGrid" class="row g-4">
+            <!-- Content injected by JS -->
+        </div>
+
+        <!-- Video View -->
+        <div id="videoView" class="hidden">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="video-stage shadow-2xl mb-4">
+                        <video id="mainVideo" controls crossorigin="anonymous"></video>
+                    </div>
+                    <div class="media-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 id="nowPlayingName" class="h4 mb-1">No Source Detected</h2>
+                                <p class="text-muted small mb-0">Lightweight HTML5 Engine Active</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button onclick="promptRemote()" class="btn btn-outline-danger rounded-pill px-4">URL</button>
+                                <button onclick="document.getElementById('fileInput').click()" class="btn btn-danger rounded-pill px-4">Local</button>
+                                <input type="file" id="fileInput" class="hidden" accept="video/*,audio/*">
+                            </div>
                         </div>
-                        <div id="countrySelectorContainer">
-                            <select id="countrySelect" class="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-red-500 font-brand">
-                                <!-- Loaded via API -->
-                            </select>
-                        </div>
-                    </header>
-
-                    <div id="contentGrid" class="flex-1 overflow-y-auto p-6 scrollbar-hide grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 content-start">
-                        <!-- Items populated by JS -->
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </main>
 
-    <!-- PLAYER CONTROLLER (FLOATING) -->
-    <footer class="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl z-[2000]">
-        <div class="bg-slate-900/80 border border-white/10 backdrop-blur-2xl rounded-full px-8 py-4 flex items-center justify-between shadow-2xl">
-            <div class="flex items-center gap-4 w-1/3 min-w-0">
-                <div id="trackDisk" class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden border border-white/10 bg-slate-800 transition-all">
-                    <i class="fa-solid fa-compact-disc text-red-500 fs-4" id="diskIcon"></i>
-                </div>
-                <div class="min-w-0 hidden sm:block">
-                    <h6 id="currentTrackTitle" class="text-sm font-bold truncate font-brand m-0">The Desert Silence</h6>
-                    <p id="currentTrackArtist" class="text-[10px] text-red-500 font-bold uppercase tracking-widest truncate font-brand m-0">Standby</p>
-                </div>
+    <!-- Master Player Bar -->
+    <footer class="master-bar">
+        <div class="d-flex align-items-center gap-3 w-25">
+            <div id="miniArt" class="rounded-3 bg-dark border border-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; overflow: hidden;">
+                <i class="fas fa-compact-disc text-secondary"></i>
             </div>
-
-            <div class="flex items-center gap-4">
-                <button id="prevBtn" class="text-slate-500 hover:text-white transition-all"><i class="fa-solid fa-backward-step"></i></button>
-                <button id="playBtn" class="w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg">
-                    <i class="fa-solid fa-play fs-4" id="playIcon"></i>
-                </button>
-                <button id="nextBtn" class="text-slate-500 hover:text-white transition-all"><i class="fa-solid fa-forward-step"></i></button>
-            </div>
-
-            <div class="flex items-center gap-3 w-1/3 justify-end">
-                <i class="fa-solid fa-volume-low text-slate-500 hidden sm:block"></i>
-                <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.7"
-                    class="w-20 accent-red-600 cursor-pointer h-1 bg-white/10 rounded-full appearance-none">
+            <div class="overflow-hidden">
+                <div id="barTitle" class="fw-bold text-truncate small">System Standby</div>
+                <div id="barMeta" class="text-danger text-uppercase" style="font-size: 10px; font-weight: 700;">Idle</div>
             </div>
         </div>
-        <div id="errorMessage" class="hidden absolute top-[-40px] left-1/2 -translate-x-1/2 text-xs font-bold text-red-500 bg-black/80 px-4 py-1.5 rounded-full border border-red-500/20 font-brand">
-            Stream blocked or offline.
+
+        <div class="flex-grow-1 d-flex justify-content-center gap-4 align-items-center">
+            <button class="btn text-secondary"><i class="fas fa-step-backward"></i></button>
+            <button id="masterPlayBtn" class="play-btn">
+                <i class="fas fa-play" id="playIcon"></i>
+            </button>
+            <button class="btn text-secondary"><i class="fas fa-step-forward"></i></button>
+        </div>
+
+        <div class="w-25 d-flex justify-content-end align-items-center gap-3">
+            <i class="fas fa-volume-up text-muted small"></i>
+            <input type="range" id="masterVol" min="0" max="1" step="0.05" value="0.7" class="form-range" style="width: 100px;">
         </div>
     </footer>
 
-    <footer class="py-20 text-center opacity-30 text-[11px] uppercase tracking-[0.3em] font-bold font-brand">
-        &copy; 2025 Heat_In_The_Desert_Guy | Audio Network
-    </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const apiKey = ""; // Gemini API Key
-        let activeTab = 'radio';
-        let isDarkMode = true;
-        let stations = [];
-        let localTracks = [];
-        let currentTrack = null;
-        let isPlaying = false;
-        let searchQuery = "";
-        let selectedCountry = "US";
+        const RADIO_API = "https://de1.api.radio-browser.info/json";
+        const IPTV_API = "https://iptv-org.github.io/api/channels.json";
 
-        const audio = new Audio();
-        audio.volume = 0.7;
-
-        const dom = {
-            clock: document.getElementById('clock'),
-            themeToggle: document.getElementById('themeToggle'),
-            tabRadio: document.getElementById('tabRadio'),
-            tabPlayer: document.getElementById('tabPlayer'),
-            searchInput: document.getElementById('searchInput'),
-            countrySelect: document.getElementById('countrySelect'),
-            contentGrid: document.getElementById('contentGrid'),
-            playBtn: document.getElementById('playBtn'),
-            playIcon: document.getElementById('playIcon'),
-            volumeSlider: document.getElementById('volumeSlider'),
-            trackDisk: document.getElementById('trackDisk'),
-            trackTitle: document.getElementById('currentTrackTitle'),
-            trackArtist: document.getElementById('currentTrackArtist'),
-            errorMessage: document.getElementById('errorMessage'),
-            refreshStats: document.getElementById('refreshStats')
+        const state = {
+            activeTab: 'radio',
+            data: { radio: [], iptv: [] },
+            current: null,
+            search: ''
         };
 
-        async function init() {
-            lucide.createIcons();
-            startClock();
-            await loadCountries();
-            await loadStations(selectedCountry);
-            setupListeners();
-        }
+        const audio = new Audio();
+        const video = document.getElementById('mainVideo');
 
-        function startClock() {
-            setInterval(() => {
-                const now = new Date();
-                dom.clock.innerText = now.toTimeString().split(' ')[0];
-            }, 1000);
-        }
+        function init() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            switchTab('radio');
 
-        async function loadCountries() {
-            try {
-                const res = await fetch('https://de1.api.radio-browser.info/json/countries');
-                const countries = await res.json();
-                countries.sort((a, b) => b.stationcount - a.stationcount);
-                dom.countrySelect.innerHTML = countries.slice(0, 40).map(c => 
-                    `<option value="${c.iso_3166_1}" ${c.iso_3166_1 === 'US' ? 'selected' : ''}>${c.name}</option>`
-                ).join('');
-            } catch (e) { console.error("API error", e); }
-        }
-
-        async function loadStations(countryCode) {
-            dom.contentGrid.innerHTML = `<div class="col-span-full py-20 text-center opacity-40 animate-pulse font-brand text-xs uppercase tracking-widest">Scanning signals...</div>`;
-            try {
-                const res = await fetch(`https://de1.api.radio-browser.info/json/stations/bycountrycodeexact/${countryCode}?limit=30&order=clickcount&reverse=true`);
-                stations = await res.json();
+            // Global Listeners
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                state.search = e.target.value;
                 render();
-            } catch (e) { console.error("Stations failed", e); }
+            });
+
+            document.getElementById('masterPlayBtn').addEventListener('click', togglePlay);
+            document.getElementById('masterVol').addEventListener('input', (e) => {
+                const vol = e.target.value;
+                audio.volume = vol;
+                video.volume = vol;
+            });
+
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) play({ name: file.name, url: URL.createObjectURL(file), tags: "Local File" });
+            });
+
+            // Media Event Logic Fix
+            [audio, video].forEach(m => {
+                m.onplay = () => document.getElementById('playIcon').className = 'fas fa-pause';
+                m.onpause = () => document.getElementById('playIcon').className = 'fas fa-play';
+            });
         }
 
-        function render() {
-            dom.contentGrid.innerHTML = '';
+        async function switchTab(tab) {
+            state.activeTab = tab;
             
-            if (activeTab === 'radio') {
-                const filtered = stations.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
-                filtered.forEach(station => {
-                    const isActive = currentTrack?.stationuuid === station.stationuuid;
-                    const card = document.createElement('div');
-                    card.className = `flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${isActive ? 'bg-red-600/10 border-red-500/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
-                    card.onclick = () => playMedia(station, 'radio');
-                    card.innerHTML = `
-                        <div class="w-12 h-12 bg-slate-800 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
-                            ${station.favicon ? `<img src="${station.favicon}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-tower-broadcast"></i>`}
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-sm font-bold truncate font-brand mb-0">${station.name}</h4>
-                            <p class="text-[10px] uppercase opacity-50 tracking-wider truncate font-brand mb-0">${station.tags || 'General'}</p>
-                        </div>
-                    `;
-                    dom.contentGrid.appendChild(card);
-                });
-            } else {
-                // Local Media Section
-                const uploadBox = document.createElement('div');
-                uploadBox.className = "p-4 h-full rounded-2xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-500 transition-all font-brand group";
-                uploadBox.innerHTML = `<input type="file" multiple id="fileUpload" class="hidden"><i class="fa-solid fa-cloud-arrow-up text-slate-500 group-hover:text-red-500"></i><span class="text-[10px] uppercase font-bold text-slate-500">Add Tracks</span>`;
-                uploadBox.onclick = () => document.getElementById('fileUpload').click();
-                dom.contentGrid.appendChild(uploadBox);
-                
-                document.getElementById('fileUpload')?.addEventListener('change', handleFileUpload);
+            // UI Toggle
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${tab}`).classList.add('active');
 
-                localTracks.forEach(track => {
-                    const isActive = currentTrack?.id === track.id;
-                    const card = document.createElement('div');
-                    card.className = `flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${isActive ? 'bg-red-600/10 border-red-500/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
-                    card.onclick = () => playMedia(track, 'local');
-                    card.innerHTML = `
-                        <div class="w-12 h-12 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center">
-                            <i class="fa-solid fa-music"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-sm font-bold truncate font-brand mb-0">${track.name}</h4>
-                            <p class="text-[10px] uppercase opacity-50 tracking-wider truncate font-brand mb-0">${track.artist}</p>
-                        </div>
-                    `;
-                    dom.contentGrid.appendChild(card);
-                });
-            }
-        }
+            const isPlayer = tab === 'video';
+            document.getElementById('videoView').classList.toggle('hidden', !isPlayer);
+            document.getElementById('mediaGrid').classList.toggle('hidden', isPlayer);
 
-        async function handleFileUpload(e) {
-            const files = Array.from(e.target.files);
-            for (const file of files) {
-                const meta = await getGeminiMetadata(file.name);
-                localTracks.push({
-                    id: Math.random().toString(36),
-                    name: file.name.replace(/\.[^/.]+$/, ""),
-                    artist: meta.artist || "Local Artist",
-                    url: URL.createObjectURL(file),
-                    type: 'local'
-                });
-            }
+            document.getElementById('viewTitle').innerText = tab.toUpperCase();
+            document.getElementById('viewSubtitle').innerText = `Intercepting ${tab} signals...`;
+
+            if (tab === 'radio' && !state.data.radio.length) loadRadio();
+            if (tab === 'iptv' && !state.data.iptv.length) loadIPTV();
+            
             render();
         }
 
-        async function getGeminiMetadata(filename) {
-            if (!apiKey) return { artist: "Desert Unknown" };
+        async function loadRadio() {
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Extract probable artist name from filename: ${filename}. Return JSON: {"artist": "string"}` }] }],
-                        generationConfig: { responseMimeType: "application/json" }
-                    })
-                });
-                const data = await res.json();
-                return JSON.parse(data.candidates[0].content.parts[0].text);
-            } catch { return { artist: "Local Session" }; }
-        }
-
-        function playMedia(item, type) {
-            dom.errorMessage.classList.add('hidden');
-            audio.src = type === 'radio' ? item.url_resolved : item.url;
-            audio.play().then(() => {
-                isPlaying = true;
-                currentTrack = { ...item, type };
-                updatePlayerUI();
+                const res = await fetch(`${RADIO_API}/stations/bycountrycodeexact/US?limit=100&order=clickcount&reverse=true`);
+                state.data.radio = await res.json();
                 render();
-            }).catch(() => dom.errorMessage.classList.remove('hidden'));
+            } catch (e) { console.error("Radio fail", e); }
         }
 
-        function updatePlayerUI() {
-            dom.playIcon.className = isPlaying ? 'fa-solid fa-pause fs-4' : 'fa-solid fa-play fs-4';
-            if (isPlaying) dom.trackDisk.classList.add('animate-spin-slow');
-            else dom.trackDisk.classList.remove('animate-spin-slow');
-            
-            if (currentTrack) {
-                dom.trackTitle.innerText = currentTrack.name;
-                dom.trackArtist.innerText = currentTrack.artist || currentTrack.country || "Network Frequency";
-                if (currentTrack.favicon) {
-                    dom.trackDisk.innerHTML = `<img src="${currentTrack.favicon}" class="w-full h-full object-cover">`;
-                } else {
-                    dom.trackDisk.innerHTML = `<i class="fa-solid fa-compact-disc text-red-500 fs-4"></i>`;
-                }
+        async function loadIPTV() {
+            try {
+                const res = await fetch(IPTV_API);
+                const data = await res.json();
+                state.data.iptv = data.slice(0, 200).map(c => ({
+                    name: c.name,
+                    url: c.url,
+                    logo: c.logo,
+                    tags: c.languages?.join(', ') || "Global"
+                }));
+                render();
+            } catch (e) { console.error("IPTV fail", e); }
+        }
+
+        function render() {
+            if (state.activeTab === 'video') return;
+            const grid = document.getElementById('mediaGrid');
+            grid.innerHTML = '';
+
+            const list = state.data[state.activeTab] || [];
+            const filtered = list.filter(i => (i.name || "").toLowerCase().includes(state.search.toLowerCase()));
+
+            filtered.forEach(item => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                
+                const tagsRaw = item.tags || "";
+                const hasLongTags = tagsRaw.length > 25;
+                const displayTags = hasLongTags ? tagsRaw.substring(0, 25) + "..." : tagsRaw;
+
+                col.innerHTML = `
+                    <div class="media-card">
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="rounded-3 bg-dark d-flex align-items-center justify-content-center overflow-hidden" style="width: 45px; height: 45px; flex-shrink:0;">
+                                ${ (item.favicon || item.logo) ? `<img src="${item.favicon || item.logo}" class="w-100 h-100 object-fit-cover" onerror="this.src='https://placehold.co/100?text=Signal'">` : '<i class="fas fa-satellite text-secondary"></i>'}
+                            </div>
+                            <div class="overflow-hidden">
+                                <h6 class="mb-0 text-truncate font-brand">${item.name}</h6>
+                                <div class="tag-container" id="tag-${Math.random().toString(36).substr(2,9)}">
+                                    <span class="tag-text">${displayTags}</span>
+                                    ${hasLongTags ? `<button class="tag-toggle" onclick="expandTags(this, '${tagsRaw.replace(/'/g, "\\'")}')">></button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="play(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="btn btn-sm btn-outline-danger w-100 rounded-pill mt-auto">CONNECT</button>
+                    </div>
+                `;
+                grid.appendChild(col);
+            });
+        }
+
+        function expandTags(btn, fullText) {
+            const span = btn.previousElementSibling;
+            if (btn.innerText === '>') {
+                span.innerText = fullText;
+                btn.innerText = '<';
+            } else {
+                span.innerText = fullText.substring(0, 25) + "...";
+                btn.innerText = '>';
             }
         }
 
-        function setupListeners() {
-            dom.themeToggle.onclick = () => {
-                isDarkMode = !isDarkMode;
-                document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
-                dom.themeToggle.innerHTML = isDarkMode ? `<i class="fa-solid fa-sun"></i>` : `<i class="fa-solid fa-moon"></i>`;
-            };
-
-            dom.tabRadio.onclick = () => {
-                activeTab = 'radio';
-                dom.tabRadio.classList.add('bg-red-600', 'text-white');
-                dom.tabRadio.classList.remove('text-slate-400');
-                dom.tabPlayer.classList.remove('bg-red-600', 'text-white');
-                dom.tabPlayer.classList.add('text-slate-400');
-                render();
-            };
-
-            dom.tabPlayer.onclick = () => {
-                activeTab = 'player';
-                dom.tabPlayer.classList.add('bg-red-600', 'text-white');
-                dom.tabPlayer.classList.remove('text-slate-400');
-                dom.tabRadio.classList.remove('bg-red-600', 'text-white');
-                dom.tabRadio.classList.add('text-slate-400');
-                render();
-            };
-
-            dom.playBtn.onclick = () => {
-                if (!audio.src) return;
-                if (isPlaying) audio.pause(); else audio.play();
-                isPlaying = !isPlaying;
-                updatePlayerUI();
-            };
-
-            dom.volumeSlider.oninput = (e) => audio.volume = e.target.value;
-            dom.searchInput.oninput = (e) => { searchQuery = e.target.value; render(); };
-            dom.countrySelect.onchange = (e) => loadStations(e.target.value);
+        function play(item) {
+            state.current = item;
+            const url = item.url_resolved || item.url;
             
-            dom.refreshStats.onclick = () => {
-                dom.refreshStats.classList.add('animate-spin');
-                setTimeout(() => dom.refreshStats.classList.remove('animate-spin'), 800);
-            };
+            // Logic to determine if it's a video signal
+            const isVideo = state.activeTab === 'iptv' || url.includes('.m3u8') || url.includes('.mp4');
+
+            audio.pause();
+            video.pause();
+
+            if (isVideo) {
+                switchTab('video');
+                video.src = url;
+                video.play().catch(e => console.warn("Auto-play blocked"));
+                document.getElementById('nowPlayingName').innerText = item.name;
+            } else {
+                audio.src = url;
+                audio.play().catch(e => console.warn("Auto-play blocked"));
+            }
+
+            // Update Master Bar
+            document.getElementById('barTitle').innerText = item.name;
+            document.getElementById('barMeta').innerText = isVideo ? 'VIDEO SIGNAL' : 'AUDIO SIGNAL';
+            document.getElementById('miniArt').innerHTML = (item.favicon || item.logo) 
+                ? `<img src="${item.favicon || item.logo}" class="w-100 h-100 object-fit-cover">` 
+                : `<i class="fas fa-compact-disc text-danger fa-spin"></i>`;
+        }
+
+        function togglePlay() {
+            if (!state.current) return;
+            const activeMedia = (state.activeTab === 'video' || video.src) ? video : audio;
+            if (activeMedia.paused) activeMedia.play(); else activeMedia.pause();
+        }
+
+        function promptRemote() {
+            const url = prompt("Enter Stream URL:");
+            if (url) play({ name: "Remote Stream", url: url, tags: "Network Link" });
+        }
+
+        function updateClock() {
+            const el = document.getElementById('live-clock');
+            if (el) el.textContent = new Date().toLocaleTimeString();
         }
 
         window.onload = init;
