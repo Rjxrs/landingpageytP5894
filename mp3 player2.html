@@ -1,0 +1,368 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Play, Pause, SkipBack, SkipForward, Volume2, Music, 
+  Radio, Globe, Search, RadioTower, Sparkles, HeartPulse, 
+  Disc, Wand2, Moon, Sun, RefreshCw, Youtube
+} from 'lucide-react';
+
+const apiKey = ""; // Gemini API Key handled by environment
+const HANDLE = 'heat_in_the_desert_guy';
+
+export default function App() {
+  // Navigation & Theme
+  const [activeTab, setActiveTab] = useState('radio');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [clock, setClock] = useState("00:00:00");
+
+  // Stats State
+  const [stats, setStats] = useState({ subs: '106', vids: '24', views: '91.8K' });
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Audio Player State
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [volume, setVolume] = useState(0.7);
+  const [audioError, setAudioError] = useState(null);
+  
+  // Radio/Media Data
+  const [stations, setStations] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState('US');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [localTracks, setLocalTracks] = useState([]);
+  
+  const audioRef = useRef(new Audio());
+
+  // Initialization & Clock
+  useEffect(() => {
+    fetchCountries();
+    fetchStations('US');
+    updateStats();
+    
+    const timer = setInterval(() => {
+      setClock(new Date().toLocaleTimeString());
+    }, 1000);
+
+    const audio = audioRef.current;
+    audio.volume = volume;
+    
+    const handleError = () => {
+      setAudioError("Stream blocked or offline. Try another.");
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('error', handleError);
+    return () => {
+      clearInterval(timer);
+      audio.pause();
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // --- API LOGIC ---
+
+  const fetchCountries = async () => {
+    try {
+      const res = await fetch('https://de1.api.radio-browser.info/json/countries');
+      const data = await res.json();
+      setCountries(data.sort((a, b) => b.stationcount - a.stationcount).slice(0, 50));
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchStations = async (countryCode) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`https://de1.api.radio-browser.info/json/stations/bycountrycodeexact/${countryCode}?limit=24&order=clickcount&reverse=true`);
+      const data = await res.json();
+      setStations(data);
+    } catch (err) { console.error(err); }
+    setIsLoading(false);
+  };
+
+  const updateStats = async () => {
+    setIsSyncing(true);
+    // Simple mock update to simulate the Social Blade extraction logic
+    setTimeout(() => {
+      setIsSyncing(false);
+    }, 1000);
+  };
+
+  const handleGeminiEnrichment = async (trackName) => {
+    try {
+      const prompt = `Identify artist and album for: ${trackName}. Return JSON: {"artist": "...", "album": "..."}`;
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          tools: [{ "google_search": {} }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+      const data = await res.json();
+      return JSON.parse(data.candidates[0].content.parts[0].text);
+    } catch { return { artist: "Unknown Artist", album: "Unknown Album" }; }
+  };
+
+  // --- AUDIO CONTROLS ---
+
+  const playMedia = (item, type) => {
+    const audio = audioRef.current;
+    setAudioError(null);
+    audio.pause();
+    audio.src = type === 'radio' ? item.url_resolved : item.url;
+    audio.load();
+    
+    // User Activation fix: play() is called directly in the onClick handler
+    audio.play().then(() => {
+      setIsPlaying(true);
+      setCurrentTrack({ ...item, type });
+    }).catch(() => setAudioError("Playback blocked. Click Play."));
+  };
+
+  const togglePlay = () => {
+    if (isPlaying) audioRef.current.pause();
+    else audioRef.current.play();
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    setIsLoading(true);
+    const newTracks = await Promise.all(files.map(async (file) => {
+      const meta = await handleGeminiEnrichment(file.name);
+      return {
+        id: Math.random().toString(36),
+        name: file.name.replace(/\.[^/.]+$/, ""),
+        artist: meta.artist,
+        url: URL.createObjectURL(file),
+        type: 'local'
+      };
+    }));
+    setLocalTracks(prev => [...prev, ...newTracks]);
+    setIsLoading(false);
+  };
+
+  return (
+    <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-[#050507] text-slate-100' : 'bg-slate-100 text-slate-900'}`}>
+      
+      {/* HEADER DOCK */}
+      <header className={`fixed top-0 left-0 right-0 z-[2000] border-b backdrop-blur-xl py-3 px-6 flex justify-between items-center transition-all ${isDarkMode ? 'bg-[#050507]/80 border-white/10' : 'bg-white/80 border-black/10'}`}>
+        <div className="flex items-center gap-4">
+          <span className="bg-black/40 border border-white/10 text-[11px] font-mono px-3 py-1.5 rounded-lg text-red-500">
+            {clock}
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <a href="#" className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-red-500 hover:text-white transition-all"><HeartPulse size={18}/></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-red-500 hover:text-white transition-all"><Disc size={18}/></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-red-500 hover:text-white transition-all"><Wand2 size={18}/></a>
+          <div className="w-[1px] h-6 bg-white/10 mx-2" />
+          <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-amber-400 hover:scale-110 transition-all"
+          >
+            {isDarkMode ? <Sun size={18}/> : <Moon size={18}/>}
+          </button>
+        </div>
+      </header>
+
+      {/* HERO SECTION */}
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden text-center">
+        {/* Animated Background Mesh */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+           <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] animate-[spin_20s_linear_infinite]" 
+                style={{ background: 'radial-gradient(circle at center, rgba(255, 62, 62, 0.15) 0%, transparent 40%), radial-gradient(circle at 20% 30%, rgba(112, 0, 255, 0.12) 0%, transparent 30%)' }}>
+           </div>
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto">
+          {/* Stats Badge */}
+          <div className="inline-flex items-center gap-8 px-8 py-3 bg-white/5 border border-white/10 backdrop-blur-2xl rounded-full mb-8 shadow-2xl relative">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-red-500">{stats.subs}</span>
+              <span className="text-[10px] uppercase font-bold opacity-50 tracking-widest">Subs</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-red-500">{stats.vids}</span>
+              <span className="text-[10px] uppercase font-bold opacity-50 tracking-widest">Videos</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-red-500">{stats.views}</span>
+              <span className="text-[10px] uppercase font-bold opacity-50 tracking-widest">Views</span>
+            </div>
+            <button 
+              onClick={updateStats}
+              className={`absolute -right-12 text-slate-500 hover:text-red-500 transition-all ${isSyncing ? 'animate-spin' : ''}`}
+            >
+              <RefreshCw size={18} />
+            </button>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-serif italic text-white">
+            Heat_In_The_Desert_Guy
+          </h1>
+          <p className="text-lg opacity-60 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Exploring the digital desert. Content, tools, and updates from the frontline of creation.
+          </p>
+          
+          <div className="flex justify-center gap-4">
+            <button className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold transition-all shadow-xl flex items-center gap-2">
+              <Youtube size={20}/> Subscribe
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* APP CONTENT AREA */}
+      <section className="max-w-7xl mx-auto px-6 pb-40">
+        <div className="bg-slate-900/40 border border-white/5 rounded-[40px] overflow-hidden backdrop-blur-md">
+          <div className="flex flex-col md:flex-row h-[700px]">
+            {/* Nav Rail */}
+            <div className="w-full md:w-20 border-b md:border-b-0 md:border-r border-white/5 p-4 flex flex-row md:flex-col items-center gap-4">
+              <button 
+                onClick={() => setActiveTab('radio')}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${activeTab === 'radio' ? 'bg-red-600 text-white' : 'hover:bg-white/5 text-slate-400'}`}
+              >
+                <Globe size={24}/>
+              </button>
+              <button 
+                onClick={() => setActiveTab('player')}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${activeTab === 'player' ? 'bg-red-600 text-white' : 'hover:bg-white/5 text-slate-400'}`}
+              >
+                <Music size={24}/>
+              </button>
+            </div>
+
+            {/* List and Explorer */}
+            <div className="flex-1 flex flex-col min-w-0">
+              <header className="p-6 border-b border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div className="relative w-full max-w-sm">
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input 
+                    type="text" placeholder="Search frequencies..."
+                    className="w-full bg-black/40 border border-white/10 rounded-full py-2.5 pl-12 pr-6 text-sm focus:border-red-500 outline-none"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                {activeTab === 'radio' && (
+                  <select 
+                    value={selectedCountry}
+                    onChange={(e) => { setSelectedCountry(e.target.value); fetchStations(e.target.value); }}
+                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-red-500"
+                  >
+                    {countries.map(c => <option key={c.iso_3166_1} value={c.iso_3166_1}>{c.name}</option>)}
+                  </select>
+                )}
+              </header>
+
+              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                {isLoading ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-3 opacity-30 italic">
+                    <RefreshCw className="animate-spin" />
+                    <p>Scouring the desert for signals...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {activeTab === 'radio' ? (
+                      stations.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map(station => (
+                        <button 
+                          key={station.stationuuid}
+                          onClick={() => playMedia(station, 'radio')}
+                          className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${currentTrack?.stationuuid === station.stationuuid ? 'bg-red-600/10 border-red-500/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
+                        >
+                          <div className="w-12 h-12 bg-slate-800 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            {station.favicon ? <img src={station.favicon} alt="" className="w-full h-full object-cover" /> : <RadioTower size={20}/>}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold truncate">{station.name}</h4>
+                            <p className="text-[10px] uppercase opacity-50 tracking-wider truncate">{station.tags || station.country}</p>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <>
+                        <label className="p-4 rounded-2xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-red-500 transition-all">
+                          <input type="file" multiple className="hidden" onChange={handleFileUpload} />
+                          <Disc className="text-red-500" />
+                          <span className="text-[10px] uppercase font-bold">Add Local Files</span>
+                        </label>
+                        {localTracks.map(track => (
+                          <button 
+                            key={track.id}
+                            onClick={() => playMedia(track, 'local')}
+                            className={`flex items-center gap-4 p-4 rounded-2xl border text-left transition-all ${currentTrack?.id === track.id ? 'bg-red-600/10 border-red-500/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
+                          >
+                            <div className="w-12 h-12 bg-red-600/20 text-red-500 rounded-xl flex items-center justify-center">
+                              <Music size={20}/>
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold truncate">{track.name}</h4>
+                              <p className="text-[10px] uppercase opacity-50 tracking-wider truncate">{track.artist}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PLAYER CONTROLLER (FLOATING) */}
+      <footer className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl z-[2000]">
+        <div className="bg-slate-900/80 border border-white/10 backdrop-blur-2xl rounded-full px-8 py-4 flex items-center justify-between shadow-2xl">
+          <div className="flex items-center gap-4 w-1/3 min-w-0">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden border border-white/10 bg-slate-800 ${isPlaying ? 'animate-[spin_10s_linear_infinite]' : ''}`}>
+              {currentTrack?.favicon ? <img src={currentTrack.favicon} className="w-full h-full object-cover"/> : <Disc className="text-red-500"/>}
+            </div>
+            <div className="min-w-0 hidden sm:block">
+              <h6 className="text-sm font-bold truncate">{currentTrack?.name || "The Desert Silence"}</h6>
+              <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest truncate">{currentTrack?.artist || "Standby"}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <button className="text-slate-500 hover:text-white transition-all"><SkipBack size={20}/></button>
+            <button 
+              onClick={togglePlay}
+              disabled={!currentTrack}
+              className="w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg disabled:opacity-50"
+            >
+              {isPlaying ? <Pause size={28} fill="white" /> : <Play size={28} fill="white" className="ml-1" />}
+            </button>
+            <button className="text-slate-500 hover:text-white transition-all"><SkipForward size={20}/></button>
+          </div>
+
+          <div className="flex items-center gap-3 w-1/3 justify-end">
+            <Volume2 size={16} className="text-slate-500 hidden sm:block" />
+            <input 
+              type="range" min="0" max="1" step="0.01" value={volume}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                setVolume(v);
+                audioRef.current.volume = v;
+              }}
+              className="w-20 accent-red-600 cursor-pointer h-1 bg-white/10 rounded-full appearance-none"
+            />
+          </div>
+        </div>
+        {audioError && (
+          <div className="absolute top-[-40px] left-1/2 -translate-x-1/2 text-xs font-bold text-red-500 bg-black/80 px-4 py-1.5 rounded-full border border-red-500/20">
+            {audioError}
+          </div>
+        )}
+      </footer>
+
+      {/* FOOTER */}
+      <footer className="py-20 text-center opacity-30 text-[11px] uppercase tracking-[0.3em] font-bold">
+        &copy; 2025 Heat_In_The_Desert_Guy
+      </footer>
+    </div>
+  );
+}
