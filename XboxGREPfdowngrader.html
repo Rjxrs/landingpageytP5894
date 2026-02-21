@@ -1,411 +1,280 @@
 <!DOCTYPE html>
-<html lang="en" class=""> <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xbox Era PFP Downgrader</title>
-
+    <title>Xbox Era PFP Downgrader V2</title>
+    <!-- Frameworks -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Tailwind dark mode config
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <style type="text/tailwindcss">
-        /* Base body styles */
-        body {
-            @apply font-sans flex flex-col items-center min-h-screen p-4 transition-colors duration-500;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            padding-top: 70px;
-            /* Base background - Era specific will override */
-            @apply bg-gray-100 dark:bg-gray-900;
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .font-brand { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+        
+        /* Dynamic Backgrounds */
+        .bg-overlay {
+            position: fixed; inset: 0; z-index: -1;
+            background-size: cover; background-position: center;
+            transition: opacity 1s ease-in-out;
         }
 
-        /* Background styles for different eras (applied via JS) */
-        body.era-original, body.era-blades, body.era-nxe, body.era-metro {
-            @apply transition-all duration-500 ease-in-out;
-        }
-        body.era-original {
-            background-color: #1a1a1a;
-            background-image: url('https://static.wikia.nocookie.net/xbox/images/4/49/The-original-dynamic-background.gif/revision/latest?cb=20220323013547');
-        }
-        body.era-blades {
-            background-color: #e5e7eb;
-            background-image: url('https://i.redd.it/ijpbtu5dd3211.gif');
-        }
-        body.era-nxe {
-            background-color: #4b5563;
-            background-image: url('https://static.wikia.nocookie.net/xbox/images/e/ec/Xbox360-dynamic-background.gif/revision/latest?cb=20220323020528');
-        }
-         body.era-metro {
-            background-color: #107C10;
-            background-image: url('https://i.redd.it/ctownureqwl91.gif');
+        .era-original { background-color: #000; }
+        .era-original .bg-active { background-image: url('https://static.wikia.nocookie.net/xbox/images/4/49/The-original-dynamic-background.gif/revision/latest?cb=20220323013547'); opacity: 0.4; }
+        
+        .era-blades { background-color: #1e293b; }
+        .era-blades .bg-active { background-image: url('https://i.redd.it/ijpbtu5dd3211.gif'); opacity: 0.3; }
+        
+        .era-nxe { background-color: #334155; }
+        .era-nxe .bg-active { background-image: url('https://static.wikia.nocookie.net/xbox/images/e/ec/Xbox360-dynamic-background.gif/revision/latest?cb=20220323020528'); opacity: 0.4; }
+        
+        .era-metro { background-color: #064e3b; }
+        .era-metro .bg-active { background-image: url('https://i.redd.it/ctownureqwl91.gif'); opacity: 0.3; }
+
+        /* Custom UI Elements */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* --- Top Bar Styling using Tailwind --- */
-        .top-bar {
-            @apply fixed top-0 left-0 right-0 z-20 w-full px-4 py-2 flex justify-between items-center min-h-[50px];
-            @apply bg-white/80 dark:bg-black/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700;
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+        #result-img { 
+            image-rendering: pixelated; 
+            box-shadow: 0 0 30px rgba(16, 124, 16, 0.2);
         }
-        .time-date {
-            @apply text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap transition-colors duration-300;
+
+        .tab-btn.active {
+            background: #107c10;
+            color: white;
+            box-shadow: 0 0 20px rgba(16, 124, 16, 0.4);
         }
-        .top-bar-controls {
-            @apply flex items-center space-x-3;
-        }
-        /* Style applied to ALL buttons in the top bar */
-        .btn-top-bar {
-            @apply w-[34px] h-[34px] inline-flex items-center justify-center rounded-full transition-all duration-200;
-            @apply bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400;
-            @apply hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105;
-        }
-        /* Ensure icon size is consistent */
-        .btn-top-bar i { @apply text-sm; }
-
-        /* Theme switch specific styling */
-        .theme-switch-wrapper { @apply flex items-center space-x-2; }
-        .theme-switch-wrapper .fa-sun { @apply text-yellow-500 text-lg transition-colors duration-300; }
-        .theme-switch-wrapper .fa-moon { @apply text-gray-400 text-lg transition-colors duration-300; }
-        .dark .theme-switch-wrapper .fa-sun { @apply text-gray-500; }
-        .dark .theme-switch-wrapper .fa-moon { @apply text-indigo-400; }
-        .toggle-label { @apply relative block w-10 h-6 rounded-full cursor-pointer bg-gray-300 dark:bg-gray-600 transition-colors duration-300; }
-        .toggle-checkbox { @apply absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-200 dark:border-gray-500 dark:bg-gray-300 transition-all duration-300 ease-in-out; top: 2px; left: 2px; }
-        .toggle-checkbox:checked { @apply right-0 border-green-400 dark:border-green-500; transform: translateX(calc(100% - 2px)); }
-        .toggle-checkbox:checked + .toggle-label { @apply bg-green-400 dark:bg-green-500; }
-        /* End Theme Switch Styling */
-
-
-        /* --- Main Content Styling --- */
-        .content-wrapper { @apply w-full max-w-4xl mx-auto; }
-
-        /* Container for the main app elements */
-        .main-app-container {
-             @apply w-full p-6 md:p-8 rounded-xl shadow-lg backdrop-blur-sm transition-colors duration-300 mt-6 mb-6; /* Added margin */
-             @apply bg-gray-100/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50;
-        }
-        /* Adjust container background based on era for better contrast if needed */
-         body.era-original .main-app-container { @apply bg-gray-950/70 border-gray-800/50; }
-         body.era-nxe .main-app-container { @apply bg-gray-800/70 border-gray-700/50; }
-         body.era-metro .main-app-container { @apply bg-gray-950/70 border-gray-800/50; }
-         /* body.era-blades uses the default light/dark above */
-
-
-        .title-image { @apply w-full max-w-lg mx-auto mb-6 block; }
-
-        /* Card Base Styles with dark: variants */
-        .card {
-            @apply p-6 rounded-lg shadow-md w-full max-w-md mb-6 mx-auto transition-colors duration-300;
-            @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-transparent dark:border-gray-700/50;
-        }
-        .image-card {
-            @apply p-4 rounded-lg shadow-md text-center flex-1 min-w-[250px] transition-colors duration-300;
-             @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-transparent dark:border-gray-700/50;
-        }
-        img.pfp-image {
-             @apply border border-gray-300 dark:border-gray-600 rounded mt-2 mx-auto w-48 h-48 object-contain bg-gray-200 dark:bg-gray-700;
-        }
-        #result-img { image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; }
-
-        /* Form Elements Base Styles with dark: variants */
-        select {
-             @apply block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm;
-             @apply bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100;
-             @apply focus:ring-indigo-500 focus:border-indigo-500;
-        }
-        .file-label { @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200; }
-        button {
-             @apply text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200;
-             @apply bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400;
-             @apply dark:bg-gray-600 dark:hover:bg-gray-500 dark:disabled:bg-gray-500;
-        }
-        a.button { @apply inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer transition-colors duration-200 text-sm no-underline; }
-        .hidden { display: none; }
-
-        /* Text Base Styles with dark: variants */
-        .placeholder-text { @apply text-gray-500 dark:text-gray-400; }
-        /* Apply base text color within the main container */
-        .main-app-container p, .main-app-container h2, .main-app-container label { @apply text-gray-800 dark:text-gray-100; }
-        .main-app-container h1#fallback-title { @apply text-green-700 dark:text-green-400; }
-        #loading { @apply text-orange-600 dark:text-orange-400; }
-
-        /* --- Era-Specific Overrides --- */
-        /* These adjust contrast ON TOP of the base light/dark styles */
-
-        /* Original Era (Dark Background) */
-        body.era-original .card, body.era-original .image-card { @apply bg-gray-900/80 dark:bg-gray-900/80; }
-        body.era-original .main-app-container p, body.era-original .main-app-container h2, body.era-original .main-app-container label, body.era-original h1#fallback-title, body.era-original .placeholder-text { @apply text-gray-100 dark:text-gray-100; }
-        body.era-original select { @apply bg-gray-700 dark:bg-gray-700 text-white dark:text-white border-gray-600 dark:border-gray-600; }
-        body.era-original img.pfp-image { @apply border-gray-600 dark:border-gray-600 bg-gray-700 dark:bg-gray-700; }
-
-        /* NXE Era (Mid-Dark Background) */
-        body.era-nxe .card, body.era-nxe .image-card { @apply bg-gray-800/75 dark:bg-gray-800/75; }
-        body.era-nxe .main-app-container p, body.era-nxe .main-app-container h2, body.era-nxe .main-app-container label, body.era-nxe h1#fallback-title, body.era-nxe .placeholder-text { @apply text-gray-100 dark:text-gray-100; }
-        body.era-nxe select { @apply bg-gray-700 dark:bg-gray-700 text-white dark:text-white border-gray-600 dark:border-gray-600; }
-        body.era-nxe img.pfp-image { @apply border-gray-600 dark:border-gray-600 bg-gray-700 dark:bg-gray-700; }
-
-        /* Metro Era (Dark Green Background) */
-        body.era-metro .card, body.era-metro .image-card { @apply bg-gray-900/80 dark:bg-gray-900/80; }
-        body.era-metro .main-app-container p, body.era-metro .main-app-container h2, body.era-metro .main-app-container label, body.era-metro h1#fallback-title, body.era-metro .placeholder-text { @apply text-gray-100 dark:text-gray-100; }
-        body.era-metro select { @apply bg-gray-700 dark:bg-gray-700 text-white dark:text-white border-gray-600 dark:border-gray-600; }
-        body.era-metro img.pfp-image { @apply border-gray-600 dark:border-gray-600 bg-gray-700 dark:bg-gray-700; }
-
-        /* Blades Era (Light Background) - Relies mostly on default light/dark styles */
-
     </style>
 </head>
-<body class="era-blades"> <div class="top-bar" id="top-bar-element">
-        <div class="time-date" id="time-date-display">Loading...</div>
-        <div class="top-bar-controls">
-            <a href="https://heatinthedesertguy.netlify.app/" class="btn-top-bar" title="Homepage" target="_blank" rel="noopener noreferrer">
-                <i class="fas fa-home"></i>
-            </a>
-            <a href="https://heatinthedesertguy.netlify.app/mp3%20player.html" class="btn-top-bar" target="_blank" rel="noopener noreferrer" title="MP3 Player">
-                 <i class="fas fa-headphones"></i>
-             </a>
-            <a href="https://heatinthedesertguy.netlify.app/faceswapv1.html" class="btn-top-bar" title="Face Swap App"> <i class="fas fa-face-smile"></i>
-            </a>
-            <div class="theme-switch-wrapper">
-                <i class="fas fa-sun"></i>
-                 <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                     <input type="checkbox" name="toggle" id="themeSwitch" class="toggle-checkbox"/>
-                     <label for="themeSwitch" class="toggle-label"></label>
-                 </div>
-                 <i class="fas fa-moon"></i>
-             </div>
+<body class="era-blades text-slate-100 min-h-screen overflow-x-hidden">
+
+    <div class="bg-overlay bg-active"></div>
+
+    <!-- HEADER DOCK -->
+    <header class="fixed top-0 left-0 right-0 z-[2000] border-b border-white/10 backdrop-blur-xl py-3 px-6 flex justify-between items-center bg-black/40">
+        <div class="flex items-center gap-4">
+            <span id="clock" class="bg-black/40 border border-white/10 text-[11px] font-mono px-3 py-1.5 rounded-lg text-green-500">
+                00:00:00
+            </span>
         </div>
-    </div>
+        
+        <div class="flex items-center gap-2">
+            <a href="https://heatinthedesertguy.netlify.app/" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-green-600 hover:text-white transition-all">
+                <i data-lucide="home" class="w-[18px]"></i>
+            </a>
+            <div class="w-[1px] h-6 bg-white/10 mx-2"></div>
+            <button id="themeToggle" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-amber-400">
+                <i data-lucide="sun" class="w-[18px]"></i>
+            </button>
+        </div>
+    </header>
 
-    <div class="content-wrapper">
-        <div class="main-app-container">
+    <!-- MAIN CONTENT -->
+    <main class="pt-32 pb-20 px-6 max-w-6xl mx-auto">
+        
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-bold font-brand mb-4 flex items-center justify-center gap-4">
+                <i data-lucide="monitor" class="text-green-500 w-10 h-10 md:w-14 md:h-14"></i>
+                PFP Downgrader <span class="text-green-500">V2</span>
+            </h1>
+            <p class="text-slate-400 max-w-xl mx-auto">Digitally degrade your profile pictures to match the aesthetic limitations of classic Xbox hardware.</p>
+        </div>
 
-            <img src="https://github.com/Rjxrs/landingpageytP5894/blob/main/Xbox-360-Era-PFP-Downgrader-06-04-2025.png?raw=true"
-                 alt="Xbox 360 Era PFP Downgrader Title"
-                 class="title-image"
-                 onerror="this.style.display='none'; document.getElementById('fallback-title').classList.remove('hidden');"
-            >
-            <h1 id="fallback-title" class="hidden text-3xl font-bold text-center mb-4">Xbox Era PFP Downgrader</h1>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Sidebar Controls -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-panel rounded-[32px] p-6 space-y-6">
+                    <div class="space-y-3">
+                        <label class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Selection Era</label>
+                        <div class="grid grid-cols-2 gap-2" id="eraGrid">
+                            <button data-era="original" class="tab-btn p-3 rounded-2xl border border-white/5 bg-white/5 text-xs font-bold hover:bg-white/10 transition-all text-center">OG XBOX</button>
+                            <button data-era="blades" class="tab-btn active p-3 rounded-2xl border border-white/5 bg-white/5 text-xs font-bold hover:bg-white/10 transition-all text-center">BLADES</button>
+                            <button data-era="nxe" class="tab-btn p-3 rounded-2xl border border-white/5 bg-white/5 text-xs font-bold hover:bg-white/10 transition-all text-center">NXE</button>
+                            <button data-era="metro" class="tab-btn p-3 rounded-2xl border border-white/5 bg-white/5 text-xs font-bold hover:bg-white/10 transition-all text-center">METRO</button>
+                        </div>
+                    </div>
 
-            <p class="mb-6 text-center max-w-lg mx-auto">Upload an image and select an Xbox era to give it a retro profile picture look!</p>
+                    <div class="space-y-4">
+                        <label class="text-[10px] uppercase font-bold tracking-widest text-slate-500">Image Source</label>
+                        <label for="fileInput" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-3xl hover:border-green-500/50 hover:bg-green-500/5 transition-all cursor-pointer group">
+                            <i data-lucide="upload-cloud" class="text-slate-500 group-hover:text-green-500 mb-2 transition-colors"></i>
+                            <span class="text-xs font-bold text-slate-400 group-hover:text-white">Choose Frequency</span>
+                            <input type="file" id="fileInput" class="hidden" accept="image/*">
+                        </label>
+                    </div>
 
-            <div class="card">
-                <div class="mb-4">
-                    <label for="era-select" class="block text-sm font-medium mb-1">Select Era:</label>
-                    <select id="era-select">
-                        <option value="blades" selected>Xbox 360 - Blades (2005)</option>
-                        <option value="nxe">Xbox 360 - NXE (2008)</option>
-                        <option value="original">Original Xbox (2001)</option>
-                        <option value="metro">Xbox One - Metro (2013)</option>
-                    </select>
+                    <button id="processBtn" disabled class="w-full py-4 bg-green-600 disabled:opacity-30 disabled:grayscale text-white rounded-2xl font-bold font-brand shadow-xl shadow-green-900/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="zap" class="w-5"></i> GENERATE DEGRADATION
+                    </button>
                 </div>
-                <div class="flex items-center justify-center space-x-4">
-                    <label for="file-input" class="file-label">Choose Image</label>
-                    <input type="file" id="file-input" class="hidden" accept="image/*">
-                    <button id="process-button" disabled>Downgrade Image</button>
+
+                <div class="glass-panel rounded-[32px] p-4 flex items-center gap-4 opacity-60">
+                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
+                        <i data-lucide="info" class="w-5"></i>
+                    </div>
+                    <p class="text-[11px] leading-relaxed">System uses local Canvas buffer for processing. Your data never leaves the desert.</p>
                 </div>
             </div>
 
-            <div id="loading" class="hidden font-semibold my-4 text-center">
-                 Processing... Please wait.
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-6 w-full mt-6">
-                <div class="image-card">
-                    <h2 class="text-lg font-semibold">Original Preview</h2>
-                    <img id="preview-img" src="#" alt="Image Preview" class="pfp-image hidden">
-                    <div id="preview-placeholder" class="pfp-image flex items-center justify-center placeholder-text">Select Image</div>
+            <!-- Preview Area -->
+            <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Original -->
+                <div class="glass-panel rounded-[40px] p-2 flex flex-col">
+                    <div class="p-6 pb-2">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500">Input Stream</h3>
+                    </div>
+                    <div class="flex-1 min-h-[300px] flex items-center justify-center p-6">
+                        <div id="previewContainer" class="relative w-full aspect-square rounded-2xl overflow-hidden bg-black/20 border border-white/5">
+                            <img id="previewImg" src="" class="hidden w-full h-full object-cover">
+                            <div id="previewPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 italic text-sm">
+                                <i data-lucide="image" class="w-12 h-12 mb-2 opacity-20"></i>
+                                Waiting for signal...
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="image-card">
-                    <h2 class="text-lg font-semibold">Downgraded Result</h2>
-                    <img id="result-img" src="#" alt="Processed Image" class="pfp-image hidden">
-                     <div id="result-placeholder" class="pfp-image flex items-center justify-center placeholder-text">Result</div>
-                    <a id="download-link" href="#" class="button mt-4 hidden" download="downgraded_pfp.jpg">Download Result</a>
+                <!-- Result -->
+                <div class="glass-panel rounded-[40px] p-2 flex flex-col border-green-500/20">
+                    <div class="p-6 pb-2 flex justify-between items-center">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-green-500">Degraded Output</h3>
+                        <a id="downloadBtn" href="#" download="xbox_pfp_v2.jpg" class="hidden text-green-500 hover:text-white transition-colors">
+                            <i data-lucide="download" class="w-5"></i>
+                        </a>
+                    </div>
+                    <div class="flex-1 min-h-[300px] flex items-center justify-center p-6">
+                        <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-black/20 border border-white/5 flex items-center justify-center">
+                            <img id="resultImg" src="" class="hidden w-full h-full object-contain">
+                            <div id="resultPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 italic text-sm">
+                                <i data-lucide="cpu" class="w-12 h-12 mb-2 opacity-20"></i>
+                                Output pending...
+                            </div>
+                            <!-- Loading Overlay -->
+                            <div id="loader" class="hidden absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                                <i data-lucide="refresh-cw" class="animate-spin text-green-500"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div> </div> <canvas id="processing-canvas" class="hidden"></canvas>
+
+        </div>
+    </main>
+
+    <canvas id="procCanvas" class="hidden"></canvas>
 
     <script>
-        // Wait for the DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- System State ---
+        let currentEra = 'blades';
+        let originalImage = null;
 
-            // --- Top Bar JS ---
-            // (Keep existing Top Bar JS: theme switch, time/date)
-            const themeSwitch = document.getElementById('themeSwitch');
-            const htmlElement = document.documentElement;
-            const timeDateDisplay = document.getElementById('time-date-display');
+        const eraConfigs = {
+            'original': { size: 64, quality: 0.15, smooth: false, filter: 'grayscale(100%) brightness(1.1) contrast(1.2)' },
+            'blades': { size: 96, quality: 0.35, smooth: false, filter: 'none' },
+            'nxe': { size: 128, quality: 0.45, smooth: true, filter: 'none' },
+            'metro': { size: 192, quality: 0.75, smooth: true, filter: 'none' }
+        };
 
-            const applyGlobalTheme = (theme) => {
-                if (theme === 'dark') { htmlElement.classList.add('dark'); }
-                else { htmlElement.classList.remove('dark'); }
-                if (themeSwitch) { themeSwitch.checked = (theme === 'dark'); }
+        const dom = {
+            fileInput: document.getElementById('fileInput'),
+            processBtn: document.getElementById('processBtn'),
+            previewImg: document.getElementById('previewImg'),
+            resultImg: document.getElementById('resultImg'),
+            previewPlaceholder: document.getElementById('previewPlaceholder'),
+            resultPlaceholder: document.getElementById('resultPlaceholder'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            loader: document.getElementById('loader'),
+            canvas: document.getElementById('procCanvas'),
+            eraBtns: document.querySelectorAll('[data-era]'),
+            clock: document.getElementById('clock')
+        };
+
+        // --- Core Logic ---
+        function init() {
+            lucide.createIcons();
+            startClock();
+            setupEventListeners();
+        }
+
+        function startClock() {
+            setInterval(() => {
+                dom.clock.innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        }
+
+        function setupEventListeners() {
+            // Era Selection
+            dom.eraBtns.forEach(btn => {
+                btn.onclick = () => {
+                    dom.eraBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentEra = btn.dataset.era;
+                    document.body.className = `era-${currentEra} text-slate-100 min-h-screen overflow-x-hidden`;
+                };
+            });
+
+            // File Handling
+            dom.fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    originalImage = event.target.result;
+                    dom.previewImg.src = originalImage;
+                    dom.previewImg.classList.remove('hidden');
+                    dom.previewPlaceholder.classList.add('hidden');
+                    dom.processBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
             };
-            const getPreferredGlobalTheme = () => {
-                const storedTheme = localStorage.getItem('theme');
-                return storedTheme ? storedTheme : 'light'; // Defaulting to light now
+
+            // Processing
+            dom.processBtn.onclick = processImage;
+        }
+
+        function processImage() {
+            if (!originalImage) return;
+
+            dom.loader.classList.remove('hidden');
+            const config = eraConfigs[currentEra];
+            const img = new Image();
+
+            img.onload = () => {
+                const ctx = dom.canvas.getContext('2d');
+                dom.canvas.width = config.size;
+                dom.canvas.height = config.size;
+
+                ctx.imageSmoothingEnabled = config.smooth;
+                
+                // Square crop logic
+                const minSide = Math.min(img.width, img.height);
+                const sx = (img.width - minSide) / 2;
+                const sy = (img.height - minSide) / 2;
+
+                ctx.filter = config.filter;
+                ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, config.size, config.size);
+
+                const resultData = dom.canvas.toDataURL('image/jpeg', config.quality);
+                
+                dom.resultImg.src = resultData;
+                dom.resultImg.classList.remove('hidden');
+                dom.resultPlaceholder.classList.add('hidden');
+                dom.downloadBtn.href = resultData;
+                dom.downloadBtn.classList.remove('hidden');
+                
+                setTimeout(() => dom.loader.classList.add('hidden'), 400);
             };
-            const currentGlobalTheme = getPreferredGlobalTheme();
-            applyGlobalTheme(currentGlobalTheme);
+            img.src = originalImage;
+        }
 
-            if (themeSwitch) {
-                themeSwitch.addEventListener('change', () => {
-                    const newTheme = themeSwitch.checked ? 'dark' : 'light';
-                    applyGlobalTheme(newTheme);
-                    localStorage.setItem('theme', newTheme);
-                });
-            } else { console.warn("Theme switch element not found."); }
-
-            const updateTimeDate = () => {
-                if (timeDateDisplay) {
-                    const now = new Date();
-                    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    const optionsTime = { hour: 'numeric', minute: '2-digit', second: '2-digit' };
-                    const formattedDate = now.toLocaleDateString(undefined, optionsDate);
-                    const formattedTime = now.toLocaleTimeString(undefined, optionsTime);
-                    timeDateDisplay.textContent = `${formattedDate} | ${formattedTime}`;
-                }
-            };
-            updateTimeDate();
-            setInterval(updateTimeDate, 1000);
-
-
-            // --- Original Xbox Downgrader JS ---
-            // (Keep existing Downgrader JS: eraConfigs, element selectors, updateBackground, event listeners, processing logic)
-            const eraConfigs = {
-                'original': { targetSize: 64, jpegQuality: 0.2, smoothing: false, filter: 'grayscale(100%) contrast(1.1)', bodyClass: 'era-original' },
-                'blades': { targetSize: 96, jpegQuality: 0.4, smoothing: false, filter: 'none', bodyClass: 'era-blades' },
-                'nxe': { targetSize: 128, jpegQuality: 0.3, smoothing: true, filter: 'none', bodyClass: 'era-nxe' },
-                'metro': { targetSize: 192, jpegQuality: 0.7, smoothing: true, filter: 'none', bodyClass: 'era-metro' }
-            };
-            const fileInput = document.getElementById('file-input');
-            const processButton = document.getElementById('process-button');
-            const previewImg = document.getElementById('preview-img');
-            const resultImg = document.getElementById('result-img');
-            const processingCanvas = document.getElementById('processing-canvas');
-            const downloadLink = document.getElementById('download-link');
-            const loadingDiv = document.getElementById('loading');
-            const previewPlaceholder = document.getElementById('preview-placeholder');
-            const resultPlaceholder = document.getElementById('result-placeholder');
-            const eraSelect = document.getElementById('era-select');
-            const bodyElement = document.body;
-            let originalImageSrc = null;
-
-            function updateBackground(selectedEra) {
-                const config = eraConfigs[selectedEra];
-                Object.values(eraConfigs).forEach(conf => {
-                    if (conf.bodyClass) bodyElement.classList.remove(conf.bodyClass);
-                });
-                if (config && config.bodyClass) {
-                    bodyElement.classList.add(config.bodyClass);
-                } else {
-                    bodyElement.classList.add(eraConfigs['blades'].bodyClass); // Fallback
-                }
-            }
-
-            if(eraSelect) {
-                eraSelect.addEventListener('change', (event) => {
-                    updateBackground(event.target.value);
-                });
-                 updateBackground(eraSelect.value); // Initialize
-            }
-
-            if(fileInput) {
-                fileInput.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            originalImageSrc = e.target.result;
-                            if (previewImg) { previewImg.src = originalImageSrc; previewImg.classList.remove('hidden'); }
-                            if (previewPlaceholder) previewPlaceholder.classList.add('hidden');
-                            if (resultImg) { resultImg.src = "#"; resultImg.classList.add('hidden'); }
-                            if (resultPlaceholder) resultPlaceholder.classList.remove('hidden');
-                            if (downloadLink) downloadLink.classList.add('hidden');
-                            if (processButton) processButton.disabled = false;
-                        }
-                        reader.readAsDataURL(file);
-                    } else {
-                        originalImageSrc = null;
-                        if (previewImg) { previewImg.src = "#"; previewImg.classList.add('hidden'); }
-                         if (previewPlaceholder) previewPlaceholder.classList.remove('hidden');
-                        if (processButton) processButton.disabled = true;
-                    }
-                });
-            }
-
-            if(processButton) {
-                processButton.addEventListener('click', () => {
-                    if (!originalImageSrc) { alert("Please select an image first."); return; }
-                    if (!eraSelect || !processingCanvas || !resultImg || !downloadLink || !loadingDiv || !resultPlaceholder || !previewImg) {
-                        console.error("Missing required elements for processing."); alert("Error: Required page elements missing."); return;
-                    }
-
-                    const selectedEra = eraSelect.value;
-                    const config = eraConfigs[selectedEra] || eraConfigs['blades'];
-
-                    loadingDiv.classList.remove('hidden');
-                    resultImg.classList.add('hidden');
-                    resultPlaceholder.classList.remove('hidden');
-                    downloadLink.classList.add('hidden');
-                    processButton.disabled = true;
-
-                    const tempImg = new Image();
-                    tempImg.onload = () => {
-                         try {
-                            const ctx = processingCanvas.getContext('2d');
-                            if (!ctx) { throw new Error("Could not get canvas context"); }
-
-                            const targetSize = config.targetSize;
-                            const jpegQuality = config.jpegQuality;
-                            processingCanvas.width = targetSize; processingCanvas.height = targetSize;
-                            ctx.imageSmoothingEnabled = config.smoothing;
-
-                            const originalWidth = tempImg.naturalWidth; const originalHeight = tempImg.naturalHeight;
-                            let sourceX = 0, sourceY = 0, sourceWidth = originalWidth, sourceHeight = originalHeight;
-                            const targetAspectRatio = 1;
-
-                            if (originalWidth / originalHeight > targetAspectRatio) { sourceWidth = originalHeight * targetAspectRatio; sourceX = (originalWidth - sourceWidth) / 2; }
-                            else if (originalWidth / originalHeight < targetAspectRatio) { sourceHeight = originalWidth / targetAspectRatio; sourceY = (originalHeight - sourceHeight) / 2; }
-
-                            ctx.clearRect(0, 0, targetSize, targetSize);
-                            ctx.filter = (config.filter && config.filter !== 'none') ? config.filter : 'none';
-                            ctx.drawImage(tempImg, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetSize, targetSize);
-
-                            const downgradedImageDataUrl = processingCanvas.toDataURL('image/jpeg', jpegQuality);
-
-                            resultImg.src = downgradedImageDataUrl; resultImg.classList.remove('hidden');
-                            resultPlaceholder.classList.add('hidden');
-                            downloadLink.href = downgradedImageDataUrl; downloadLink.classList.remove('hidden');
-
-                        } catch (error) {
-                            console.error("Error during image processing:", error);
-                            alert("An error occurred while processing the image.");
-                        } finally {
-                            loadingDiv.classList.add('hidden');
-                            processButton.disabled = false;
-                        }
-                    };
-                    tempImg.onerror = () => {
-                        alert("Failed to load the selected image.");
-                        loadingDiv.classList.add('hidden'); processButton.disabled = false;
-                    };
-                    tempImg.src = originalImageSrc;
-                });
-            }
-
-        }); // End DOMContentLoaded
+        window.onload = init;
     </script>
-
 </body>
-</ht
+</html>
