@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pulse Path V0.3BETA - Elite Training v3</title>
+    <title>Pulse Path - Professional Edition</title>
     
+    <!-- PWA / Mobile Home Screen Compatibility -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pulse Path">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#3b82f6">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,8 +23,8 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
-                        slate: { 850: '#111827', 950: '#030712' }
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+                        amoled: '#0a0a0a'
                     }
                 }
             }
@@ -30,261 +32,320 @@
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-
         :root {
             --bg-main: #f8fafc;
             --card-bg: #ffffff;
-            --text-main: #0f172a;
+            --text-main: #1e293b;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
-            --input-bg: #f1f5f9;
+            --input-bg: rgba(0,0,0,0.03);
+            --modal-bg: #ffffff;
+            --tag-text: #ffffff;
+            --tag-bg: #1e293b;
         }
 
         [data-bs-theme="dark"] {
-            --bg-main: #020617;
-            --card-bg: #0f172a;
-            --text-main: #f8fafc;
+            --bg-main: #0a0a0a;
+            --card-bg: #121212;
+            --text-main: #f1f5f9;
             --text-muted: #94a3b8;
-            --border-color: #1e293b;
-            --input-bg: #1e293b;
+            --border-color: #262626;
+            --input-bg: rgba(255,255,255,0.05);
+            --modal-bg: #1a1a1a;
+            --tag-text: #121212;
+            --tag-bg: #f1f5f9;
         }
 
         body { 
             background-color: var(--bg-main); 
             color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overscroll-behavior-y: contain;
         }
 
-        .navbar { background-color: var(--card-bg) !important; border-bottom: 1px solid var(--border-color) !important; }
-        .sidebar { background-color: var(--card-bg); border-right: 1px solid var(--border-color); }
+        .bg-main-adaptive { background-color: var(--bg-main); }
+        .bg-card-adaptive { background-color: var(--card-bg); }
+        .border-adaptive { border-color: var(--border-color); }
+
+        [data-bs-theme="dark"] .modal-content { background-color: var(--modal-bg) !important; border: 1px solid var(--border-color); }
+        [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select { 
+            background-color: var(--input-bg) !important; 
+            color: var(--text-main) !important; 
+            border-color: var(--border-color) !important; 
+        }
         
+        @media (max-width: 768px) {
+            .main-layout { height: auto !important; display: block !important; overflow-y: auto !important; }
+            .sidebar { width: 100% !important; height: auto !important; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .week-container { flex-direction: column !important; overflow-x: hidden !important; padding: 1rem !important; gap: 1.5rem !important; }
+            .day-column { width: 100% !important; min-width: 100% !important; }
+        }
+
         .exercise-card { 
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 1.25rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .exercise-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
         }
 
-        .day-column {
-            min-width: 320px;
-            max-width: 320px;
-            height: calc(100vh - 160px);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .tag-pill {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 0.25rem 0.6rem;
-            border-radius: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-
-        .set-input {
-            background-color: var(--input-bg);
-            border: 1px solid transparent;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-align: center;
-            border-radius: 0.75rem;
-            padding: 0.5rem;
-            width: 100%;
-        }
-
-        .set-input:focus {
-            border-color: #3b82f6;
-            outline: none;
-            background-color: var(--card-bg);
-        }
+        .sidebar { background-color: var(--card-bg); border-right: 1px solid var(--border-color); }
+        .navbar { background-color: var(--card-bg) !important; border-bottom: 1px solid var(--border-color) !important; }
+        .week-container { scrollbar-width: thin; display: flex; flex-direction: row; }
+        .main-layout { height: calc(100vh - 57px); }
 
         .theme-switch {
-            width: 60px; height: 30px;
-            background: #e2e8f0; border-radius: 30px;
-            position: relative; cursor: pointer; transition: 0.4s;
+            width: 52px; height: 26px;
+            background: #cbd5e1;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
         }
         [data-bs-theme="dark"] .theme-switch { background: #3b82f6; }
         .theme-switch::after {
             content: "\f185"; font-family: "Font Awesome 6 Free"; font-weight: 900;
-            position: absolute; left: 4px; top: 4px;
-            width: 22px; height: 22px; background: white; border-radius: 50%;
+            position: absolute; left: 3px; top: 3px;
+            width: 20px; height: 20px; background: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: #f59e0b; transition: 0.4s;
+            font-size: 10px; color: #f59e0b; transition: 0.3s;
         }
-        [data-bs-theme="dark"] .theme-switch::after { content: "\f186"; left: 34px; color: #1e3a8a; }
+        [data-bs-theme="dark"] .theme-switch::after { content: "\f186"; left: 29px; color: #1e3a8a; }
 
-        .logo-img { height: 38px; width: auto; transition: opacity 0.3s; }
+        .logo-img { height: 34px; width: auto; border-radius: 4px; }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; }
+        /* Fancy Tag System */
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+        
+        .name-tag {
+            background-color: var(--tag-bg);
+            color: var(--tag-text);
+        }
 
-        @media (max-width: 768px) {
-            .day-column { min-width: 100%; height: auto; }
-            .sidebar { width: 100% !important; border-right: none; height: auto !important; }
-            .main-layout { flex-direction: column !important; overflow-y: auto !important; }
-            .week-container { flex-direction: column !important; overflow-x: hidden !important; }
+        /* Hidden file input */
+        #import-input { display: none; }
+        
+        /* Remove arrows from number inputs */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        .dropdown-menu-adaptive {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+        .dropdown-item-adaptive {
+            color: var(--text-main);
+        }
+        .dropdown-item-adaptive:hover {
+            background-color: var(--input-bg);
+            color: var(--text-main);
         }
     </style>
 </head>
-<body class="vh-100 d-flex flex-column overflow-hidden">
+<body class="d-flex flex-column vh-100 overflow-hidden bg-main-adaptive">
 
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg px-4 py-3 shrink-0">
+    <nav class="navbar navbar-expand-lg px-3 py-2 shrink-0">
         <div class="container-fluid p-0 flex justify-between items-center">
-            <div class="flex items-center gap-6">
-                <a class="flex items-center gap-3 no-underline" href="#">
+            <div class="flex items-center gap-4">
+                <a class="navbar-brand fw-bold text-brand-600 flex items-center gap-2 m-0" href="#">
                     <img id="app-logo" src="https://github.com/Rjxrs/landingpageytP5894/blob/main/112acbc9-8602-447a-9709-90091f51e237.png?raw=true" alt="Pulse Path" class="logo-img">
-                    <span class="text-xl font-extrabold tracking-tight hidden sm:block" style="color: var(--text-main)">Pulse <span class="text-brand-500">Path</span></span>
+                    <span class="hidden sm:inline"></span>
                 </a>
-                <div class="theme-switch" id="darkModeToggle" onclick="toggleDarkMode()"></div>
+                <div class="theme-switch shadow-inner" id="darkModeToggle" onclick="toggleDarkMode()"></div>
             </div>
             
-            <div class="flex gap-3 items-center">
-                <div class="hidden lg:flex items-center mr-4 text-[11px] font-bold uppercase tracking-widest text-slate-400 gap-2">
-                    <span id="save-icon"><i class="fa-solid fa-cloud-check text-emerald-500"></i></span>
-                    <span id="auto-save-status">Cloud Sync Active</span>
-                </div>
-                <input type="file" id="import-input" class="hidden" accept=".json" onchange="handleImport(event)">
-                <button onclick="document.getElementById('import-input').click()" class="btn btn-sm flex items-center gap-2 font-bold text-xs px-4 py-2 rounded-xl border-1 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <i class="fa-solid fa-file-import"></i> <span>Import</span>
-                </button>
-                <button onclick="exportJSON()" class="btn btn-primary btn-sm flex items-center gap-2 font-bold text-xs px-4 py-2 rounded-xl bg-brand-600 border-0 shadow-lg shadow-brand-500/20">
-                    <i class="fa-solid fa-file-export"></i> <span>Export</span>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="hidden md:inline text-[10px] uppercase tracking-widest text-slate-400 font-bold mr-2" id="auto-save-status" data-i18n="saved">Saved</span>
+                
+                <button class="btn btn-outline-secondary btn-sm rounded-lg px-3 border-slate-200 dark:border-slate-700 text-xs font-bold flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                    <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline" data-i18n="settings">Settings</span>
                 </button>
             </div>
         </div>
     </nav>
 
-    <div class="flex flex-grow overflow-hidden main-layout">
-        <!-- Sidebar: Exercise Library -->
-        <aside class="sidebar w-80 flex flex-col h-100">
-            <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex justify-between items-center mb-6">
-                    <h6 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-0">Library</h6>
-                    <button class="bg-brand-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
-                        <i class="fa-solid fa-plus"></i>
+    <div class="d-flex flex-grow-1 overflow-hidden main-layout">
+        <!-- Sidebar: Library -->
+        <div class="sidebar w-80 d-flex flex-column h-100 flex-shrink-0">
+            <div class="p-4 border-bottom border-adaptive">
+                <div class="flex justify-between items-center mb-4">
+                    <h6 class="fw-bold text-muted uppercase tracking-wider text-[11px] mb-0" data-i18n="library">Exercise Library</h6>
+                    <button class="btn btn-primary bg-brand-600 btn-sm border-0 rounded-lg px-3 py-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#addExerciseModal">
+                        <i class="fa-solid fa-plus mr-1"></i> <span class="text-[10px] font-bold" data-i18n="add">ADD</span>
                     </button>
                 </div>
                 
-                <div class="space-y-4">
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="search-library" class="w-full bg-slate-50 dark:bg-slate-900 border-0 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:ring-2 focus:ring-brand-500 transition-all" placeholder="Find movements...">
+                <div class="space-y-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-adaptive opacity-50"><i class="fa-solid fa-search text-[10px]"></i></span>
+                        <input type="text" id="search-library" class="form-control border-adaptive bg-transparent text-xs py-2" placeholder="Search exercises..." data-i18n-placeholder="search">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-2">
-                        <select id="filter-muscle" class="bg-slate-50 dark:bg-slate-900 border-0 rounded-xl py-2 px-3 text-[10px] font-bold uppercase tracking-wide cursor-pointer focus:ring-1 focus:ring-brand-500" onchange="renderLibrary()">
-                            <option value="all">All Muscles</option>
-                            <option value="Chest">Chest</option>
-                            <option value="Back">Back</option>
-                            <option value="Legs">Legs</option>
-                            <option value="Shoulders">Shoulders</option>
-                            <option value="Arms">Arms</option>
-                            <option value="Core">Core</option>
+                        <select id="filter-muscle" class="form-select border-adaptive bg-transparent text-[10px] font-bold py-1.5 uppercase tracking-wide cursor-pointer" onchange="renderLibrary()">
+                            <option value="all" data-i18n="allMuscles">All Muscles</option>
+                            <option value="Chest" data-i18n="chest">Chest</option>
+                            <option value="Back" data-i18n="back">Back</option>
+                            <option value="Legs" data-i18n="legs">Legs</option>
+                            <option value="Shoulders" data-i18n="shoulders">Shoulders</option>
+                            <option value="Arms" data-i18n="arms">Arms</option>
+                            <option value="Core" data-i18n="core">Core</option>
                         </select>
-                        <select id="filter-type" class="bg-slate-50 dark:bg-slate-900 border-0 rounded-xl py-2 px-3 text-[10px] font-bold uppercase tracking-wide cursor-pointer focus:ring-1 focus:ring-brand-500" onchange="renderLibrary()">
-                            <option value="all">All Types</option>
-                            <option value="Compound">Compound</option>
-                            <option value="Isolation">Isolation</option>
+                        <select id="filter-type" class="form-select border-adaptive bg-transparent text-[10px] font-bold py-1.5 uppercase tracking-wide cursor-pointer" onchange="renderLibrary()">
+                            <option value="all" data-i18n="allTypes">All Types</option>
+                            <option value="Compound" data-i18n="compound">Compound</option>
+                            <option value="Isolation" data-i18n="isolation">Isolation</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="flex-grow overflow-y-auto p-4 space-y-3" id="library-list">
-                <!-- Library Items Generated Here -->
-            </div>
-        </aside>
+            <div class="flex-grow-1 overflow-auto p-4" id="library-list"></div>
+        </div>
 
         <!-- Main Workspace -->
-        <main class="flex-grow overflow-x-auto p-6 md:p-10">
-            <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                    <h1 class="text-2xl font-black mb-2 flex items-center gap-3">
-                        <span contenteditable="true" id="program-title" onblur="updateProgramMeta()" class="outline-none focus:text-brand-500 transition-colors">Elite Performance</span>
-                        <i class="fa-solid fa-pen-to-square text-slate-300 text-sm"></i>
-                    </h1>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Training Protocol Overview</p>
-                </div>
-
-                <div class="flex items-center bg-white dark:bg-slate-900 rounded-2xl p-2 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-400" onclick="changeWeek(-1)">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <div class="px-6 text-center min-w-[180px]">
-                        <span class="block text-[10px] font-extrabold text-brand-500 uppercase tracking-tighter">Current Phase</span>
-                        <span class="block text-sm font-bold" id="date-display">...</span>
+        <div class="flex-grow-1 overflow-y-auto p-4 md:p-6 bg-main-adaptive">
+            <div class="mb-4 d-flex flex-column sm:flex-row justify-content-between align-items-center gap-4">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center bg-card-adaptive rounded-xl shadow-sm border border-adaptive p-1">
+                        <button class="p-2 text-muted hover:text-brand-600" onclick="changeWeek(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="px-2 text-center min-w-[120px]">
+                            <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest" data-i18n="week">Week</span>
+                            <span class="block text-xs font-bold" id="date-display">...</span>
+                        </div>
+                        <button class="p-2 text-muted hover:text-brand-600" onclick="changeWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
-                    <button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-400" onclick="changeWeek(1)">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
+                    
+                    <!-- New Week Actions Menu -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm rounded-xl p-2 px-3 border border-adaptive bg-card-adaptive shadow-sm text-xs font-bold flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-ellipsis-vertical"></i> <span class="hidden md:inline" data-i18n="weekActions">Actions</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg dropdown-menu-adaptive text-xs rounded-xl py-2">
+                            <li><button class="dropdown-item dropdown-item-adaptive py-2 px-3" onclick="copyWeek(-1)"><i class="fa-solid fa-arrow-left mr-2 opacity-50"></i> <span data-i18n="copyPrev">Copy to Prev Week</span></button></li>
+                            <li><button class="dropdown-item dropdown-item-adaptive py-2 px-3" onclick="copyWeek(1)"><i class="fa-solid fa-arrow-right mr-2 opacity-50"></i> <span data-i18n="copyNext">Copy to Next Week</span></button></li>
+                            <li><hr class="dropdown-divider border-adaptive my-1"></li>
+                            <li><button class="dropdown-item py-2 px-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" onclick="clearWeek()"><i class="fa-solid fa-trash-can mr-2"></i> <span data-i18n="clearWeek">Clear Week</span></button></li>
+                        </ul>
+                    </div>
                 </div>
-            </header>
-
-            <div class="week-container flex gap-6 pb-20" id="week-container">
-                <!-- Week columns generated here -->
+                
+                <div class="d-flex align-items-center bg-card-adaptive border border-adaptive rounded-xl p-2 px-4 shadow-sm w-full sm:w-auto">
+                    <h2 class="text-sm fw-bold mb-0 flex-grow text-center outline-none" id="program-title" contenteditable="true" onblur="updateProgramMeta()">My Workout Plan</h2>
+                </div>
             </div>
-        </main>
+            <div class="week-container gap-4 pb-10" id="week-container"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3xl border-0 shadow-2xl bg-card-adaptive">
+                <div class="modal-header border-bottom-0 p-5 pb-0">
+                    <h5 class="modal-title fw-bold text-sm uppercase tracking-widest" data-i18n="settings">Settings & Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-5">
+                    
+                    <div class="mb-5">
+                        <label class="form-label text-[10px] font-bold text-muted uppercase" data-i18n="language">Language</label>
+                        <select id="app-language" class="form-select border-adaptive bg-transparent p-3 text-sm rounded-xl" onchange="changeLanguage(this.value)">
+                            <option value="en">English (EN)</option>
+                            <option value="es">Español (ES)</option>
+                            <option value="fr">Français (FR)</option>
+                            <option value="de">Deutsch (DE)</option>
+                            <option value="nl">Nederlands (NL)</option>
+                            <option value="it">Italiano (IT)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label text-[10px] font-bold text-muted uppercase flex justify-between">
+                            <span data-i18n="customTags">Custom Tags</span>
+                        </label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="new-tag-input" class="form-control border-adaptive bg-transparent p-2 text-xs rounded-lg" placeholder="e.g. Warmup, Drop Set">
+                            <button onclick="addCustomTag()" class="btn btn-primary bg-brand-600 border-0 text-xs px-3 rounded-lg fw-bold"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="custom-tags-list" class="flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+
+                    <hr class="border-adaptive my-4">
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="file" id="import-input" accept=".json" onchange="handleImport(event)">
+                        <button onclick="document.getElementById('import-input').click()" class="btn w-full border border-adaptive hover:bg-slate-100 dark:hover:bg-slate-800 text-xs p-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-upload"></i> <span data-i18n="importData">Import Data</span>
+                        </button>
+                        <button onclick="exportJSON()" class="btn btn-primary bg-brand-600 border-0 shadow-sm text-xs p-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download"></i> <span data-i18n="exportData">Export Data</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Selection Modal -->
     <div class="modal fade" id="selectDayModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content rounded-3xl border-0 shadow-2xl overflow-hidden">
-                <div class="bg-brand-500 p-6 text-white text-center">
-                    <i class="fa-solid fa-calendar-day text-3xl mb-3"></i>
-                    <h5 class="font-bold text-sm uppercase tracking-widest m-0" id="select-day-title">Schedule Workout</h5>
+            <div class="modal-content rounded-3xl border-0 shadow-2xl bg-card-adaptive">
+                <div class="modal-header border-bottom-0 p-4 pb-0">
+                    <h5 class="modal-title fw-bold text-xs uppercase tracking-widest" id="select-day-title">Add to Day</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4 space-y-2" id="day-selection-list"></div>
+                <div class="modal-body p-3" id="day-selection-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- Create Exercise Modal -->
+    <!-- Add Custom Exercise Modal -->
     <div class="modal fade" id="addExerciseModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-3xl border-0 overflow-hidden">
-                <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-                    <h5 class="font-black text-lg m-0">Define Movement</h5>
-                    <p class="text-xs text-slate-400 font-semibold">Add a new exercise to your local database.</p>
+            <div class="modal-content rounded-3xl border-0 bg-card-adaptive">
+                <div class="modal-header border-bottom-0 p-5 pb-0">
+                    <h5 class="modal-title fw-bold text-sm uppercase tracking-widest" data-i18n="createExercise">Create Exercise</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-6">
-                    <form id="new-exercise-form" class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Exercise Name</label>
-                            <input type="text" class="w-full bg-slate-50 dark:bg-slate-900 border-0 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none" id="new-ex-name" required placeholder="e.g. Bulgarian Split Squat">
+                <div class="modal-body p-5">
+                    <form id="new-exercise-form">
+                        <div class="mb-4">
+                            <label class="form-label text-[10px] font-bold text-muted uppercase" data-i18n="name">Name</label>
+                            <input type="text" class="form-control border-adaptive bg-transparent p-3 text-sm rounded-xl" id="new-ex-name" required placeholder="e.g. Leg Press">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-3 mb-4">
                             <div>
-                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Target Muscle</label>
-                                <select id="new-ex-muscle" class="w-full bg-slate-50 dark:bg-slate-900 border-0 rounded-xl p-3 text-xs font-bold uppercase">
-                                    <option value="Chest">Chest</option>
-                                    <option value="Back">Back</option>
-                                    <option value="Legs">Legs</option>
-                                    <option value="Shoulders">Shoulders</option>
-                                    <option value="Arms">Arms</option>
-                                    <option value="Core">Core</option>
+                                <label class="form-label text-[10px] font-bold text-muted uppercase" data-i18n="muscle">Muscle</label>
+                                <select id="new-ex-muscle" class="form-select border-adaptive bg-transparent p-3 text-sm rounded-xl">
+                                    <option value="Chest" data-i18n="chest">Chest</option>
+                                    <option value="Back" data-i18n="back">Back</option>
+                                    <option value="Legs" data-i18n="legs">Legs</option>
+                                    <option value="Shoulders" data-i18n="shoulders">Shoulders</option>
+                                    <option value="Arms" data-i18n="arms">Arms</option>
+                                    <option value="Core" data-i18n="core">Core</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Movement Type</label>
-                                <select id="new-ex-type" class="w-full bg-slate-50 dark:bg-slate-900 border-0 rounded-xl p-3 text-xs font-bold uppercase">
-                                    <option value="Compound">Compound</option>
-                                    <option value="Isolation">Isolation</option>
+                                <label class="form-label text-[10px] font-bold text-muted uppercase" data-i18n="type">Type</label>
+                                <select id="new-ex-type" class="form-select border-adaptive bg-transparent p-3 text-sm rounded-xl">
+                                    <option value="Compound" data-i18n="compound">Compound</option>
+                                    <option value="Isolation" data-i18n="isolation">Isolation</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="w-full bg-brand-600 text-white font-bold p-4 rounded-2xl shadow-xl shadow-brand-500/30 hover:bg-brand-700 transition-all mt-4">Save to Library</button>
+                        <button type="submit" class="btn btn-primary w-100 bg-brand-600 border-0 p-3 rounded-xl fw-bold text-sm" data-i18n="addToLibrary">Add to Library</button>
                     </form>
                 </div>
             </div>
@@ -292,28 +353,119 @@
     </div>
 
     <script>
+        // --- Comprehensive Translations Dictionary (i18n) ---
+        const I18N = {
+            en: { 
+                saved: "Saved", settings: "Settings", library: "Exercise Library", add: "ADD", search: "Search exercises...", 
+                allMuscles: "All Muscles", allTypes: "All Types", week: "Week", language: "Language", customTags: "Custom Tags", 
+                importData: "Import Data", exportData: "Export Data", createExercise: "Create Exercise", name: "Name", muscle: "Muscle", 
+                type: "Type", addToLibrary: "Add to Library", reps: "reps", kg: "kg", addSet: "Add Set", 
+                chest: "Chest", back: "Back", legs: "Legs", shoulders: "Shoulders", arms: "Arms", core: "Core", general: "General",
+                compound: "Compound", isolation: "Isolation", standard: "Standard",
+                weekActions: "Actions", copyNext: "Copy to Next Week", copyPrev: "Copy to Prev Week", clearWeek: "Clear Week",
+                confirmClear: "Are you sure you want to clear all exercises for this entire week?", confirmCopy: "Copy current week to the target week?"
+            },
+            es: { 
+                saved: "Guardado", settings: "Ajustes", library: "Biblioteca", add: "AÑADIR", search: "Buscar ejercicios...", 
+                allMuscles: "Músculos", allTypes: "Todos Tipos", week: "Semana", language: "Idioma", customTags: "Etiquetas", 
+                importData: "Importar", exportData: "Exportar", createExercise: "Crear Ejercicio", name: "Nombre", muscle: "Músculo", 
+                type: "Tipo", addToLibrary: "Añadir a Biblioteca", reps: "reps", kg: "kg", addSet: "Añadir Serie",
+                chest: "Pecho", back: "Espalda", legs: "Piernas", shoulders: "Hombros", arms: "Brazos", core: "Core", general: "General",
+                compound: "Compuesto", isolation: "Aislamiento", standard: "Estándar",
+                weekActions: "Acciones", copyNext: "Copiar a Próx.", copyPrev: "Copiar a Ant.", clearWeek: "Limpiar Semana",
+                confirmClear: "¿Estás seguro de que quieres borrar todos los ejercicios de esta semana?", confirmCopy: "¿Copiar esta semana a la siguiente/anterior?"
+            },
+            fr: { 
+                saved: "Enregistré", settings: "Paramètres", library: "Bibliothèque", add: "AJOUTER", search: "Rechercher...", 
+                allMuscles: "Tous Muscles", allTypes: "Tous Types", week: "Semaine", language: "Langue", customTags: "Tags Perso", 
+                importData: "Importer", exportData: "Exporter", createExercise: "Créer Exercice", name: "Nom", muscle: "Muscle", 
+                type: "Type", addToLibrary: "Ajouter", reps: "réps", kg: "kg", addSet: "Ajouter Série",
+                chest: "Poitrine", back: "Dos", legs: "Jambes", shoulders: "Épaules", arms: "Bras", core: "Gainage", general: "Général",
+                compound: "Polyarticulaire", isolation: "Isolation", standard: "Standard",
+                weekActions: "Actions", copyNext: "Copier à Suiv.", copyPrev: "Copier à Préc.", clearWeek: "Vider Semaine",
+                confirmClear: "Voulez-vous vraiment supprimer tous les exercices de cette semaine ?", confirmCopy: "Copier la semaine ?"
+            },
+            de: { 
+                saved: "Gespeichert", settings: "Einstellungen", library: "Übungsbibliothek", add: "HINZUFÜGEN", search: "Suchen...", 
+                allMuscles: "Alle Muskeln", allTypes: "Alle Typen", week: "Woche", language: "Sprache", customTags: "Eigene Tags", 
+                importData: "Importieren", exportData: "Exportieren", createExercise: "Übung Erstellen", name: "Name", muscle: "Muskel", 
+                type: "Typ", addToLibrary: "Hinzufügen", reps: "wdh", kg: "kg", addSet: "Satz Hinzufügen",
+                chest: "Brust", back: "Rücken", legs: "Beine", shoulders: "Schultern", arms: "Arme", core: "Core", general: "Allgemein",
+                compound: "Verbund", isolation: "Isolation", standard: "Standard",
+                weekActions: "Aktionen", copyNext: "Nächste Woche Kopieren", copyPrev: "Vorherige Woche Kopieren", clearWeek: "Woche Leeren",
+                confirmClear: "Sind Sie sicher, dass Sie alle Übungen für diese Woche löschen möchten?", confirmCopy: "Woche kopieren?"
+            },
+            nl: { 
+                saved: "Opgeslagen", settings: "Instellingen", library: "Oefeningen", add: "TOEVOEGEN", search: "Zoeken...", 
+                allMuscles: "Alle Spieren", allTypes: "Alle Types", week: "Week", language: "Taal", customTags: "Eigen Tags", 
+                importData: "Importeer", exportData: "Exporteer", createExercise: "Oefening Maken", name: "Naam", muscle: "Spier", 
+                type: "Type", addToLibrary: "Toevoegen", reps: "hh", kg: "kg", addSet: "Set Toevoegen",
+                chest: "Borst", back: "Rug", legs: "Benen", shoulders: "Schouders", arms: "Armen", core: "Core", general: "Algemeen",
+                compound: "Compound", isolation: "Isolatie", standard: "Standaard",
+                weekActions: "Acties", copyNext: "Kopieer naar Volgende", copyPrev: "Kopieer naar Vorige", clearWeek: "Week Wissen",
+                confirmClear: "Weet je zeker dat je alle oefeningen van deze week wilt wissen?", confirmCopy: "Huidige week kopiëren?"
+            },
+            it: { 
+                saved: "Salvato", settings: "Impostazioni", library: "Libreria", add: "AGGIUNGI", search: "Cerca...", 
+                allMuscles: "Tutti Muscoli", allTypes: "Tutti Tipi", week: "Settimana", language: "Lingua", customTags: "Tag Pers.", 
+                importData: "Importa", exportData: "Esporta", createExercise: "Crea Esercizio", name: "Nome", muscle: "Muscolo", 
+                type: "Tipo", addToLibrary: "Aggiungi", reps: "rip", kg: "kg", addSet: "Aggiungi Set",
+                chest: "Petto", back: "Schiena", legs: "Gambe", shoulders: "Spalle", arms: "Braccia", core: "Core", general: "Generale",
+                compound: "Multiarticolare", isolation: "Isolamento", standard: "Standard",
+                weekActions: "Azioni", copyNext: "Copia a Pros.", copyPrev: "Copia a Prec.", clearWeek: "Svuota Settimana",
+                confirmClear: "Sei sicuro di voler cancellare tutti gli esercizi di questa settimana?", confirmCopy: "Copiare la settimana?"
+            }
+        };
+
         const LOGOS = {
             light: "https://github.com/Rjxrs/landingpageytP5894/blob/main/112acbc9-8602-447a-9709-90091f51e237.png?raw=true",
             dark: "https://github.com/Rjxrs/landingpageytP5894/blob/main/7975235b-d8ee-40d2-9384-2ff5fc71883c.png?raw=true"
         };
 
+        function getMuscleImage(muscle) {
+            const colors = {
+                'Chest': '1d4ed8', 'Back': '047857', 'Legs': 'b91c1c', 
+                'Shoulders': 'b45309', 'Arms': '4338ca', 'Core': '0f766e', 'General': '334155'
+            };
+            const hex = colors[muscle] || '334155';
+            return `https://placehold.co/150x150/${hex}/ffffff?text=${muscle.charAt(0)}&font=montserrat`;
+        }
+
         const DEFAULT_EXERCISES = [
-            { id: 'ex-1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
-            { id: 'ex-2', name: 'Flat Bench Press', muscle: 'Chest', type: 'Compound' },
-            { id: 'ex-3', name: 'Conventional Deadlift', muscle: 'Back', type: 'Compound' },
-            { id: 'ex-4', name: 'Weighted Pull Ups', muscle: 'Back', type: 'Compound' },
-            { id: 'ex-5', name: 'Military Press', muscle: 'Shoulders', type: 'Compound' },
-            { id: 'ex-6', name: 'Dumbbell Incline Curl', muscle: 'Arms', type: 'Isolation' },
-            { id: 'ex-7', name: 'Overhead Extension', muscle: 'Arms', type: 'Isolation' },
-            { id: 'ex-8', name: 'Hanging Leg Raise', muscle: 'Core', type: 'Isolation' }
+            { id: 'ex-c1', name: 'Barbell Bench Press', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-c2', name: 'Incline Dumbbell Press', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-c3', name: 'Decline Bench Press', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-c4', name: 'Cable Crossover', muscle: 'Chest', type: 'Isolation' },
+            { id: 'ex-c5', name: 'Pec Deck Machine', muscle: 'Chest', type: 'Isolation' },
+            { id: 'ex-c6', name: 'Push-ups', muscle: 'Chest', type: 'Compound' },
+            { id: 'ex-b1', name: 'Deadlift', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-b2', name: 'Pull-ups', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-b3', name: 'Lat Pulldown', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-b4', name: 'Barbell Row', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-b5', name: 'Seated Cable Row', muscle: 'Back', type: 'Compound' },
+            { id: 'ex-b6', name: 'Face Pulls', muscle: 'Back', type: 'Isolation' },
+            { id: 'ex-l1', name: 'Barbell Back Squat', muscle: 'Legs', type: 'Compound' },
+            { id: 'ex-l2', name: 'Leg Press', muscle: 'Legs', type: 'Compound' },
+            { id: 'ex-l3', name: 'Romanian Deadlift (RDL)', muscle: 'Legs', type: 'Compound' },
+            { id: 'ex-l5', name: 'Leg Extensions', muscle: 'Legs', type: 'Isolation' },
+            { id: 'ex-s1', name: 'Overhead Press', muscle: 'Shoulders', type: 'Compound' },
+            { id: 'ex-s2', name: 'Dumbbell Shoulder Press', muscle: 'Shoulders', type: 'Compound' },
+            { id: 'ex-s3', name: 'Lateral Raises', muscle: 'Shoulders', type: 'Isolation' },
+            { id: 'ex-a1', name: 'Barbell Bicep Curls', muscle: 'Arms', type: 'Isolation' },
+            { id: 'ex-a4', name: 'Tricep Pushdowns', muscle: 'Arms', type: 'Isolation' },
+            { id: 'ex-a6', name: 'Skullcrushers', muscle: 'Arms', type: 'Isolation' },
+            { id: 'ex-co1', name: 'Plank', muscle: 'Core', type: 'Isolation' },
+            { id: 'ex-co2', name: 'Cable Crunches', muscle: 'Core', type: 'Isolation' },
+            { id: 'ex-co5', name: 'Ab Wheel Rollouts', muscle: 'Core', type: 'Compound' }
         ];
 
         let state = {
-            version: "3.0.0",
+            version: "3.1",
             theme: 'light',
             currentWeekStart: getMonday(new Date()).toISOString(),
             customExercises: [],
-            program: { name: "Elite Athlete Program", logs: {} }
+            program: { name: "Pulse Path Program", logs: {} },
+            settings: { language: 'en', customTags: ['Warmup', 'Drop Set'] }
         };
 
         function getMonday(d) {
@@ -323,23 +475,40 @@
         }
 
         function init() {
-            const saved = localStorage.getItem('pulse_path_pro_v3');
+            const saved = localStorage.getItem('pulse_path_v1');
             if (saved) { 
                 try {
                     const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed }; 
-                } catch(e) { console.error("Restore failed", e); }
+                    state = { ...state, ...parsed, settings: { ...state.settings, ...(parsed.settings || {}) } }; 
+                    migrateState();
+                } catch(e) { console.error("Load failed", e); }
             }
-            applyTheme();
-            refreshUI();
-            setupEvents();
+            applyTheme(); applyLanguage(); refreshUI(); setupEvents(); renderSettingsTags();
+        }
+
+        function migrateState() {
+            let modified = false;
+            Object.keys(state.program.logs).forEach(date => {
+                state.program.logs[date].forEach(ex => {
+                    if (!ex.muscle || !ex.type || ex.muscle === 'Unknown') {
+                        const libEx = [...DEFAULT_EXERCISES, ...state.customExercises].find(e => e.name === ex.name);
+                        ex.muscle = libEx ? libEx.muscle : 'General';
+                        ex.type = libEx ? libEx.type : 'Standard';
+                        modified = true;
+                    }
+                    if (!ex.customTags) { ex.customTags = []; modified = true; }
+                });
+            });
+            if (modified) saveState();
         }
 
         function refreshUI() {
             document.getElementById('program-title').innerText = state.program.name;
+            document.getElementById('app-language').value = state.settings.language;
             updateDateDisplay();
             renderLibrary();
             renderWeek();
+            applyLanguage();
         }
 
         function applyTheme() {
@@ -347,60 +516,142 @@
             const logo = document.getElementById('app-logo');
             html.setAttribute('data-bs-theme', state.theme);
             if (state.theme === 'dark') {
-                html.classList.add('dark');
-                logo.src = LOGOS.dark;
+                html.classList.add('dark'); logo.src = LOGOS.dark;
             } else {
-                html.classList.remove('dark');
-                logo.src = LOGOS.light;
+                html.classList.remove('dark'); logo.src = LOGOS.light;
             }
         }
 
-        function toggleDarkMode() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            applyTheme();
-            saveState();
-        }
+        function toggleDarkMode() { state.theme = state.theme === 'light' ? 'dark' : 'light'; applyTheme(); saveState(); }
 
         function saveState() {
-            localStorage.setItem('pulse_path_pro_v3', JSON.stringify(state));
+            localStorage.setItem('pulse_path_v1', JSON.stringify(state));
             const status = document.getElementById('auto-save-status');
-            const icon = document.getElementById('save-icon');
-            status.innerText = 'Synchronizing...';
-            icon.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-brand-500"></i>';
-            setTimeout(() => {
-                status.innerText = 'Changes Saved Locally';
-                icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i>';
-            }, 800);
+            status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            setTimeout(() => { status.innerHTML = t('saved'); }, 600);
         }
 
+        // --- Core Translation Engine ---
+        function changeLanguage(lang) { state.settings.language = lang; saveState(); applyLanguage(); refreshUI(); }
+        
+        function applyLanguage() {
+            const lang = state.settings.language;
+            const dict = I18N[lang] || I18N['en'];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.innerHTML = dict[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) el.placeholder = dict[key];
+            });
+        }
+
+        // Safe translator for strings (falls back to the English string itself if not mapped)
+        function t(keyStr) { 
+            if (!keyStr) return '';
+            const key = keyStr.toLowerCase();
+            const dict = I18N[state.settings.language] || I18N['en'];
+            return dict[key] ? dict[key] : keyStr; 
+        }
+
+        // --- Week Actions (Copy / Clear) ---
+        function copyWeek(offset) {
+            if (!confirm(t('confirmCopy'))) return;
+            
+            const currentMonday = new Date(state.currentWeekStart);
+            const targetMonday = new Date(currentMonday);
+            targetMonday.setDate(currentMonday.getDate() + (offset * 7));
+            
+            for (let i = 0; i < 7; i++) {
+                const sourceDate = new Date(currentMonday);
+                sourceDate.setDate(currentMonday.getDate() + i);
+                const sourceKey = sourceDate.toISOString().split('T')[0];
+                
+                const targetDate = new Date(targetMonday);
+                targetDate.setDate(targetMonday.getDate() + i);
+                const targetKey = targetDate.toISOString().split('T')[0];
+                
+                if (state.program.logs[sourceKey] && state.program.logs[sourceKey].length > 0) {
+                    // Deep copy and assign fresh unique IDs
+                    state.program.logs[targetKey] = JSON.parse(JSON.stringify(state.program.logs[sourceKey])).map(ex => {
+                        ex.id = Date.now() + Math.floor(Math.random() * 10000);
+                        return ex;
+                    });
+                } else if (!state.program.logs[targetKey]) {
+                     state.program.logs[targetKey] = [];
+                }
+            }
+            
+            state.currentWeekStart = targetMonday.toISOString();
+            saveState();
+            refreshUI();
+        }
+
+        function clearWeek() {
+            if (!confirm(t('confirmClear'))) return;
+            const currentMonday = new Date(state.currentWeekStart);
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(currentMonday);
+                date.setDate(currentMonday.getDate() + i);
+                const key = date.toISOString().split('T')[0];
+                delete state.program.logs[key];
+            }
+            saveState();
+            refreshUI();
+        }
+
+        // --- Settings Tags System ---
+        function renderSettingsTags() {
+            const container = document.getElementById('custom-tags-list');
+            container.innerHTML = state.settings.customTags.map((tag, idx) => `
+                <div class="bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-2">
+                    ${tag} <button onclick="removeCustomTag(${idx})" class="text-brand-400 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+                </div>`).join('');
+        }
+        function addCustomTag() {
+            const input = document.getElementById('new-tag-input');
+            const val = input.value.trim();
+            if (val && !state.settings.customTags.includes(val)) {
+                state.settings.customTags.push(val); input.value = ''; saveState(); renderSettingsTags(); renderWeek();
+            }
+        }
+        function removeCustomTag(idx) { state.settings.customTags.splice(idx, 1); saveState(); renderSettingsTags(); renderWeek(); }
+
+        // --- Library & Rendering ---
         function renderLibrary() {
             const container = document.getElementById('library-list');
-            const search = document.getElementById('search-library').value.toLowerCase();
-            const muscle = document.getElementById('filter-muscle').value;
-            const type = document.getElementById('filter-type').value;
+            const filterSearch = document.getElementById('search-library').value.toLowerCase();
+            const filterMuscle = document.getElementById('filter-muscle').value;
+            const filterType = document.getElementById('filter-type').value;
 
             container.innerHTML = '';
             
             const list = [...DEFAULT_EXERCISES, ...state.customExercises].filter(ex => {
-                return (ex.name.toLowerCase().includes(search)) && 
-                       (muscle === 'all' || ex.muscle === muscle) &&
-                       (type === 'all' || ex.type === type);
+                const matchesSearch = ex.name.toLowerCase().includes(filterSearch);
+                const matchesMuscle = filterMuscle === 'all' || ex.muscle === filterMuscle;
+                const matchesType = filterType === 'all' || ex.type === filterType;
+                return matchesSearch && matchesMuscle && matchesType;
             });
 
             list.forEach(ex => {
+                const imgUrl = ex.image || getMuscleImage(ex.muscle);
                 const el = document.createElement('div');
-                el.className = 'exercise-card p-4 cursor-pointer hover:border-brand-500 group flex justify-between items-center';
+                el.className = 'exercise-card p-4 rounded-2xl mb-3 shadow-sm cursor-pointer active:scale-95 hover:border-brand-500 transition-all group';
                 el.onclick = () => openDaySelector(ex);
                 el.innerHTML = `
-                    <div class="pr-3">
-                        <p class="text-[12px] font-black mb-2 group-hover:text-brand-500 transition-colors">${ex.name}</p>
-                        <div class="flex gap-2">
-                            <span class="tag-pill bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">${ex.muscle}</span>
-                            <span class="tag-pill bg-slate-100 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">${ex.type}</span>
+                    <div class="flex items-center gap-3">
+                        <img src="${imgUrl}" class="w-10 h-10 rounded-lg object-cover bg-slate-100 dark:bg-slate-800 shadow-sm opacity-90 group-hover:opacity-100 transition-opacity">
+                        <div class="flex-grow min-w-0 pr-2">
+                            <div class="fw-bold text-xs mb-1 truncate">${ex.name}</div>
+                            <div class="flex gap-1.5 flex-wrap">
+                                <span class="tag-pill bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300 font-bold uppercase" style="font-size: 8px;">${t(ex.muscle)}</span>
+                                <span class="tag-pill bg-slate-100 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400 font-bold uppercase" style="font-size: 8px;">${t(ex.type)}</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-900 text-slate-400 w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-brand-500 group-hover:text-white transition-all">
-                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <div class="bg-brand-500 text-white rounded-lg w-7 h-7 flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                        </div>
                     </div>
                 `;
                 container.appendChild(el);
@@ -408,7 +659,8 @@
         }
 
         function openDaySelector(exercise) {
-            document.getElementById('select-day-title').innerText = `Assign ${exercise.name}`;
+            const modalTitle = document.getElementById('select-day-title');
+            modalTitle.innerText = `${t('add')} ${exercise.name}`;
             const list = document.getElementById('day-selection-list');
             list.innerHTML = '';
             const monday = new Date(state.currentWeekStart);
@@ -418,12 +670,9 @@
                 const dayName = date.toLocaleDateString(undefined, { weekday: 'long' });
                 const dateKey = date.toISOString().split('T')[0];
                 const btn = document.createElement('button');
-                btn.className = 'w-full text-left p-4 rounded-2xl hover:bg-brand-50 dark:hover:bg-slate-800 border-1 border-slate-100 dark:border-slate-800 flex justify-between items-center font-bold text-xs transition-all';
-                btn.innerHTML = `<span>${dayName}</span><i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>`;
-                btn.onclick = () => {
-                    addExerciseToDay(dateKey, exercise);
-                    bootstrap.Modal.getInstance(document.getElementById('selectDayModal')).hide();
-                };
+                btn.className = 'w-full text-left p-3 mb-2 rounded-xl hover:bg-brand-500 hover:text-white border-adaptive border flex justify-between items-center group transition-all';
+                btn.innerHTML = `<span class="text-xs font-bold">${dayName}</span><i class="fa-solid fa-plus text-[10px] opacity-30 group-hover:opacity-100"></i>`;
+                btn.onclick = () => { addExerciseToDay(dateKey, exercise); bootstrap.Modal.getInstance(document.getElementById('selectDayModal')).hide(); };
                 list.appendChild(btn);
             }
             new bootstrap.Modal(document.getElementById('selectDayModal')).show();
@@ -432,14 +681,17 @@
         function addExerciseToDay(dateKey, exercise) {
             if (!state.program.logs[dateKey]) state.program.logs[dateKey] = [];
             state.program.logs[dateKey].push({ 
-                id: Date.now(), 
-                name: exercise.name, 
-                muscle: exercise.muscle,
-                type: exercise.type,
-                sets: [{ reps: '', weight: '' }] 
+                id: Date.now(), name: exercise.name, muscle: exercise.muscle, type: exercise.type,
+                image: exercise.image, customTags: [], sets: [{ reps: '', weight: '' }] 
             });
-            saveState();
-            renderWeek();
+            saveState(); renderWeek();
+        }
+
+        function toggleExerciseTag(dateKey, exIdx, tag) {
+            const ex = state.program.logs[dateKey][exIdx];
+            if (!ex.customTags) ex.customTags = [];
+            ex.customTags = ex.customTags.includes(tag) ? ex.customTags.filter(t => t !== tag) : [...ex.customTags, tag];
+            saveState(); renderWeek();
         }
 
         function renderWeek() {
@@ -451,137 +703,114 @@
                 currentDate.setDate(monday.getDate() + i);
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const dayExercises = state.program.logs[dateKey] || [];
-                
                 const col = document.createElement('div');
-                col.className = 'day-column';
+                col.className = 'day-column flex flex-col flex-shrink-0 bg-card-adaptive rounded-2xl border border-adaptive shadow-sm w-80 h-fit overflow-hidden';
                 col.innerHTML = `
-                    <div class="mb-6 flex justify-between items-baseline px-2">
-                        <h3 class="text-sm font-black uppercase tracking-widest text-brand-500">${currentDate.toLocaleDateString(undefined, { weekday: 'long' })}</h3>
-                        <span class="text-[10px] font-bold text-slate-400">${dayExercises.length} Movements</span>
+                    <div class="p-4 border-bottom border-adaptive flex justify-between items-center bg-black/[0.02] dark:bg-white/[0.02]">
+                        <span class="block text-[10px] font-extrabold text-muted uppercase tracking-widest">${currentDate.toLocaleDateString(undefined, { weekday: 'long' })}</span>
+                        <span class="text-[9px] opacity-50 font-bold">${dayExercises.length} Ex</span>
                     </div>
-                    <div class="flex-grow overflow-y-auto pr-2 space-y-4 sortable-day-list" data-date="${dateKey}">
+                    <div class="p-3 sortable-day-list min-h-[50px]" data-date="${dateKey}">
                         ${dayExercises.map((ex, idx) => renderExerciseCard(ex, dateKey, idx)).join('')}
-                        ${dayExercises.length === 0 ? `<div class="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center text-slate-300 text-[10px] font-bold uppercase tracking-widest">Rest Day</div>` : ''}
                     </div>
                 `;
                 container.appendChild(col);
-                new Sortable(col.querySelector('.sortable-day-list'), { 
-                    animation: 150, 
-                    handle: '.drag-handle', 
-                    ghostClass: 'opacity-50',
-                    onUpdate: handleReorder 
-                });
+                new Sortable(col.querySelector('.sortable-day-list'), { animation: 150, handle: '.drag-handle', onUpdate: handleReorder });
             }
         }
 
         function renderExerciseCard(ex, dateKey, idx) {
-            const setHtml = (ex.sets || []).map((set, sIdx) => `
-                <div class="grid grid-cols-[20px_1fr_1fr_30px] gap-2 items-center mb-2">
-                    <span class="text-[9px] font-black text-slate-300">${sIdx + 1}</span>
-                    <input type="number" placeholder="Reps" class="set-input" value="${set.reps}" oninput="updateSetData('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)">
-                    <input type="number" placeholder="Kg" class="set-input" value="${set.weight}" oninput="updateSetData('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)">
-                    <button onclick="removeSet('${dateKey}', ${idx}, ${sIdx})" class="text-slate-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-circle-xmark"></i></button>
+            const typeColor = ex.type === 'Compound' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
+            const muscleColor = 'bg-brand-50 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300';
+            const imgUrl = ex.image || getMuscleImage(ex.muscle);
+            
+            const userTags = ex.customTags || [];
+            const tagsHtml = userTags.map(tag => `<span class="tag-pill bg-purple-50 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300 text-[8px] uppercase cursor-pointer" onclick="toggleExerciseTag('${dateKey}', ${idx}, '${tag}')">${tag}</span>`).join('');
+            
+            const addTagDropdown = state.settings.customTags.length > 0 ? `
+                <div class="dropdown inline-block">
+                    <button class="tag-pill border border-dashed border-adaptive text-muted hover:text-brand-500 hover:border-brand-500 bg-transparent text-[8px] uppercase" data-bs-toggle="dropdown">+</button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 bg-card-adaptive text-[10px] p-2 min-w-[120px] rounded-xl">
+                        ${state.settings.customTags.map(tg => `<li><button class="dropdown-item rounded-lg py-1.5 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 ${userTags.includes(tg) ? 'fw-bold text-brand-500' : ''}" onclick="toggleExerciseTag('${dateKey}', ${idx}, '${tg}')">${tg}</button></li>`).join('')}
+                    </ul>
+                </div>
+            ` : '';
+
+            let setHtml = (ex.sets || []).map((set, sIdx) => `
+                <div class="flex gap-2 mb-2 items-center set-row bg-black/[0.02] dark:bg-white/[0.02] p-1.5 rounded-xl border border-transparent hover:border-adaptive transition-colors">
+                    <span class="text-[9px] w-4 font-bold opacity-30 text-center">${sIdx + 1}</span>
+                    <div class="flex-1 flex items-center bg-[var(--input-bg)] rounded-lg overflow-hidden border border-adaptive focus-within:border-brand-500 transition-colors">
+                        <input type="number" class="w-full bg-transparent border-0 text-center text-xs font-bold p-1.5 outline-none text-[var(--text-main)]" value="${set.reps}" oninput="updateSetData('${dateKey}', ${idx}, ${sIdx}, 'reps', this.value)" placeholder="0">
+                        <span class="text-[8px] font-extrabold text-muted uppercase pr-2 tracking-wider select-none">${t('reps')}</span>
+                    </div>
+                    <div class="flex-1 flex items-center bg-[var(--input-bg)] rounded-lg overflow-hidden border border-adaptive focus-within:border-brand-500 transition-colors">
+                        <input type="number" class="w-full bg-transparent border-0 text-center text-xs font-bold p-1.5 outline-none text-[var(--text-main)]" value="${set.weight}" oninput="updateSetData('${dateKey}', ${idx}, ${sIdx}, 'weight', this.value)" placeholder="0">
+                        <span class="text-[8px] font-extrabold text-muted uppercase pr-2 tracking-wider select-none">${t('kg')}</span>
+                    </div>
+                    <button onclick="removeSet('${dateKey}', ${idx}, ${sIdx})" class="p-1.5 text-muted opacity-40 hover:opacity-100 hover:text-red-500 transition-all"><i class="fa-solid fa-times text-[10px]"></i></button>
                 </div>
             `).join('');
-
+            
             return `
-                <div class="exercise-card p-5 bg-white dark:bg-slate-900 shadow-sm relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="space-y-1">
-                            <h4 class="text-xs font-black m-0">${ex.name}</h4>
-                            <div class="flex gap-2">
-                                <span class="text-[9px] font-bold text-brand-500 uppercase">${ex.muscle}</span>
-                                <span class="text-[9px] font-bold text-slate-400 uppercase">• ${ex.type}</span>
+                <div class="exercise-card rounded-2xl p-4 mb-3 shadow-sm transition-all group/card">
+                    <div class="flex justify-between items-start mb-4 gap-3">
+                        <img src="${imgUrl}" class="w-12 h-12 rounded-xl object-cover shadow-sm bg-slate-100 dark:bg-slate-800 flex-shrink-0 border border-adaptive">
+                        <div class="flex-grow min-w-0 space-y-1.5 mt-0.5">
+                            <div class="flex items-center flex-wrap gap-1 mb-1">
+                                <span class="tag-pill name-tag truncate max-w-full">${ex.name}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="tag-pill ${muscleColor} font-bold" style="font-size: 8px;">${t(ex.muscle || 'General')}</span>
+                                <span class="tag-pill ${typeColor} font-bold" style="font-size: 8px;">${t(ex.type || 'Standard')}</span>
+                                ${tagsHtml}
+                                ${addTagDropdown}
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <i class="fa-solid fa-grip-vertical text-slate-200 drag-handle cursor-grab p-1"></i>
-                            <button onclick="removeExercise('${dateKey}', ${idx})" class="text-slate-200 hover:text-red-400"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                             <i class="fa-solid fa-grip-vertical opacity-20 drag-handle cursor-grab p-1 hover:opacity-100 transition-opacity"></i>
+                             <button onclick="removeExercise('${dateKey}', ${idx})" class="p-1 text-muted hover:text-red-500 transition-colors opacity-0 group-hover/card:opacity-100"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
                         </div>
                     </div>
                     <div id="sets-${dateKey}-${idx}">${setHtml}</div>
-                    <button onclick="addSet('${dateKey}', ${idx})" class="w-full mt-3 py-2 bg-slate-50 dark:bg-slate-850 rounded-xl text-[9px] font-black uppercase text-slate-400 hover:bg-brand-500 hover:text-white transition-all">
-                        <i class="fa-solid fa-plus-circle mr-1"></i> Add Set
+                    <button onclick="addSet('${dateKey}', ${idx})" class="w-full mt-2 py-2 border border-dashed border-adaptive rounded-xl text-[10px] font-extrabold text-muted uppercase hover:bg-brand-50 hover:text-brand-600 hover:border-brand-300 dark:hover:bg-brand-900/20 dark:hover:text-brand-400 dark:hover:border-brand-700 transition-all">
+                        <i class="fa-solid fa-plus-circle mr-1"></i> ${t('addSet')}
                     </button>
-                </div>
-            `;
+                </div>`;
         }
 
-        function updateSetData(dateKey, exIdx, setIdx, key, value) {
-            state.program.logs[dateKey][exIdx].sets[setIdx][key] = value;
-            saveState();
-        }
-
-        function addSet(dateKey, exIdx) {
-            state.program.logs[dateKey][exIdx].sets.push({ reps: '', weight: '' });
-            saveState();
-            renderWeek();
-        }
-
-        function removeSet(dateKey, exIdx, setIdx) {
-            if (state.program.logs[dateKey][exIdx].sets.length > 1) {
-                state.program.logs[dateKey][exIdx].sets.splice(setIdx, 1);
-                saveState();
-                renderWeek();
-            }
-        }
-
-        function handleReorder(evt) {
-            const dateKey = evt.to.dataset.date;
-            const list = state.program.logs[dateKey];
-            const [item] = list.splice(evt.oldIndex, 1);
-            list.splice(evt.newIndex, 0, item);
-            saveState();
-        }
-
-        function removeExercise(date, idx) { 
-            state.program.logs[date].splice(idx, 1); 
-            saveState(); 
-            renderWeek(); 
-        }
-
-        function updateProgramMeta() { 
-            state.program.name = document.getElementById('program-title').innerText; 
-            saveState(); 
-        }
-
-        function changeWeek(dir) { 
-            const d = new Date(state.currentWeekStart); 
-            d.setDate(d.getDate() + (dir * 7)); 
-            state.currentWeekStart = d.toISOString(); 
-            updateDateDisplay(); 
-            renderWeek(); 
-            saveState(); 
-        }
-
+        function updateSetData(dateKey, exIdx, setIdx, key, value) { state.program.logs[dateKey][exIdx].sets[setIdx][key] = value; saveState(); }
+        function addSet(dateKey, exIdx) { state.program.logs[dateKey][exIdx].sets.push({ reps: '', weight: '' }); saveState(); renderWeek(); }
+        function removeSet(dateKey, exIdx, setIdx) { if (state.program.logs[dateKey][exIdx].sets.length > 1) { state.program.logs[dateKey][exIdx].sets.splice(setIdx, 1); saveState(); renderWeek(); } }
+        function handleReorder(evt) { const dateKey = evt.to.dataset.date; const list = state.program.logs[dateKey]; const [item] = list.splice(evt.oldIndex, 1); list.splice(evt.newIndex, 0, item); saveState(); }
+        function removeExercise(date, idx) { state.program.logs[date].splice(idx, 1); saveState(); renderWeek(); }
+        function updateProgramMeta() { state.program.name = document.getElementById('program-title').innerText; saveState(); }
+        function changeWeek(dir) { const d = new Date(state.currentWeekStart); d.setDate(d.getDate() + (dir * 7)); state.currentWeekStart = d.toISOString(); updateDateDisplay(); renderWeek(); saveState(); }
         function updateDateDisplay() {
             const start = new Date(state.currentWeekStart);
-            const end = new Date(start); 
-            end.setDate(start.getDate() + 6);
-            document.getElementById('date-display').innerText = `${start.toLocaleDateString(undefined, {month:'long', day:'numeric'})} - ${end.toLocaleDateString(undefined, {month:'long', day:'numeric'})}`;
+            const end = new Date(start); end.setDate(start.getDate() + 6);
+            document.getElementById('date-display').innerText = `${start.toLocaleDateString(undefined, {month:'short', day:'numeric'})} - ${end.toLocaleDateString(undefined, {month:'short', day:'numeric'})}`;
         }
 
         function exportJSON() {
             const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob);
-            a.download = `PulsePath_Export_${new Date().toISOString().split('T')[0]}.json`; 
-            a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `PulsePath_${state.program.name.replace(/\s+/g, '_')}.json`; a.click();
+            bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
         }
 
         function handleImport(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = function(e) {
                 try {
-                    const imported = JSON.parse(e.target.result);
-                    if (imported.program) {
-                        state = { ...state, ...imported };
-                        saveState();
-                        refreshUI();
-                    }
-                } catch (err) { alert("Invalid backup file."); }
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState && importedState.program) {
+                        state = { ...state, ...importedState, settings: { ...state.settings, ...(importedState.settings || {}) }};
+                        migrateState(); saveState(); refreshUI(); renderSettingsTags();
+                        event.target.value = ''; bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+                    } else throw new Error("Invalid format");
+                } catch (err) { console.error("Import error", err); alert("Failed to import. Invalid JSON format."); }
             };
             reader.readAsText(file);
         }
@@ -590,21 +819,23 @@
             document.getElementById('search-library').addEventListener('input', renderLibrary);
             document.getElementById('new-exercise-form').onsubmit = (e) => {
                 e.preventDefault();
+                const muscle = document.getElementById('new-ex-muscle').value;
                 state.customExercises.push({ 
-                    id: Date.now(), 
-                    name: document.getElementById('new-ex-name').value,
-                    muscle: document.getElementById('new-ex-muscle').value,
-                    type: document.getElementById('new-ex-type').value
+                    id: Date.now(), name: document.getElementById('new-ex-name').value,
+                    muscle: muscle, type: document.getElementById('new-ex-type').value, image: getMuscleImage(muscle)
                 });
-                saveState(); 
-                renderLibrary(); 
-                bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide(); 
-                e.target.reset();
+                saveState(); renderLibrary(); bootstrap.Modal.getInstance(document.getElementById('addExerciseModal')).hide(); e.target.reset();
             };
+            document.getElementById('new-tag-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') { e.preventDefault(); addCustomTag(); } });
         }
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<footer class="w-full bg-main-adaptive border-t border-adaptive text-muted text-xs py-2 px-4 flex justify-center items-center flex-shrink-0 z-10 transition-colors">
+  <span class="font-bold tracking-wide">
+    &copy; 2026 Made by RS. All rights reserved.
+  </span>
+</footer>
 </html>
