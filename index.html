@@ -118,7 +118,22 @@
             gap: 28px;
             margin-bottom: 30px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            position: relative;
         }
+
+        .refresh-btn {
+            position: absolute;
+            right: -45px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .refresh-btn:hover { color: var(--brand-primary); transform: translateY(-50%) rotate(180deg); }
 
         .stat-node { display: flex; align-items: baseline; }
         .stat-node .val { font-weight: 700; color: var(--brand-primary); font-size: 1.2rem; }
@@ -211,17 +226,20 @@
         <div class="container hero-content">
             <div class="profile-stat-badge">
                 <div class="stat-node">
-                    <span class="val" id="stat-subs"><div class="stat-loading"></div></span>
+                    <span class="val" id="stat-subs">106</span>
                     <span class="lbl">Subs</span>
                 </div>
                 <div class="stat-node">
-                    <span class="val" id="stat-videos"><div class="stat-loading"></div></span>
+                    <span class="val" id="stat-videos">24</span>
                     <span class="lbl">Videos</span>
                 </div>
                 <div class="stat-node">
-                    <span class="val" id="stat-views"><div class="stat-loading"></div></span>
+                    <span class="val" id="stat-views">...</span>
                     <span class="lbl">Views</span>
                 </div>
+                <button class="refresh-btn" onclick="updateStats()" title="Refresh Stats">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
             </div>
             
             <h1 class="display-3 fw-bold mb-3">Heat_In_The_Desert_Guy</h1>
@@ -244,12 +262,18 @@
                 <div id="shortsCarouselV2" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         <div class="carousel-item active carousel-item-v2">
-                            <iframe src="https://youtube.com/shorts/hig2LFBU8dI?si=4KXEECpcQbMBTSNc" frameborder="0" allowfullscreen></iframe>
+                            <iframe src="https://www.youtube.com/embed/hig2LFBU8dI" title="YouTube Shorts Player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                         <div class="carousel-item carousel-item-v2">
-                            <iframe src="https://www.youtube.com/embed/963z4iN-ZNQ" frameborder="0" allowfullscreen></iframe>
+                            <iframe src="https://www.youtube.com/embed/DNZkD_oA6Qs" title="YouTube Shorts Player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                     </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#shortsCarouselV2" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#shortsCarouselV2" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -304,69 +328,102 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        /**
-         * RELIABLE YOUTUBE STATS FETCHER
-         * Uses OEmbed API (No Key Required) + Metadata Backup
-         */
-        const CHANNEL_URL = 'https://www.youtube.com/@Heat_In_The_Desert_Guy';
+        const HANDLE = 'heat_in_the_desert_guy';
+        const apiKey = ""; // Set by environment
+
+        async function geminiExtract(rawHtml) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ 
+                    parts: [{ 
+                        text: `Extract YouTube channel stats from this Social Blade HTML. Focus on the stats section (subscribers, views, videos). Return JSON only with numeric values. \n\n HTML: ${rawHtml.substring(0, 8000)}` 
+                    }] 
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            subscribers: { type: "STRING" },
+                            videoCount: { type: "STRING" },
+                            totalViews: { type: "STRING" }
+                        }
+                    }
+                }
+            };
+
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error('API Error');
+                    const result = await response.json();
+                    return JSON.parse(result.candidates[0].content.parts[0].text);
+                } catch (err) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                }
+            }
+            return null;
+        }
 
         async function updateStats() {
+            const subsEl = document.getElementById('stat-subs');
+            const vidsEl = document.getElementById('stat-videos');
+            const viewsEl = document.getElementById('stat-views');
+
+            viewsEl.innerHTML = '<div class="stat-loading"></div>';
+
             try {
-                // Method 1: Fetch via OEmbed for basic structured data
-                const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(CHANNEL_URL)}&format=json`;
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(oembedUrl)}`);
-                const json = await response.json();
-                const content = JSON.parse(json.contents);
-                
-                // OEmbed gives us Author Name/Title reliably. 
-                // For Subs/Views without an API key, we parse the public meta data 
-                // but use a more robust regex on the raw HTML.
-                const pageResponse = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(CHANNEL_URL)}`);
-                const pageData = await pageResponse.json();
-                const html = pageData.contents;
+                let html = "";
+                try {
+                    // Target Social Blade specifically
+                    const sbUrl = `https://socialblade.com/youtube/handle/${HANDLE}`;
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(sbUrl)}`;
+                    
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+                    
+                    // Check if proxy got blocked by Cloudflare
+                    if (data.contents && !data.contents.includes('Cloudflare') && !data.contents.includes('Just a moment...')) {
+                        html = data.contents;
+                    } else {
+                        throw new Error("Proxy blocked by Cloudflare");
+                    }
+                } catch (fetchErr) {
+                    console.warn("Live fetch blocked. Using the exact provided HTML snippet for AI extraction.");
+                    // The exact snippet provided to ensure accurate AI scraping when proxy is blocked
+                    html = `<div class="hidden md:flex flex-row"><div class="py-1"><p class="m-0 text-[0.75em] font-medium capitalize pr-[50px]">subscribers</p><p class="text-[1.25em] font-extralight pr-[50px]">106</p></div><div class="py-1"><p class="m-0 text-[0.75em] font-medium capitalize pr-[50px]">views</p><p class="text-[1.25em] font-extralight pr-[50px]">91,821</p></div><div class="py-1"><p class="m-0 text-[0.75em] font-medium capitalize pr-[50px]">videos</p><p class="text-[1.25em] font-extralight pr-[50px]">24</p></div><div class="py-1 block md:hidden lg:block"><p class="m-0 text-[0.75em] font-semibold capitalize">Created On</p><p class="text-[1.25em] font-extralight">September 20, 2011</p></div></div>`;
+                }
 
-                // Extracting using more reliable JSON-path-like patterns found in YT scripts
-                const subCount = html.match(/"subscriberCountText":\{"simpleText":"([\d.KM]+)\s/)?.[1] || "33";
-                const videoCount = html.match(/"videoCountText":\{"runs":\[\{"text":"([\d,]+)"/)?.[1] || "31";
-                const viewCount = html.match(/"viewCountText":\{"simpleText":"([\d,]+)\s/)?.[1] || "20,542";
+                const stats = await geminiExtract(html);
 
-                animateValue("stat-subs", 0, parseShortCount(subCount), 1500);
-                animateValue("stat-videos", 0, parseInt(videoCount.replace(/,/g, '')), 1500);
-                animateValue("stat-views", 0, parseInt(viewCount.replace(/,/g, '')), 2000, true);
+                if (stats) {
+                    if (stats.subscribers) subsEl.textContent = stats.subscribers.replace(/,/g, '');
+                    if (stats.videoCount) vidsEl.textContent = stats.videoCount.replace(/,/g, '');
+                    
+                    if (stats.totalViews) {
+                        const numeric = parseInt(stats.totalViews.replace(/,/g, ''));
+                        viewsEl.textContent = isNaN(numeric) ? stats.totalViews : formatCompact(numeric);
+                    }
+                } else {
+                    throw new Error("AI failed");
+                }
 
             } catch (err) {
-                console.warn("API restricted. Loading last known verified stats.");
-                animateValue("stat-subs", 0, 33, 1000);
-                animateValue("stat-videos", 0, 31, 1000);
-                animateValue("stat-views", 0, 20542, 1500, true);
+                console.warn("Using latest known stats.");
+                viewsEl.textContent = "91.8K";
+                subsEl.textContent = "106";
+                vidsEl.textContent = "24";
             }
         }
 
-        function parseShortCount(str) {
-            const val = parseFloat(str);
-            if (str.includes('K')) return val * 1000;
-            if (str.includes('M')) return val * 1000000;
-            return val;
-        }
-
-        function animateValue(id, start, end, duration, isK = false) {
-            const obj = document.getElementById(id);
-            if (!obj) return;
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                let current = Math.floor(progress * (end - start) + start);
-                
-                if (isK && current > 1000) {
-                    obj.innerHTML = (current / 1000).toFixed(1) + 'K';
-                } else {
-                    obj.innerHTML = current.toLocaleString();
-                }
-                
-                if (progress < 1) window.requestAnimationFrame(step);
-            };
-            window.requestAnimationFrame(step);
+        function formatCompact(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
         }
 
         function updateClock() {
@@ -388,4 +445,3 @@
     </script>
 </body>
 </html>
-
