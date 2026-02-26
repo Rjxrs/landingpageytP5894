@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAAL CLASSIC // PROXY WRAPPER v1.0</title>
+    <title>GRAAL CLASSIC // APPLET POPOUT v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
         .terminal-font { font-family: 'VT323', monospace; }
-        .viewport {
-            box-shadow: 0 0 80px -20px rgb(16 185 129);
-        }
-        #gameframe {
-            border: none;
-            image-rendering: pixelated;
+        .applet-screen {
+            background: repeating-linear-gradient(45deg, #111, #111 10px, #1a1a1a 10px, #1a1a1a 20px);
+            box-shadow: inset 0 0 60px rgba(16, 185, 129, 0.3);
         }
     </style>
 </head>
@@ -26,21 +23,11 @@
                 <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center text-black font-black text-2xl shadow-inner">G</div>
                 <div>
                     <h1 class="text-3xl font-black tracking-[-2px]">GRAAL CLASSIC</h1>
-                    <p class="text-[10px] text-emerald-400 tracking-[3px] -mt-1">SECURE PLAYER-ONLY WRAPPER</p>
+                    <p class="text-[10px] text-emerald-400 tracking-[3px] -mt-1">LEGACY APPLET POPOUT WRAPPER</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-x-6">
-                <!-- Proxy Engine -->
-                <div class="flex items-center gap-x-3 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-2.5">
-                    <span class="text-xs uppercase tracking-widest text-zinc-400">ENGINE</span>
-                    <select id="proxy-select" class="bg-transparent text-emerald-400 font-medium focus:outline-none text-sm">
-                        <option value="alpha">ALPHA — AllOrigins</option>
-                        <option value="beta">BETA — CorsProxy.io</option>
-                        <option value="gamma">GAMMA — CodeTabs</option>
-                    </select>
-                </div>
-
                 <!-- Session ID -->
                 <div class="flex items-center gap-x-3 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-2.5 font-mono">
                     <span class="text-emerald-400"><i class="fas fa-fingerprint"></i></span>
@@ -50,15 +37,15 @@
                     </button>
                 </div>
 
-                <!-- Execute -->
-                <button onclick="executeBypass()" 
-                        id="execute-btn"
+                <!-- Launch Popout -->
+                <button onclick="launchPopout()" 
+                        id="launch-btn"
                         class="flex items-center gap-x-3 bg-emerald-500 hover:bg-emerald-600 active:scale-95 transition-all text-black font-semibold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-500/50">
-                    <i class="fas fa-bolt"></i>
-                    <span class="uppercase tracking-widest text-sm">EXECUTE BYPASS</span>
+                    <i class="fas fa-window-restore"></i>
+                    <span class="uppercase tracking-widest text-sm">LAUNCH APPLET POPOUT</span>
                 </button>
 
-                <!-- Fullscreen -->
+                <!-- Fullscreen (for the launcher itself) -->
                 <button onclick="toggleFullscreen()" 
                         class="p-3.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl transition-colors">
                     <i class="fas fa-expand text-xl"></i>
@@ -67,19 +54,19 @@
         </nav>
 
         <div class="flex flex-1 overflow-hidden">
-            <!-- Viewport Container -->
+            <!-- Viewport = "Applet Monitor" -->
             <div class="flex-1 flex items-center justify-center p-8 bg-zinc-900">
                 <div id="viewport" 
-                     class="viewport relative w-[800px] h-[600px] bg-black border-[14px] border-emerald-500 rounded-3xl overflow-hidden ring-1 ring-inset ring-black">
+                     class="applet-screen relative w-[800px] h-[600px] bg-black border-[14px] border-emerald-500 rounded-3xl overflow-hidden flex flex-col items-center justify-center text-center">
                     
-                    <!-- Iframe (1024px wide, cropped) -->
-                    <iframe id="gameframe" 
-                            class="absolute left-1/2 top-[-146px] -translate-x-1/2 w-[1024px] h-[746px]"
-                            allow="fullscreen; accelerometer; gyroscope; magnetometer; autoplay; encrypted-media">
-                    </iframe>
-
-                    <!-- Subtle scanline overlay for retro feel -->
-                    <div class="absolute inset-0 pointer-events-none bg-[repeating-linear-gradient(transparent_0px,transparent_2px,rgba(0,0,0,0.08)_2px,rgba(0,0,0,0.08)_4px)]"></div>
+                    <div class="text-emerald-400 text-6xl mb-6"><i class="fas fa-gamepad"></i></div>
+                    <h2 id="monitor-title" class="text-3xl font-black tracking-widest text-white">GRAAL CLASSIC v6.0</h2>
+                    <p id="monitor-status" class="terminal-font text-emerald-300 text-2xl mt-4">READY FOR POPOUT</p>
+                    
+                    <div class="mt-12 text-xs font-mono text-zinc-500 max-w-xs">
+                        Emulating legacy Java Applet pop-out window<br>
+                        Game will open directly on classic.graalonline.com
+                    </div>
                 </div>
             </div>
 
@@ -88,17 +75,17 @@
                 <div>
                     <div class="flex items-center gap-2 mb-4">
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span class="uppercase text-xs font-medium tracking-widest text-emerald-400">SECURE TUNNEL</span>
+                        <span class="uppercase text-xs font-medium tracking-widest text-emerald-400">APPLET TUNNEL</span>
                     </div>
-                    <div id="status" class="font-mono text-xs bg-black/50 border border-zinc-700 rounded-xl px-4 py-3 text-zinc-400">
-                        IDLE • AWAITING BYPASS COMMAND
+                    <div id="status" class="font-mono text-xs bg-black/50 border border-zinc-700 rounded-xl px-4 py-3 text-emerald-400">
+                        IDLE • AWAITING POPOUT COMMAND
                     </div>
                 </div>
 
                 <!-- Terminal Log -->
                 <div class="flex-1 mt-8 flex flex-col">
                     <div class="uppercase text-xs tracking-widest text-zinc-500 mb-3 flex justify-between items-baseline">
-                        <span>CONNECTION LOG</span>
+                        <span>SYSTEM LOG</span>
                         <button onclick="clearLog()" class="text-zinc-500 hover:text-red-400 transition-colors text-[10px]">CLEAR</button>
                     </div>
                     <div id="terminal" 
@@ -106,23 +93,22 @@
                     </div>
                 </div>
 
-                <!-- Footer Info -->
+                <!-- Footer -->
                 <div class="mt-auto pt-6 border-t border-zinc-800 text-[10px] text-zinc-500 font-mono space-y-1">
                     <div>TARGET <span class="text-amber-300">classic.graalonline.com</span></div>
-                    <div>VIEWPORT <span class="text-emerald-400">800×600</span> • CROP @ -146px</div>
-                    <div class="pt-2 text-emerald-400/70">PLAYER-ONLY MODE • CSP STRIPPED</div>
+                    <div>POPOUT MODE • NATIVE DOMAIN • NO PROXY</div>
+                    <div class="pt-2 text-emerald-400/70">LEGACY APPLET EXPERIENCE RESTORED</div>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Bar -->
         <div class="h-10 bg-black border-t border-zinc-800 px-6 flex items-center text-[10px] font-mono text-zinc-500">
-            <div>GRAAL CLASSIC WRAPPER • SECURITY ARCHITECTURE v2026.02</div>
+            <div>GRAAL CLASSIC WRAPPER • APPLET POPOUT ARCHITECTURE v2026.02</div>
             <div id="live-clock" class="ml-auto"></div>
         </div>
     </div>
 
-    <!-- Cloudflare-style Loading Overlay -->
+    <!-- Launching Overlay -->
     <div id="overlay" class="hidden fixed inset-0 bg-zinc-950/95 backdrop-blur-3xl z-[9999] flex items-center justify-center">
         <div class="text-center">
             <div class="flex justify-center">
@@ -131,28 +117,16 @@
                     <div class="absolute top-0 left-0 w-20 h-20 border-8 border-transparent border-t-emerald-500 rounded-full animate-spin"></div>
                 </div>
             </div>
-            
             <div class="mt-10">
-                <div class="text-emerald-400 text-2xl font-medium tracking-[6px]">RESOLVING CLOUDFLARE RAY</div>
-                <div class="text-zinc-400 font-mono text-sm mt-3">X-FRAME-OPTIONS • CSP • BOT CHALLENGE</div>
-            </div>
-            
-            <div id="overlay-status" class="mt-16 font-mono text-xs text-emerald-500/80 tracking-widest">
-                ESTABLISHING SECURE PROXY TUNNEL...
+                <div class="text-emerald-400 text-2xl font-medium tracking-[6px]">OPENING APPLET POPOUT</div>
+                <div class="text-zinc-400 font-mono text-sm mt-3">classic.graalonline.com • Native Session</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Tailwind already initialized via CDN
-        const proxies = {
-            alpha: { name: "AllOrigins", base: "https://api.allorigins.win/raw?url=" },
-            beta: { name: "CorsProxy.io", base: "https://corsproxy.io/?" },
-            gamma: { name: "CodeTabs", base: "https://api.codetabs.com/v1/proxy?quest=" }
-        };
-
         let currentSessionId = "";
-        let currentProxyKey = "alpha";
+        let popoutWindow = null;
 
         function generateSessionId() {
             return "GRAAL-" + Math.random().toString(36).substring(2, 11).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
@@ -160,136 +134,4 @@
 
         function log(msg, type = "info") {
             const term = document.getElementById("terminal");
-            const time = new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-            let prefix = "[INFO]";
-            let cls = "text-emerald-300";
-            if (type === "success") { prefix = "[OK]"; cls = "text-emerald-400"; }
-            else if (type === "error") { prefix = "[ERR]"; cls = "text-red-400"; }
-            else if (type === "warn") { prefix = "[WARN]"; cls = "text-amber-400"; }
-            
-            const entry = document.createElement("div");
-            entry.className = `${cls} mb-1`;
-            entry.innerHTML = `<span class="text-zinc-500">${time}</span> ${prefix} ${msg}`;
-            term.appendChild(entry);
-            term.scrollTop = term.scrollHeight;
-        }
-
-        function updateSessionDisplay() {
-            document.getElementById("session-display").textContent = currentSessionId;
-        }
-
-        function copySession() {
-            if (!currentSessionId) return;
-            navigator.clipboard.writeText(currentSessionId);
-            const el = document.getElementById("session-display");
-            const orig = el.textContent;
-            el.textContent = "✓ COPIED";
-            setTimeout(() => { el.textContent = orig; }, 1500);
-        }
-
-        function showOverlay() {
-            document.getElementById("overlay").classList.remove("hidden");
-        }
-
-        function hideOverlay() {
-            document.getElementById("overlay").classList.add("hidden");
-        }
-
-        function executeBypass() {
-            const btn = document.getElementById("execute-btn");
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>BOOTING...`;
-
-            currentSessionId = generateSessionId();
-            updateSessionDisplay();
-
-            currentProxyKey = document.getElementById("proxy-select").value;
-            const proxy = proxies[currentProxyKey];
-
-            const timestamp = Math.floor(Date.now() / 1000);
-            const targetUrl = `https://classic.graalonline.com/?sid=${encodeURIComponent(currentSessionId)}&ts=${timestamp}`;
-
-            let proxyUrl = proxy.base + encodeURIComponent(targetUrl);
-            if (currentProxyKey === "beta") {
-                proxyUrl = proxy.base + encodeURIComponent(targetUrl); // already correct
-            }
-
-            log(`Bypass sequence started • ${proxy.name}`, "warn");
-            log(`Session ID: ${currentSessionId} • Timestamp: ${timestamp}`, "info");
-            log(`Proxying → ${targetUrl}`, "info");
-
-            showOverlay();
-            document.getElementById("overlay-status").textContent = `TUNNELING VIA ${proxy.name.toUpperCase()}...`;
-
-            const iframe = document.getElementById("gameframe");
-            iframe.src = proxyUrl;
-
-            iframe.onload = () => {
-                log("Proxy delivered page. Resolving internal challenges...", "success");
-                setTimeout(() => {
-                    hideOverlay();
-                    log("Cloudflare Ray resolved • Player-only viewport ready", "success");
-                    document.getElementById("status").innerHTML = `LIVE • ${proxy.name.toUpperCase()} TUNNEL`;
-                    document.getElementById("status").classList.add("text-emerald-400");
-
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fas fa-bolt"></i><span class="uppercase tracking-widest text-sm ml-2">RE-EXECUTE BYPASS</span>`;
-                }, 3000);
-            };
-
-            iframe.onerror = () => {
-                hideOverlay();
-                log("Proxy connection failed. Try alternate engine.", "error");
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fas fa-bolt"></i><span class="uppercase tracking-widest text-sm ml-2">EXECUTE BYPASS</span>`;
-            };
-        }
-
-        function toggleFullscreen() {
-            const vp = document.getElementById("viewport");
-            if (!document.fullscreenElement) {
-                vp.requestFullscreen().catch(() => {});
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        function clearLog() {
-            document.getElementById("terminal").innerHTML = "";
-            log("Terminal cleared", "info");
-        }
-
-        // Live clock
-        function startClock() {
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById("live-clock").textContent = now.toISOString().slice(0, 19).replace("T", " ") + " UTC";
-            }, 1000);
-        }
-
-        // Keyboard support
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "F11" || (e.key === "f" && e.ctrlKey)) {
-                e.preventDefault();
-                toggleFullscreen();
-            }
-            if (e.key === "Enter" && !document.getElementById("execute-btn").disabled) {
-                executeBypass();
-            }
-        });
-
-        // Init
-        window.onload = () => {
-            startClock();
-            currentSessionId = generateSessionId();
-            updateSessionDisplay();
-            
-            log("GRAAL CLASSIC PROXY WRAPPER v1.0 INITIALIZED", "success");
-            log("Security bypass ready • Select engine & EXECUTE", "info");
-            
-            // Pre-select Beta (most reliable for full pages)
-            document.getElementById("proxy-select").value = "beta";
-        };
-    </script>
-</body>
-</html>
+            const time = new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit",
