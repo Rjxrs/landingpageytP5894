@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reken Pro | Duolingo Style Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            /* Duolingo Palette */
+            --duo-green: #58cc02;
+            --duo-green-dark: #46a302;
+            --duo-blue: #1cb0f6;
+            --duo-blue-dark: #1899d6;
+            --duo-yellow: #ffc800;
+            --duo-orange: #ff9600;
+            --duo-gray: #afafaf;
+            --duo-gray-light: #e5e5e5;
+            --duo-text: #4b4b4b;
+            --duo-text-muted: #777777;
+            --duo-bg: #ffffff;
+            
+            /* Feedback Colors */
+            --soft-success-bg: #d7ffb8;
+            --soft-success-text: #58a700;
+            --soft-retry-bg: #ffdfad;
+            --soft-retry-text: #c07a00;
+
+            /* Timing & Curves */
+            --transition-bounce: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            --curve-duo: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--duo-bg);
+            color: var(--duo-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- Global Animations --- */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes softShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(88, 204, 2, 0.3); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes nodeUnlock {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- Layout --- */
+        .app-shell {
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            border-bottom: 2px solid var(--duo-gray-light);
+        }
+
+        .streak {
+            color: var(--duo-orange);
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.2rem;
+        }
+
+        .progress-track {
+            flex-grow: 1;
+            height: 16px;
+            background: var(--duo-gray-light);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--duo-green);
+            width: 0%;
+            transition: width 0.4s var(--curve-duo);
+            border-radius: 20px;
+            box-shadow: 0 -4px 0 rgba(0,0,0,0.1) inset;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .view.active { display: flex; flex-direction: column; }
+
+        /* --- Path View (Duolingo Map) --- */
+        .path-scroll {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0 100px;
+            gap: 20px;
+        }
+
+        .path-node {
+            width: 90px;
+            height: 85px;
+            background: var(--duo-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 8px 0 var(--duo-blue-dark);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition-bounce);
+            margin-bottom: 40px;
+        }
+
+        .path-node:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 var(--duo-blue-dark);
+        }
+
+        .path-node.locked {
+            background: var(--duo-gray-light);
+            box-shadow: 0 8px 0 #d0d0d0;
+            color: #afafaf;
+            cursor: default;
+        }
+
+        .path-node.completed {
+            background: var(--duo-yellow);
+            box-shadow: 0 8px 0 var(--duo-orange);
+        }
+
+        .path-node-label {
+            position: absolute;
+            top: 100%;
+            margin-top: 15px;
+            font-weight: 800;
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: var(--duo-text);
+        }
+
+        .path-connector {
+            width: 4px;
+            height: 40px;
+            background: var(--duo-gray-light);
+            margin-top: -40px;
+            margin-bottom: 10px;
+        }
+
+        /* --- Lesson View --- */
+        .lesson-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            animation: slideUp 0.3s var(--curve-duo);
+        }
+
+        .question-card {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border: 2px solid var(--duo-gray-light);
+            border-radius: 28px;
+            padding: 50px 30px;
+            text-align: center;
+            box-shadow: 0 6px 0 var(--duo-gray-light);
+            transition: var(--transition-bounce);
+            margin-bottom: 30px;
+        }
+
+        .question-card.shake { animation: softShake 0.4s var(--curve-duo); }
+        .question-card.success { animation: successPulse 0.6s var(--curve-duo); border-color: var(--duo-green); }
+
+        .module-title {
+            text-transform: uppercase;
+            font-weight: 800;
+            color: var(--duo-gray);
+            letter-spacing: 1.5px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .math-expr {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 20px 0;
+            color: var(--duo-text);
+        }
+
+        .input-wrapper {
+            width: 100%;
+            max-width: 250px;
+            margin: 0 auto;
+        }
+
+        .duo-input {
+            width: 100%;
+            background: #f7f7f7;
+            border: 2px solid var(--duo-gray-light);
+            border-radius: 18px;
+            padding: 18px;
+            font-size: 2rem;
+            font-family: inherit;
+            font-weight: 800;
+            text-align: center;
+            color: var(--duo-text);
+            transition: var(--transition-bounce);
+        }
+
+        .duo-input:focus {
+            outline: none;
+            background: white;
+            border-color: var(--duo-blue);
+            transform: scale(1.02);
+            box-shadow: 0 0 0 4px rgba(28, 176, 246, 0.1);
+        }
+
+        /* --- Hint System --- */
+        .hint-btn {
+            margin-top: 25px;
+            color: var(--duo-blue);
+            font-weight: 800;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition-bounce);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .hint-btn.visible { opacity: 1; transform: translateY(0); }
+
+        .hint-box {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s var(--curve-duo);
+            background: #eef9ff;
+            border-radius: 16px;
+            margin-top: 15px;
+            text-align: left;
+            border-left: 4px solid var(--duo-blue);
+        }
+
+        .hint-box.expanded {
+            max-height: 200px;
+            opacity: 1;
+            padding: 15px 20px;
+        }
+
+        /* --- Footer & Feedback --- */
+        .action-footer {
+            width: 100%;
+            padding: 25px 20px;
+            border-top: 2px solid var(--duo-gray-light);
+            display: flex;
+            justify-content: center;
+            background: white;
+        }
+
+        .feedback-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 30px 20px 50px;
+            transform: translateY(100%);
+            transition: transform 0.4s var(--curve-duo);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            border-top: 2px solid var(--duo-gray-light);
+        }
+
+        .feedback-overlay.show { transform: translateY(0); }
+
+        .feedback-inner {
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .fb-text h2 { margin: 0; font-weight: 900; font-size: 1.6rem; }
+        .fb-text p { margin: 5px 0 0 0; font-weight: 700; opacity: 0.8; }
+
+        .feedback-overlay.success { background-color: var(--soft-success-bg); color: var(--soft-success-text); border-color: transparent; }
+        .feedback-overlay.retry { background-color: var(--soft-retry-bg); color: var(--soft-retry-text); border-color: transparent; }
+
+        /* --- Buttons --- */
+        .btn-duo {
+            border: none;
+            border-radius: 18px;
+            padding: 18px 32px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition-bounce);
+            font-family: inherit;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--duo-green);
+            color: white;
+            box-shadow: 0 5px 0 var(--duo-green-dark);
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-primary:active { transform: scale(0.96) translateY(4px); box-shadow: 0 0 0 var(--duo-green-dark); }
+
+        .btn-next { background: var(--duo-green); box-shadow: 0 5px 0 var(--duo-green-dark); color: white; width: auto; }
+        .btn-retry { background: var(--duo-orange); box-shadow: 0 5px 0 #cc7800; color: white; width: auto; }
+
+        /* Desktop Layout */
+        @media (min-width: 992px) {
+            .app-shell {
+                flex-direction: row;
+                height: 100vh;
+                padding: 40px;
+                gap: 50px;
+            }
+            .sidebar {
+                width: 350px;
+                overflow-y: auto;
+                background: white;
+                border: 2px solid var(--duo-gray-light);
+                border-radius: 30px;
+                padding: 20px;
+            }
+            .main-content {
+                flex-grow: 1;
+                background: white;
+                border: 2px solid var(--duo-gray-light);
+                border-radius: 30px;
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            .top-bar { position: relative; border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-shell">
+        <!-- Sidebar for Path on Desktop -->
+        <aside class="sidebar view active" id="view-path">
+            <div class="path-scroll" id="path-map">
+                <!-- Nodes generated by JS -->
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Global Top Bar -->
+            <header class="top-bar">
+                <div class="streak">
+                    <i class="bi bi-fire"></i> <span id="streak-count">0</span>
+                </div>
+                <div class="progress-track">
+                    <div id="lesson-progress" class="progress-fill"></div>
+                </div>
+            </header>
+
+            <!-- Learning View -->
+            <div class="view" id="view-lesson">
+                <div class="lesson-layout">
+                    <div class="question-card" id="q-card">
+                        <div class="module-title" id="module-name">Tafels 2-5</div>
+                        <div class="math-expr" id="q-text">7 × 4</div>
+                        
+                        <div class="input-wrapper">
+                            <input type="number" id="ans-input" class="duo-input" placeholder="?" pattern="\d*" inputmode="numeric">
+                        </div>
+
+                        <div id="hint-trigger" class="hint-btn">
+                            <i class="bi bi-lightbulb-fill"></i> Hulp nodig?
+                        </div>
+                        <div id="hint-content" class="hint-box">
+                            <!-- Hint text -->
+                        </div>
+                    </div>
+
+                    <div class="action-footer">
+                        <button class="btn-duo btn-primary" id="btn-check">Controleer</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Feedback UI -->
+    <div class="feedback-overlay" id="fb-overlay">
+        <div class="feedback-inner">
+            <div class="fb-text">
+                <h2 id="fb-title">Fantastisch!</h2>
+                <p id="fb-subtitle">Ga zo door.</p>
+            </div>
+            <button class="btn-duo btn-next" id="btn-continue">Doorgaan</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * STATE
+         */
+        const AppState = {
+            streak: parseInt(localStorage.getItem('rp_streak')) || 0,
+            path: JSON.parse(localStorage.getItem('rp_path')) || [
+                { id: 't25', label: 'Tafels 2-5', type: 'tafels', level: 2, status: 'current' },
+                { id: 't610', label: 'Tafels 6-10', type: 'tafels', level: 6, status: 'locked' },
+                { id: 'add', label: 'Optellen', type: 'rekenen', level: 1, status: 'locked' },
+                { id: 'sub', label: 'Aftrekken', type: 'rekenen', level: 2, status: 'locked' },
+                { id: 'div', label: 'Delen', type: 'delen', level: 2, status: 'locked' }
+            ],
+            currentLesson: {
+                module: null,
+                index: 0,
+                total: 5,
+                errors: 0,
+                activeQ: null
+            }
+        };
+
+        /**
+         * GENERATOR
+         */
+        const Generator = {
+            create(type, level) {
+                if(type === 'tafels') {
+                    const b = Math.floor(Math.random() * 10) + 1;
+                    return { q: `${level} × ${b}`, a: level * b, hint: `Dit is ${b} groepjes van ${level}.` };
+                }
+                if(type === 'rekenen') {
+                    const a = Math.floor(Math.random() * 20) + 5;
+                    const b = Math.floor(Math.random() * 20) + 5;
+                    return { q: `${a} + ${b}`, a: a + b, hint: `Tel eerst de tientallen bij elkaar op.` };
+                }
+                if(type === 'delen') {
+                    const b = Math.floor(Math.random() * 5) + 2;
+                    const ans = Math.floor(Math.random() * 10) + 1;
+                    return { q: `${ans * b} ÷ ${b}`, a: ans, hint: `Hoe vaak past ${b} in ${ans*b}?` };
+                }
+            }
+        };
+
+        /**
+         * UI CONTROLLER
+         */
+        const UI = {
+            init() {
+                this.renderPath();
+                this.updateStreak();
+                this.bindEvents();
+            },
+
+            renderPath() {
+                const container = document.getElementById('path-map');
+                container.innerHTML = '';
+                AppState.path.forEach((node, i) => {
+                    const el = document.createElement('div');
+                    el.className = `path-node ${node.status}`;
+                    el.innerHTML = `
+                        <i class="bi ${node.status === 'locked' ? 'bi-lock-fill' : (node.status === 'completed' ? 'bi-check-lg' : 'bi-play-fill')}"></i>
+                        <div class="path-node-label">${node.label}</div>
+                    `;
+                    if(node.status !== 'locked') {
+                        el.onclick = () => App.startLesson(node);
+                    }
+                    container.appendChild(el);
+                    
+                    if(i < AppState.path.length - 1) {
+                        const conn = document.createElement('div');
+                        conn.className = 'path-connector';
+                        container.appendChild(conn);
+                    }
+                });
+            },
+
+            updateStreak() {
+                document.getElementById('streak-count').innerText = AppState.streak;
+            },
+
+            showView(id) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.getElementById(`view-${id}`).classList.add('active');
+            },
+
+            setQuestion(qObj) {
+                const card = document.getElementById('q-card');
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(12px)';
+                
+                setTimeout(() => {
+                    document.getElementById('q-text').innerText = qObj.q;
+                    document.getElementById('ans-input').value = '';
+                    document.getElementById('ans-input').focus();
+                    document.getElementById('hint-trigger').classList.remove('visible');
+                    document.getElementById('hint-content').classList.remove('expanded');
+                    document.getElementById('hint-content').innerText = qObj.hint;
+                    
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200);
+
+                const prog = (AppState.currentLesson.index / AppState.currentLesson.total) * 100;
+                document.getElementById('lesson-progress').style.width = `${prog}%`;
+            },
+
+            feedback(type) {
+                const overlay = document.getElementById('fb-overlay');
+                const title = document.getElementById('fb-title');
+                const sub = document.getElementById('fb-subtitle');
+                const btn = document.getElementById('btn-continue');
+                const card = document.getElementById('q-card');
+
+                if(type === 'success') {
+                    overlay.className = 'feedback-overlay show success';
+                    title.innerText = "Helemaal goed!";
+                    sub.innerText = "Je bent een natuurtalent.";
+                    btn.className = "btn-duo btn-next";
+                    btn.innerText = "Doorgaan";
+                    card.classList.add('success');
+                } else {
+                    overlay.className = 'feedback-overlay show retry';
+                    title.innerText = "Nog eens proberen?";
+                    sub.innerText = "Fouten maken hoort erbij!";
+                    btn.className = "btn-duo btn-retry";
+                    btn.innerText = "Opnieuw";
+                    card.classList.add('shake');
+                    
+                    // Progressive Hint logic
+                    if(AppState.currentLesson.errors >= 1) {
+                        document.getElementById('hint-trigger').classList.add('visible');
+                    }
+                    if(AppState.currentLesson.errors >= 2) {
+                        document.getElementById('hint-content').classList.add('expanded');
+                    }
+                }
+            },
+
+            hideFeedback() {
+                document.getElementById('fb-overlay').classList.remove('show');
+                document.getElementById('q-card').classList.remove('shake', 'success');
+            },
+
+            bindEvents() {
+                document.getElementById('btn-check').onclick = () => App.check();
+                document.getElementById('btn-continue').onclick = () => App.next();
+                document.getElementById('hint-trigger').onclick = () => {
+                    document.getElementById('hint-content').classList.toggle('expanded');
+                };
+                document.getElementById('ans-input').onkeyup = (e) => {
+                    if(e.key === 'Enter') App.check();
+                };
+            }
+        };
+
+        /**
+         * APP LOGIC
+         */
+        const App = {
+            init() {
+                UI.init();
+            },
+
+            startLesson(module) {
+                AppState.currentLesson = {
+                    module: module,
+                    index: 0,
+                    total: 5,
+                    errors: 0,
+                    activeQ: null
+                };
+                document.getElementById('module-name').innerText = module.label;
+                UI.showView('lesson');
+                this.newQuestion();
+            },
+
+            newQuestion() {
+                const q = Generator.create(AppState.currentLesson.module.type, AppState.currentLesson.module.level);
+                AppState.currentLesson.activeQ = q;
+                UI.setQuestion(q);
+            },
+
+            check() {
+                const val = parseInt(document.getElementById('ans-input').value);
+                if(isNaN(val)) return;
+
+                if(val === AppState.currentLesson.activeQ.a) {
+                    AppState.currentLesson.errors = 0;
+                    UI.feedback('success');
+                } else {
+                    AppState.currentLesson.errors++;
+                    UI.feedback('retry');
+                }
+            },
+
+            next() {
+                const isRetry = document.getElementById('btn-continue').classList.contains('btn-retry');
+                UI.hideFeedback();
+
+                if(isRetry) {
+                    document.getElementById('ans-input').value = '';
+                    document.getElementById('ans-input').focus();
+                } else {
+                    AppState.currentLesson.index++;
+                    if(AppState.currentLesson.index >= AppState.currentLesson.total) {
+                        this.complete();
+                    } else {
+                        this.newQuestion();
+                    }
+                }
+            },
+
+            complete() {
+                AppState.streak++;
+                localStorage.setItem('rp_streak', AppState.streak);
+                
+                // Unlock logic
+                const idx = AppState.path.findIndex(n => n.id === AppState.currentLesson.module.id);
+                AppState.path[idx].status = 'completed';
+                if(AppState.path[idx+1]) AppState.path[idx+1].status = 'current';
+                
+                localStorage.setItem('rp_path', JSON.stringify(AppState.path));
+                
+                UI.updateStreak();
+                UI.renderPath();
+                UI.showView('path');
+            }
+        };
+
+        App.init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reken Pro | Leerpad</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --duo-green: #58cc02;
+            --duo-green-dark: #46a302;
+            --duo-blue: #1cb0f6;
+            --duo-blue-dark: #1899d6;
+            --duo-yellow: #ffc800;
+            --duo-orange: #ff9600;
+            --duo-gray: #afafaf;
+            --duo-gray-light: #e5e5e5;
+            --duo-card-bg: #ffffff;
+            --duo-bg: #ffffff;
+            --duo-text: #4b4b4b;
+            --duo-text-muted: #777777;
+            
+            --safe-orange: #ffb347; /* Replacement for red errors */
+            --safe-blue: #85d7ff;
+            
+            --transition-bounce: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--duo-bg);
+            color: var(--duo-text);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Layout Structures --- */
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 64px;
+            border-bottom: 2px solid var(--duo-gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+        }
+
+        .streak-counter {
+            color: var(--duo-orange);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Lesson Progress Bar */
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 15px;
+            height: 16px;
+            background: var(--duo-gray-light);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--duo-green);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.1) inset;
+        }
+
+        /* --- Views --- */
+        .view {
+            display: none;
+            flex-grow: 1;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active { display: flex; flex-direction: column; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Path Map View --- */
+        .path-map {
+            padding: 40px 0 100px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .path-node {
+            width: 80px;
+            height: 80px;
+            background: var(--duo-blue);
+            border-radius: 50%;
+            box-shadow: 0 8px 0 var(--duo-blue-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition-bounce);
+        }
+
+        .path-node:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 var(--duo-blue-dark);
+        }
+
+        .path-node.locked {
+            background: var(--duo-gray-light);
+            box-shadow: 0 8px 0 #d0d0d0;
+            cursor: not-allowed;
+            color: #afafaf;
+        }
+
+        .path-node.completed {
+            background: var(--duo-yellow);
+            box-shadow: 0 8px 0 var(--duo-orange);
+        }
+
+        .path-node-label {
+            position: absolute;
+            top: 100%;
+            margin-top: 15px;
+            white-space: nowrap;
+            font-weight: 800;
+            color: var(--duo-text);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        /* Connecting S-Curve dots */
+        .path-connector {
+            width: 4px;
+            height: 30px;
+            background: var(--duo-gray-light);
+            border-radius: 2px;
+        }
+
+        /* --- Lesson View --- */
+        .lesson-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .question-card {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border: 2px solid var(--duo-gray-light);
+            border-radius: 24px;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 0 var(--duo-gray-light);
+        }
+
+        .question-label {
+            color: var(--duo-text-muted);
+            text-transform: uppercase;
+            font-weight: 800;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 20px 0;
+            color: var(--duo-text);
+        }
+
+        .answer-wrapper {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .answer-input {
+            width: 100%;
+            border: 2px solid var(--duo-gray-light);
+            border-radius: 16px;
+            background: #f7f7f7;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            font-family: inherit;
+            font-weight: 700;
+            color: var(--duo-text);
+            transition: var(--transition-bounce);
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--duo-blue);
+            background: white;
+        }
+
+        /* Shake animation for retry */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .shake { animation: shake 0.3s ease-in-out; }
+
+        /* --- Bottom Panel --- */
+        .footer-action {
+            padding: 20px;
+            border-top: 2px solid var(--duo-gray-light);
+            background: white;
+        }
+
+        .feedback-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 20px 40px 20px;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+        }
+
+        .feedback-panel.show { transform: translateY(0); }
+
+        .feedback-content {
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .feedback-success { background-color: #d7ffb8; color: #58a700; }
+        .feedback-retry { background-color: #ffdfad; color: #c07a00; }
+
+        .feedback-text h3 { margin: 0; font-weight: 800; font-size: 1.4rem; }
+        .feedback-text p { margin: 5px 0 0 0; font-weight: 600; opacity: 0.8; }
+
+        /* --- Buttons --- */
+        .btn-duo {
+            border: none;
+            border-radius: 16px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition-bounce);
+            width: 100%;
+            max-width: 300px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--duo-green);
+            color: white;
+            box-shadow: 0 5px 0 var(--duo-green-dark);
+        }
+
+        .btn-primary:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--duo-green-dark);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--duo-blue);
+            border: 2px solid var(--duo-gray-light);
+            box-shadow: 0 4px 0 var(--duo-gray-light);
+            margin-bottom: 12px;
+        }
+
+        .btn-next { background: var(--duo-green); box-shadow: 0 5px 0 var(--duo-green-dark); }
+        .btn-retry { background: var(--duo-orange); box-shadow: 0 5px 0 #cc7800; }
+
+        /* --- Hint System --- */
+        .hint-container {
+            margin-top: 15px;
+            color: var(--duo-blue);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .hint-container:hover { opacity: 1; }
+
+        .hint-bubble {
+            background: #e1f5fe;
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--duo-blue);
+            text-align: left;
+            display: none;
+        }
+        .hint-bubble.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* --- Desktop Adaptations --- */
+        @media (min-width: 992px) {
+            body { background-color: #f7f7f7; }
+            .app-container {
+                max-width: 1000px;
+                flex-direction: row;
+                gap: 40px;
+                padding-top: 40px;
+            }
+            .top-bar {
+                background: transparent;
+                border: none;
+                position: absolute;
+                width: 300px;
+                left: 50%;
+                margin-left: -500px;
+                flex-direction: column;
+                height: auto;
+                align-items: flex-start;
+            }
+            .sidebar-path {
+                width: 300px;
+                height: calc(100vh - 80px);
+                overflow-y: auto;
+                padding-right: 20px;
+            }
+            .main-learning-area {
+                flex-grow: 1;
+                background: white;
+                border: 2px solid var(--duo-gray-light);
+                border-radius: 30px;
+                height: 80vh;
+                display: flex;
+                flex-direction: column;
+            }
+            .path-map { padding-top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Top Navigation (Streak/Prog) -->
+        <header class="top-bar">
+            <div class="streak-counter">
+                <i class="bi bi-fire"></i> <span id="streak-val">0</span>
+            </div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-fill"></div>
+            </div>
+            <div style="width: 30px"></div> <!-- Spacer -->
+        </header>
+
+        <!-- Sidebar / Path Navigation (Desktop Parity) -->
+        <aside class="sidebar-path view active" id="view-path">
+            <div class="path-map" id="path-map">
+                <!-- Generated Path Nodes -->
+            </div>
+        </aside>
+
+        <!-- Main Focused Learning Panel -->
+        <main class="main-learning-area view" id="view-lesson">
+            <div class="lesson-container">
+                <div class="question-card" id="q-card">
+                    <div class="question-label" id="module-label">Module</div>
+                    <div class="question-text" id="q-text">12 × 4</div>
+                    
+                    <div class="answer-wrapper">
+                        <input type="number" id="answer-input" class="answer-input" placeholder="Antwoord..." pattern="\d*">
+                    </div>
+
+                    <div id="hint-trigger" class="hint-container mt-3 d-none">
+                        <i class="bi bi-lightbulb"></i> Hint nodig?
+                    </div>
+                    <div id="hint-bubble" class="hint-bubble"></div>
+                </div>
+
+                <div class="footer-action w-100">
+                    <button class="btn-duo btn-primary" id="btn-check">Controleer</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Feedback Panel -->
+    <div id="feedback-panel" class="feedback-panel">
+        <div class="feedback-content" id="fb-content">
+            <div class="feedback-text">
+                <h3 id="fb-title">Goed gedaan!</h3>
+                <p id="fb-sub">Je bent een reken-ster.</p>
+            </div>
+            <button class="btn-duo btn-next" id="btn-action-next" style="width: auto;">Doorgaan</button>
+        </div>
+    </div>
+
+    <!-- --- JAVASCRIPT --- -->
+    <script>
+        /**
+         * API SERVICE LAYER
+         * Abstracted logic for fetching questions.
+         */
+        const APIService = {
+            async getQuestion(type, difficulty) {
+                // In a production app, we would fetch from an endpoint here.
+                // const res = await fetch(`https://api.rekenpro.nl/q?type=${type}&diff=${difficulty}`);
+                // return await res.json();
+                
+                // Fallback to local generator
+                return QuestionGenerator.generate(type, difficulty);
+            }
+        };
+
+        /**
+         * MATH GENERATOR
+         */
+        const QuestionGenerator = {
+            generate(type, difficulty) {
+                switch(type) {
+                    case 'tafels': return this.tafels(difficulty);
+                    case 'rekenen': return this.rekenen(difficulty);
+                    case 'delen': return this.delen(difficulty);
+                    case 'procenten': return this.procenten(difficulty);
+                    default: return this.tafels(1);
+                }
+            },
+            tafels(d) {
+                const a = d + 1;
+                const b = Math.floor(Math.random() * 10) + 1;
+                return {
+                    q: `${a} × ${b}`,
+                    a: a * b,
+                    hint: `Denk aan ${b} keer ${a}.`
+                };
+            },
+            rekenen(d) {
+                const a = Math.floor(Math.random() * (10 * d)) + 5;
+                const b = Math.floor(Math.random() * (10 * d)) + 5;
+                return { q: `${a} + ${b}`, a: a + b, hint: `Tel eerst de tientallen op.` };
+            },
+            delen(d) {
+                const b = Math.floor(Math.random() * 5) + 2;
+                const ans = Math.floor(Math.random() * 10) + 1;
+                const a = b * ans;
+                return { q: `${a} ÷ ${b}`, a: ans, hint: `Hoe vaak past ${b} in ${a}?` };
+            },
+            procenten(d) {
+                const p = [10, 25, 50][Math.floor(Math.random() * 3)];
+                const base = (Math.floor(Math.random() * 5) + 1) * 20;
+                return { q: `${p}% van ${base}`, a: (p/100)*base, hint: `${p}% is hetzelfde als 1/${100/p} deel.` };
+            }
+        };
+
+        /**
+         * STATE MANAGEMENT
+         */
+        const State = {
+            streak: 0,
+            path: [
+                { id: 'tafels', label: 'Tafels 2-5', level: 1, status: 'current' },
+                { id: 'tafels', label: 'Tafels 6-10', level: 5, status: 'locked' },
+                { id: 'rekenen', label: 'Optellen', level: 2, status: 'locked' },
+                { id: 'delen', label: 'Delen', level: 1, status: 'locked' },
+                { id: 'procenten', label: 'Procenten', level: 1, status: 'locked' },
+            ],
+            currentLesson: {
+                module: null,
+                questions: [],
+                currentIndex: 0,
+                total: 5,
+                errorsInRow: 0
+            },
+            rustMode: true
+        };
+
+        /**
+         * UI CONTROLLER
+         */
+        const UI = {
+            init() {
+                this.renderPath();
+                this.updateStreak();
+                this.attachListeners();
+            },
+
+            renderPath() {
+                const map = document.getElementById('path-map');
+                map.innerHTML = '';
+                State.path.forEach((node, i) => {
+                    const el = document.createElement('div');
+                    el.className = `path-node ${node.status}`;
+                    el.innerHTML = `<i class="bi ${node.status === 'locked' ? 'bi-lock-fill' : 'bi-play-fill'}"></i>
+                                   <div class="path-node-label">${node.label}</div>`;
+                    
+                    if (node.status !== 'locked') {
+                        el.onclick = () => AppController.startLesson(node);
+                    }
+                    
+                    map.appendChild(el);
+                    if (i < State.path.length - 1) {
+                        const conn = document.createElement('div');
+                        conn.className = 'path-connector';
+                        map.appendChild(conn);
+                    }
+                });
+            },
+
+            updateStreak() {
+                document.getElementById('streak-val').innerText = State.streak;
+            },
+
+            showView(id) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.getElementById(`view-${id}`).classList.add('active');
+            },
+
+            updateProgress() {
+                const percent = (State.currentLesson.currentIndex / State.currentLesson.total) * 100;
+                document.getElementById('progress-bar').style.width = `${percent}%`;
+            },
+
+            showQuestion(qObj) {
+                document.getElementById('module-label').innerText = State.currentLesson.module.label;
+                document.getElementById('q-text').innerText = qObj.q + " =";
+                document.getElementById('answer-input').value = '';
+                document.getElementById('answer-input').focus();
+                
+                // Reset hints
+                document.getElementById('hint-trigger').classList.add('d-none');
+                document.getElementById('hint-bubble').classList.remove('active');
+                document.getElementById('hint-bubble').innerText = qObj.hint;
+                
+                this.updateProgress();
+            },
+
+            showFeedback(type) {
+                const panel = document.getElementById('feedback-panel');
+                const content = document.getElementById('fb-content');
+                const title = document.getElementById('fb-title');
+                const sub = document.getElementById('fb-sub');
+                const btn = document.getElementById('btn-action-next');
+
+                panel.className = 'feedback-panel show';
+                content.className = `feedback-content feedback-${type}`;
+
+                if (type === 'success') {
+                    title.innerText = "Helemaal goed!";
+                    sub.innerText = "Je bent goed bezig.";
+                    btn.className = "btn-duo btn-next";
+                    btn.innerText = "Doorgaan";
+                } else {
+                    title.innerText = "Nog eens proberen?";
+                    sub.innerText = "Geen zorgen, neem je tijd.";
+                    btn.className = "btn-duo btn-retry";
+                    btn.innerText = "Opnieuw";
+                    
+                    // Shake the card
+                    document.getElementById('q-card').classList.add('shake');
+                    setTimeout(() => document.getElementById('q-card').classList.remove('shake'), 400);
+                }
+            },
+
+            hideFeedback() {
+                document.getElementById('feedback-panel').classList.remove('show');
+            },
+
+            attachListeners() {
+                document.getElementById('btn-check').onclick = () => LessonEngine.checkAnswer();
+                document.getElementById('btn-action-next').onclick = () => LessonEngine.handleNext();
+                document.getElementById('hint-trigger').onclick = () => {
+                    document.getElementById('hint-bubble').classList.toggle('active');
+                };
+                
+                // Enter key support
+                document.getElementById('answer-input').onkeyup = (e) => {
+                    if (e.key === 'Enter') LessonEngine.checkAnswer();
+                };
+            }
+        };
+
+        /**
+         * LESSON ENGINE
+         */
+        const LessonEngine = {
+            async nextQuestion() {
+                const q = await APIService.getQuestion(State.currentLesson.module.id, State.currentLesson.module.level);
+                State.currentLesson.activeQ = q;
+                UI.showQuestion(q);
+            },
+
+            checkAnswer() {
+                const userAns = parseFloat(document.getElementById('answer-input').value);
+                const correctAns = State.currentLesson.activeQ.a;
+
+                if (isNaN(userAns)) return;
+
+                if (userAns === correctAns) {
+                    State.currentLesson.errorsInRow = 0;
+                    UI.showFeedback('success');
+                } else {
+                    State.currentLesson.errorsInRow++;
+                    UI.showFeedback('retry');
+                    
+                    // Progressive Hint Reveal
+                    if (State.currentLesson.errorsInRow >= 1) {
+                        document.getElementById('hint-trigger').classList.remove('d-none');
+                    }
+                }
+            },
+
+            handleNext() {
+                const isRetry = document.getElementById('btn-action-next').classList.contains('btn-retry');
+                UI.hideFeedback();
+
+                if (isRetry) {
+                    document.getElementById('answer-input').value = '';
+                    document.getElementById('answer-input').focus();
+                } else {
+                    State.currentLesson.currentIndex++;
+                    if (State.currentLesson.currentIndex >= State.currentLesson.total) {
+                        this.completeLesson();
+                    } else {
+                        this.nextQuestion();
+                    }
+                }
+            },
+
+            completeLesson() {
+                State.streak++;
+                UI.updateStreak();
+                
+                // Unlock next node
+                const currIdx = State.path.findIndex(n => n.id === State.currentLesson.module.id);
+                if (currIdx < State.path.length - 1) {
+                    State.path[currIdx].status = 'completed';
+                    State.path[currIdx + 1].status = 'current';
+                }
+                
+                StorageService.save();
+                UI.renderPath();
+                UI.showView('path');
+            }
+        };
+
+        /**
+         * STORAGE SERVICE
+         */
+        const StorageService = {
+            save() {
+                localStorage.setItem('rekenpro_v2_state', JSON.stringify({
+                    streak: State.streak,
+                    path: State.path
+                }));
+            },
+            load() {
+                const data = JSON.parse(localStorage.getItem('rekenpro_v2_state'));
+                if (data) {
+                    State.streak = data.streak || 0;
+                    State.path = data.path || State.path;
+                }
+            }
+        };
+
+        /**
+         * APP CONTROLLER
+         */
+        const AppController = {
+            init() {
+                StorageService.load();
+                UI.init();
+            },
+
+            startLesson(module) {
+                State.currentLesson = {
+                    module: module,
+                    currentIndex: 0,
+                    total: 5,
+                    errorsInRow: 0
+                };
+                UI.showView('lesson');
+                LessonEngine.nextQuestion();
+            }
+        };
+
+        window.onload = () => AppController.init();
+
+    </script>
+</body>
+</html>
